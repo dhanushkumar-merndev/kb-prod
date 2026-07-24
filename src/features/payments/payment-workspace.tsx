@@ -1,12 +1,12 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ExternalLink, Search } from "lucide-react";
-import { useActionState, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, ExternalLink, Search, Upload, X } from "lucide-react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
 import { ActionFeedback, FieldError, SubmitButton } from "@/features/core-crud/components/shared";
 import { INITIAL_CRUD_ACTION_STATE } from "@/features/core-crud/types";
 
-import { reviewPaymentAction, submitPaymentAction } from "./actions";
+import { attachPaymentProofAction, reviewPaymentAction, submitPaymentAction } from "./actions";
 import type { PaymentData, PaymentRecord } from "./types";
 import styles from "./payments.module.css";
 
@@ -109,10 +109,85 @@ function PaymentReview({ payment }: { payment: PaymentRecord }) {
   );
 }
 
+function PaymentProofDialog({
+  canSubmit,
+  onClose,
+  payment,
+}: {
+  canSubmit: boolean;
+  onClose: () => void;
+  payment: PaymentRecord | null;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [state, action] = useActionState(attachPaymentProofAction, INITIAL_CRUD_ACTION_STATE);
+
+  useEffect(() => {
+    if (payment) dialogRef.current?.showModal();
+    else dialogRef.current?.close();
+  }, [payment]);
+
+  if (!payment) return null;
+
+  return (
+    <dialog className={styles.proofDialog} onClose={onClose} ref={dialogRef}>
+      <div className={styles.proofHeader}>
+        <div>
+          <h2>Payment proof</h2>
+          <p>
+            {payment.bookingCode} · {payment.paymentStage}
+          </p>
+        </div>
+        <button aria-label="Close payment proof" onClick={() => dialogRef.current?.close()}>
+          <X aria-hidden="true" size={20} />
+        </button>
+      </div>
+      <div className={styles.proofBody}>
+        {payment.proofUrl ? (
+          <>
+            <object
+              aria-label={`Payment proof for ${payment.bookingCode}`}
+              className={styles.proofPreview}
+              data={payment.proofUrl}
+            >
+              <p>Preview unavailable. Use “Open original” below.</p>
+            </object>
+            <a href={payment.proofUrl} rel="noreferrer" target="_blank">
+              Open original <ExternalLink aria-hidden="true" size={15} />
+            </a>
+          </>
+        ) : canSubmit ? (
+          <form action={action} className={styles.proofUploadForm}>
+            <input name="paymentId" type="hidden" value={payment.id} />
+            <input name="bookingId" type="hidden" value={payment.bookingId} />
+            <p>No proof is attached to this payment. Upload the customer’s payment image or PDF.</p>
+            <label>
+              Payment proof
+              <input
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                name="proof"
+                required
+                type="file"
+              />
+            </label>
+            <FieldError field="proof" state={state} />
+            <SubmitButton pendingLabel="Uploading…">
+              <Upload aria-hidden="true" size={16} /> Upload payment proof
+            </SubmitButton>
+            <ActionFeedback state={state} />
+          </form>
+        ) : (
+          <p className={styles.empty}>No proof has been uploaded for this payment.</p>
+        )}
+      </div>
+    </dialog>
+  );
+}
+
 export function PaymentWorkspace({ data }: { data: PaymentData }) {
   const [filter, setFilter] = useState<PaymentFilter>("pending");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null);
   const normalizedSearch = search.trim().toLocaleLowerCase();
   const filteredPayments = useMemo(
     () =>
@@ -234,11 +309,21 @@ export function PaymentWorkspace({ data }: { data: PaymentData }) {
                   <span>{payment.paymentMethod ?? "Method not entered"}</span>
                   <span>{payment.transactionReference ?? "No reference"}</span>
                   {payment.proofUrl ? (
-                    <a href={payment.proofUrl} rel="noreferrer" target="_blank">
-                      View proof <ExternalLink aria-hidden="true" size={14} />
-                    </a>
+                    <button
+                      className={styles.proofLink}
+                      onClick={() => setSelectedPayment(payment)}
+                      type="button"
+                    >
+                      View proof
+                    </button>
                   ) : (
-                    <span>Proof unavailable</span>
+                    <button
+                      className={styles.proofLink}
+                      onClick={() => setSelectedPayment(payment)}
+                      type="button"
+                    >
+                      {data.canSubmit ? "Upload proof" : "Proof unavailable"}
+                    </button>
                   )}
                 </div>
                 {payment.rejectionReason ? (
@@ -269,6 +354,11 @@ export function PaymentWorkspace({ data }: { data: PaymentData }) {
           </div>
         </div>
       </section>
+      <PaymentProofDialog
+        canSubmit={data.canSubmit}
+        onClose={() => setSelectedPayment(null)}
+        payment={selectedPayment}
+      />
     </div>
   );
 }

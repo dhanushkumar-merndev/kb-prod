@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { z } from "zod";
+import { z } from "zod";
 
 import type { CrudActionState } from "@/features/core-crud/types";
 import { requireActiveSession } from "@/lib/auth/require-session";
@@ -131,6 +131,72 @@ export async function submitPaymentAction(
     return failure(
       messages[databaseMessage(insert.error)] ??
         "Payment could not be submitted. Refresh and try again.",
+    );
+  }
+
+  revalidatePayments();
+  return {
+    status: "success",
+    message: "Payment proof uploaded.",
+    mutationId: crypto.randomUUID(),
+  };
+}
+
+export async function attachPaymentProofAction(
+  _previousState: CrudActionState,
+  formData: FormData,
+): Promise<CrudActionState> {
+  const session = await requireActiveSession();
+
+  if (!["sales", "sales_manager"].includes(session.profile.role)) {
+    return failure("You do not have permission to upload this payment proof.");
+  }
+
+  const paymentId = formData.get("paymentId");
+  const bookingId = formData.get("bookingId");
+  const proof = formData.get("proof");
+
+  if (
+    typeof paymentId !== "string" ||
+    typeof bookingId !== "string" ||
+    !z.string().uuid().safeParse(paymentId).success ||
+    !z.string().uuid().safeParse(bookingId).success
+  ) {
+    return failure("This payment record is invalid. Refresh and try again.");
+  }
+
+  if (!(proof instanceof File) || proof.size === 0) {
+    return failure("Choose the customer payment proof.", { proof: "A proof file is required." });
+  }
+
+  if (!ALLOWED_MIME_TYPES.has(proof.type) || proof.size > MAX_FILE_BYTES) {
+    return failure("Upload a JPG, PNG, WebP or PDF file up to 8 MB.", {
+      proof: "This proof file is not supported.",
+    });
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const path = `${session.profile.organization_id}/${session.profile.id}/${bookingId}/${crypto.randomUUID()}.${extensionFor(proof)}`;
+  const upload = await supabase.storage.from("payment-proofs").upload(path, proof, {
+    contentType: proof.type,
+    upsert: false,
+  });
+
+  if (upload.error) {
+    return failure("Payment proof upload failed. Check the file and try again.");
+  }
+
+  const { error } = await supabase.rpc("attach_booking_payment_proof", {
+    p_payment_id: paymentId,
+    p_proof_storage_path: path,
+  });
+
+  if (error) {
+    await supabase.storage.from("payment-proofs").remove([path]);
+    return failure(
+      databaseMessage(error) === "PAYMENT_PROOF_ALREADY_ATTACHED"
+        ? "A proof is already attached to this payment. Refresh to view it."
+        : "The proof could not be attached. Refresh and try again.",
     );
   }
 

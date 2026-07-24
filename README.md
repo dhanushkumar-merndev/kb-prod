@@ -85,4 +85,61 @@ pnpm build
 9. Configure Superfone only after its official base URL, authentication, capabilities,
    webhook contract and signature scheme are supplied and verified.
 
+## Push to a new Supabase project
+
+### Without seed data (recommended for production)
+
+Link the intended project, preview the pending database migrations, and apply them:
+
+```bash
+pnpm exec supabase login
+pnpm exec supabase link --project-ref YOUR_PROJECT_REF
+pnpm exec supabase migration list
+pnpm exec supabase db push --dry-run
+pnpm exec supabase db push
+```
+
+`db push` creates the tables, SQL functions, RLS policies, indexes, Realtime configuration,
+private Storage buckets and Storage policies contained in `supabase/migrations/`. It does not
+run `scripts/seed-demo.mjs`, `scripts/seed-leads.mjs`, or `supabase/seed.sql`.
+
+Configure secrets and deploy the Edge Functions separately:
+
+```bash
+pnpm exec supabase secrets set --env-file supabase/.env.production
+pnpm exec supabase functions deploy
+pnpm exec supabase functions deploy bootstrap-organization --no-verify-jwt
+pnpm exec supabase functions deploy superfone-webhook --no-verify-jwt
+```
+
+Invoke `bootstrap-organization` once to create the organization and first Director. Bootstrap
+is required initialization, not seed data.
+
+### With seed data (local or staging only)
+
+Never run demo seeds against production. First apply migrations, deploy the required functions,
+and bootstrap the organization. The seed commands read the target credentials from the ignored
+`.env` file.
+
+To create the complete demo dataset, including demo staff, leads, bookings, conversations,
+attendance and payroll records:
+
+```bash
+pnpm seed:demo
+```
+
+The complete demo seed requires an active Director and Manager and is repeatable.
+
+To create or update only the deterministic lead dataset:
+
+```bash
+pnpm seed:leads
+```
+
+The leads-only seed requires an active Director, inserts no users/bookings/payroll records, and
+upserts 10,000 unique leads. Running it again does not duplicate those deterministic records.
+
+Use `pnpm supabase:reset` only for the local Supabase containers. Never run a database reset
+against staging or production.
+
 Detailed feature status and validation evidence are tracked in `PROGRESS.md`.
