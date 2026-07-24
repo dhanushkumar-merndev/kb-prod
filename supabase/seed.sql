@@ -1,0 +1,9 @@
+-- Development seed entry point.
+--
+-- Authentication users are intentionally not seeded: local, staging, and
+-- production must all create the first Director through bootstrap-organization,
+-- which is protected by BOOTSTRAP_TOKEN and the one-time database lock.
+--
+-- Repeatable fixture data used by database tests lives under supabase/tests and
+-- is always rolled back. This keeps `supabase db reset` free of passwords,
+-- production-like phone numbers, Aadhaar data, and proof files.

@@ -1,0 +1,60 @@
+export const ROLE_MATRIX = [
+  {
+    key: "DIRECTOR",
+    label: "Director",
+    homePath: "/director/dashboard",
+    dashboardHeading: "Director dashboard",
+    primaryNavigationLabel: "Dashboard",
+    unauthorizedPath: "/manager/dashboard",
+  },
+  {
+    key: "MANAGER",
+    label: "Manager",
+    homePath: "/manager/dashboard",
+    dashboardHeading: "Operations dashboard",
+    primaryNavigationLabel: "Operations Dashboard",
+    unauthorizedPath: "/director/dashboard",
+  },
+  {
+    key: "HR",
+    label: "HR",
+    homePath: "/hr/dashboard",
+    dashboardHeading: "HR dashboard",
+    primaryNavigationLabel: "HR Dashboard",
+    unauthorizedPath: "/sales-manager/dashboard",
+  },
+  {
+    key: "SALES_MANAGER",
+    label: "Sales Manager",
+    homePath: "/sales-manager/dashboard",
+    dashboardHeading: "Sales Manager dashboard",
+    primaryNavigationLabel: "Dashboard",
+    unauthorizedPath: "/hr/dashboard",
+  },
+  {
+    key: "SALES",
+    label: "Sales Executive",
+    homePath: "/sales/dashboard",
+    dashboardHeading: "Sales Executive dashboard",
+    primaryNavigationLabel: "Dashboard",
+    unauthorizedPath: "/sales-manager/dashboard",
+  },
+  {
+    key: "CHEF",
+    label: "Chef",
+    homePath: "/chef/dashboard",
+    dashboardHeading: "Chef dashboard",
+    primaryNavigationLabel: "Dashboard",
+    unauthorizedPath: "/hr/dashboard",
+  },
+  {
+    key: "PART_TIME_CHEF",
+    label: "Part-time Chef",
+    homePath: "/part-time-chef/dashboard",
+    dashboardHeading: "Part-time Chef dashboard",
+    primaryNavigationLabel: "Dashboard",
+    unauthorizedPath: "/chef/dashboard",
+  },
+] as const;
+
+export type E2ERole = (typeof ROLE_MATRIX)[number];

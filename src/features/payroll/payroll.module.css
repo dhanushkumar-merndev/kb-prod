@@ -1,0 +1,490 @@
+.stack {
+  display: grid;
+  gap: 20px;
+}
+
+.card,
+.summaryGrid article {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.card {
+  padding: 20px;
+}
+
+.cardHeader,
+.periodHeader,
+.entryHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.cardHeader {
+  margin-bottom: 18px;
+}
+
+.cardHeader h2 {
+  font-family: var(--font-display), sans-serif;
+  margin: 2px 0 0;
+}
+
+.cardHeader p,
+.workflowNote,
+.paymentMeta,
+.emptyInline,
+.workerPeriod {
+  color: var(--slate);
+  margin: 5px 0 0;
+}
+
+.pagination {
+  align-items: center;
+  border-top: 1px solid var(--hair-2);
+  color: var(--slate);
+  display: flex;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.pagination > div {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination button {
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  gap: 5px;
+  min-height: 40px;
+  padding: 8px 12px;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.eyebrow,
+.generateForm label,
+.paymentForm label,
+.adjustmentForm label,
+.reverseForm label,
+.amountGrid dt,
+.summaryGrid span {
+  color: var(--slate);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.count {
+  background: var(--indigo-tint);
+  border-radius: 999px;
+  font-family: var(--font-mono), monospace;
+  padding: 5px 9px;
+}
+
+.generateForm {
+  align-items: end;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+}
+
+.generateForm label,
+.paymentForm label,
+.adjustmentForm label,
+.reverseForm label {
+  display: grid;
+  gap: 6px;
+}
+
+.generateForm input,
+.paymentForm input,
+.adjustmentForm input,
+.reverseForm input {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  min-height: 44px;
+  padding: 9px 11px;
+  text-transform: none;
+}
+
+.formAction {
+  padding-bottom: 1px;
+}
+
+.periodList,
+.entryList,
+.componentList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.periodList,
+.entryList {
+  display: grid;
+  gap: 14px;
+}
+
+.period {
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-md);
+  padding: 17px;
+}
+
+.periodHeader > div,
+.entryHeader > div {
+  display: grid;
+  gap: 3px;
+}
+
+.periodDates,
+.entryHeader span,
+.periodHeader small {
+  color: var(--slate);
+}
+
+.periodHeader strong,
+.entryAmount > strong {
+  color: var(--ink);
+  font-family: var(--font-display), sans-serif;
+  font-size: 21px;
+}
+
+.statusBadge {
+  background: var(--indigo-tint);
+  border-radius: 999px;
+  color: var(--ink-2);
+  display: inline-flex;
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 5px 8px;
+  text-transform: uppercase;
+}
+
+.statusBadge[data-status="draft"],
+.statusBadge[data-status="prepared"],
+.statusBadge[data-status="reviewed"] {
+  background: var(--saffron-tint);
+  color: var(--saffron-dark);
+}
+
+.statusBadge[data-status="approved"],
+.statusBadge[data-status="paid"],
+.statusBadge[data-status="locked"] {
+  background: var(--mint-tint);
+  color: var(--mint);
+}
+
+.statusBadge[data-status="reversed"] {
+  background: var(--chilli-tint);
+  color: var(--chilli);
+}
+
+.inlineAction,
+.confirmAction,
+.paymentForm {
+  border-top: 1px solid var(--hair-2);
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
+.confirmAction {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.confirmLabel {
+  align-items: flex-start;
+  color: var(--ink);
+  display: flex !important;
+  font-family: var(--font-body), sans-serif !important;
+  font-size: 13px !important;
+  gap: 9px !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+.confirmLabel input {
+  flex: 0 0 auto;
+  min-height: 18px;
+  padding: 0;
+  width: 18px;
+}
+
+.reverseForm .confirmLabel {
+  grid-column: 1 / -1;
+}
+
+.paymentForm {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(200px, 1fr) auto;
+}
+
+.workflowNote {
+  border-left: 3px solid var(--haldi);
+  padding-left: 10px;
+}
+
+.entryList {
+  margin-top: 16px;
+}
+
+.entry {
+  background: var(--canvas);
+  border: 1px solid var(--hair-2);
+  border-radius: var(--radius-md);
+  padding: 15px;
+}
+
+.entryHeader > div:first-child strong,
+.entryHeader > div:first-child span {
+  display: block;
+}
+
+.entryAmount {
+  align-items: flex-end;
+}
+
+.amountGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 15px 0 0;
+}
+
+.amountGrid dd {
+  font-family: var(--font-mono), monospace;
+  margin: 3px 0 0;
+}
+
+.details,
+.dangerDetails {
+  border-top: 1px solid var(--hair);
+  margin-top: 13px;
+  padding-top: 11px;
+}
+
+.details summary,
+.dangerDetails summary {
+  color: var(--saffron-dark);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.dangerDetails summary {
+  color: var(--chilli);
+}
+
+.componentList {
+  display: grid;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.componentList li {
+  align-items: flex-start;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.componentList strong,
+.componentList span {
+  display: block;
+}
+
+.componentList strong {
+  text-transform: capitalize;
+}
+
+.componentList div span {
+  color: var(--slate);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.componentList > li > span {
+  font-family: var(--font-mono), monospace;
+  white-space: nowrap;
+}
+
+.negativeAmount,
+.reversal {
+  color: var(--chilli) !important;
+}
+
+.adjustmentForm {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 13px;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.reverseForm {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(200px, 1fr) auto;
+  margin-top: 13px;
+}
+
+.paymentMeta {
+  overflow-wrap: anywhere;
+}
+
+.reversal {
+  background: var(--chilli-tint);
+  border-radius: var(--radius-sm);
+  margin: 12px 0 0;
+  padding: 9px 10px;
+}
+
+.summaryGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.summaryGrid article {
+  display: grid;
+  gap: 7px;
+  min-height: 120px;
+  padding: 17px;
+}
+
+.summaryGrid strong {
+  align-self: end;
+  font-family: var(--font-display), sans-serif;
+  font-size: 25px;
+}
+
+.summaryGrid small {
+  color: var(--slate);
+}
+
+.workerPeriod {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.empty,
+.error {
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.empty {
+  background: var(--canvas);
+  border: 1px dashed var(--hair);
+  text-align: center;
+}
+
+.empty p,
+.error p {
+  margin: 5px 0 0;
+}
+
+.error {
+  background: var(--chilli-tint);
+  border: 1px solid rgb(217 58 43 / 20%);
+  color: var(--chilli);
+}
+
+@media (max-width: 900px) {
+  .summaryGrid,
+  .amountGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .card {
+    padding: 16px;
+  }
+
+  .generateForm,
+  .paymentForm,
+  .adjustmentForm,
+  .reverseForm,
+  .summaryGrid,
+  .amountGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formAction,
+  .formAction button,
+  .inlineAction button,
+  .confirmAction button,
+  .paymentForm button,
+  .reverseForm button {
+    width: 100%;
+  }
+
+  .periodHeader,
+  .entryHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .entryAmount {
+    align-items: flex-start;
+  }
+
+  .componentList li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .componentList > li > span {
+    white-space: normal;
+  }
+
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pagination > div,
+  .pagination button {
+    flex: 1;
+  }
+
+  .pagination button {
+    justify-content: center;
+  }
+}

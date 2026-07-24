@@ -1,0 +1,9 @@
+.next
+node_modules
+coverage
+playwright-report
+test-results
+AGENTS.md
+reference/legacy-crm.html
+pnpm-lock.yaml
+supabase/.temp

@@ -1,26 +1,111 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #0b2545;
+  --ink-2: #123061;
+  --slate: #5b6b85;
+  --hair: #e1e6ef;
+  --hair-2: #f0f3f8;
+  --canvas: #f5f7fa;
+  --card: #ffffff;
+  --saffron: #f2701d;
+  --saffron-dark: #c9560e;
+  --saffron-tint: #fff1e6;
+  --haldi: #e8a33d;
+  --mint: #1e9e6a;
+  --mint-tint: #e5f4ee;
+  --chilli: #d93a2b;
+  --chilli-tint: #fbeae8;
+  --indigo-tint: #e7ecf5;
+  --radius-sm: 8px;
+  --radius-md: 13px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 1px 2px rgb(11 37 69 / 5%), 0 1px 1px rgb(11 37 69 / 4%);
+  --shadow-md: 0 6px 20px rgb(11 37 69 / 9%);
+  --shadow-lg: 0 20px 48px rgb(11 37 69 / 18%);
+  --mobile-app-bar-height: 64px;
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-slate: var(--slate);
+  --color-hair: var(--hair);
+  --color-hair-2: var(--hair-2);
+  --color-canvas: var(--canvas);
+  --color-card: var(--card);
+  --color-saffron: var(--saffron);
+  --color-saffron-dark: var(--saffron-dark);
+  --color-saffron-tint: var(--saffron-tint);
+  --color-haldi: var(--haldi);
+  --color-mint: var(--mint);
+  --color-mint-tint: var(--mint-tint);
+  --color-chilli: var(--chilli);
+  --color-chilli-tint: var(--chilli-tint);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--canvas);
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--saffron-tint);
+  color: var(--ink);
+}
+
+:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--saffron);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

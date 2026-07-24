@@ -1,0 +1,274 @@
+.section {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+}
+
+.header,
+.shiftTop {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.header {
+  margin-bottom: 18px;
+}
+
+.header h2 {
+  font-family: var(--font-display), sans-serif;
+  margin: 0;
+}
+
+.header p,
+.empty,
+.shiftTop div > span,
+.list > li > p {
+  color: var(--slate);
+  margin: 3px 0 0;
+}
+
+.header > span {
+  background: var(--indigo-tint);
+  border-radius: 999px;
+  font-family: var(--font-mono), monospace;
+  padding: 5px 9px;
+}
+
+.formGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.formGrid label,
+.reviewForm label {
+  display: grid;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.formGrid input,
+.formGrid select,
+.formGrid textarea,
+.reviewForm input,
+.reviewForm select {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  min-height: 44px;
+  padding: 9px 11px;
+  text-transform: none;
+}
+
+.formGrid textarea {
+  min-height: 80px;
+}
+
+.wide,
+.actions {
+  grid-column: 1 / -1;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list > li {
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-md);
+  padding: 15px;
+}
+
+.shiftTop strong,
+.shiftTop span {
+  display: block;
+}
+
+.badge {
+  background: var(--saffron-tint);
+  border-radius: 999px;
+  color: var(--saffron-dark);
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  padding: 5px 8px;
+  text-transform: uppercase;
+}
+
+.reviewForm {
+  align-items: end;
+  border-top: 1px solid var(--hair-2);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.error {
+  background: var(--chilli-tint);
+  border: 1px solid rgb(217 58 43 / 20%);
+  border-radius: var(--radius-md);
+  color: var(--chilli);
+  padding: 14px;
+}
+
+.filters {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  margin-bottom: 16px;
+}
+
+.filters label {
+  color: var(--slate);
+  display: grid;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.filters input,
+.filters select {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  min-height: 44px;
+  padding: 8px 10px;
+  text-transform: none;
+  width: 100%;
+}
+
+.manual {
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  padding: 0 14px 14px;
+}
+
+.manual summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 44px;
+  padding-block: 12px;
+}
+
+.bulkForm {
+  align-items: center;
+  background: var(--hair-2);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px;
+}
+
+.bulkForm button {
+  background: white;
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+  min-height: 44px;
+  padding: 9px 12px;
+}
+
+.shiftIdentity {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.shiftIdentity input {
+  height: 20px;
+  width: 20px;
+}
+
+.pagination {
+  align-items: center;
+  border-top: 1px solid var(--hair-2);
+  color: var(--slate);
+  display: flex;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.pagination > div {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination button {
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  gap: 5px;
+  min-height: 40px;
+  padding: 8px 12px;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 700px) {
+  .formGrid,
+  .reviewForm,
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 16px;
+  }
+
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pagination > div,
+  .pagination button {
+    flex: 1;
+  }
+
+  .pagination button {
+    justify-content: center;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1050px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reviewForm {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

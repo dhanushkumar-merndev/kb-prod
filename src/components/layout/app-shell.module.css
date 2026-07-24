@@ -1,0 +1,344 @@
+.shell {
+  --desktop-sidebar-width: 15vw;
+
+  min-height: 100vh;
+}
+
+.notificationControl {
+  position: fixed;
+  right: 20px;
+  top: 18px;
+  z-index: 45;
+}
+
+.sidebar {
+  background:
+    radial-gradient(circle at 15% 0%, rgb(242 112 29 / 14%), transparent 28%),
+    linear-gradient(170deg, var(--ink-2), #071a32 78%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  inset: 0 auto 0 0;
+  overflow-y: auto;
+  position: fixed;
+  scrollbar-color: rgb(242 112 29 / 55%) rgb(255 255 255 / 6%);
+  scrollbar-width: thin;
+  width: var(--desktop-sidebar-width);
+  z-index: 30;
+}
+
+.sidebar::-webkit-scrollbar,
+.drawer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.drawer::-webkit-scrollbar-track {
+  background: rgb(255 255 255 / 6%);
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.drawer::-webkit-scrollbar-thumb {
+  background: rgb(242 112 29 / 55%);
+  border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.drawer::-webkit-scrollbar-thumb:hover {
+  background: rgb(242 112 29 / 78%);
+}
+
+.brand {
+  align-items: center;
+  display: flex;
+  gap: 11px;
+  min-height: 78px;
+  padding: 16px 18px;
+}
+
+.brandMark {
+  align-items: center;
+  background: var(--saffron);
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgb(242 112 29 / 25%);
+  display: inline-flex;
+  flex: 0 0 42px;
+  font-family: var(--font-display), sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  height: 42px;
+  justify-content: center;
+  letter-spacing: -0.03em;
+}
+
+.brand strong,
+.brand small {
+  display: block;
+}
+
+.brand strong {
+  font-family: var(--font-display), sans-serif;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.brand small {
+  color: #9eabc1;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.navigation {
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px 22px;
+}
+
+.navLink {
+  align-items: center;
+  border-left: 3px solid transparent;
+  border-radius: 9px;
+  color: #b5bfd0;
+  display: flex;
+  font-size: 12.5px;
+  font-weight: 600;
+  gap: 11px;
+  min-height: 44px;
+  padding: 9px 11px;
+  text-decoration: none;
+  transition:
+    background 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+.navLink:hover {
+  background: rgb(255 255 255 / 7%);
+  color: #fff;
+}
+
+.navLinkActive {
+  background: rgb(242 112 29 / 14%);
+  border-left-color: var(--saffron);
+  color: #fff;
+}
+
+.sidebarFooter {
+  border-top: 1px solid rgb(255 255 255 / 9%);
+  margin-top: auto;
+  padding: 15px 12px 18px;
+}
+
+.profile {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+.avatar,
+.mobileAvatar {
+  align-items: center;
+  background: var(--saffron-tint);
+  border: 1px solid rgb(242 112 29 / 22%);
+  border-radius: 50%;
+  color: var(--saffron-dark);
+  display: inline-flex;
+  flex: 0 0 38px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  height: 38px;
+  justify-content: center;
+}
+
+.profileCopy {
+  min-width: 0;
+}
+
+.profileCopy strong,
+.profileCopy small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileCopy strong {
+  font-size: 12.5px;
+}
+
+.profileCopy small {
+  color: #96a5bd;
+  font-size: 10.5px;
+  margin-top: 2px;
+}
+
+.main {
+  margin-left: var(--desktop-sidebar-width);
+  min-height: 100vh;
+  width: calc(100% - var(--desktop-sidebar-width));
+  padding: 32px 34px 64px;
+}
+
+.main > * {
+  margin-inline: auto;
+  max-width: 1280px;
+}
+
+.mobileBar,
+.drawerLayer {
+  display: none;
+}
+
+.menuButton {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--hair);
+  border-radius: 10px;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  height: 44px;
+  justify-content: center;
+  padding: 0;
+  width: 44px;
+}
+
+@media (max-width: 1099px) {
+  .sidebar {
+    width: 196px;
+  }
+
+  .main {
+    margin-left: 196px;
+    padding: 24px 24px 56px;
+    width: calc(100% - 196px);
+  }
+}
+
+@media (max-width: 767px) {
+  .notificationControl {
+    right: 15px;
+    top: 10px;
+    z-index: 46;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .mobileBar {
+    align-items: center;
+    background: var(--card);
+    border-bottom: 1px solid var(--hair);
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 38px;
+    height: var(--mobile-app-bar-height);
+    inset: 0 0 auto;
+    padding: 9px 14px;
+    position: fixed;
+    z-index: 35;
+  }
+
+  .mobileTitle {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  .mobileTitle span,
+  .mobileTitle strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobileTitle span {
+    color: var(--saffron-dark);
+    font-family: var(--font-mono), monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .mobileTitle strong {
+    font-family: var(--font-display), sans-serif;
+    font-size: 15px;
+  }
+
+  .mobileAvatar {
+    flex-basis: 36px;
+    height: 36px;
+  }
+
+  .main {
+    margin-left: 0;
+    padding: calc(var(--mobile-app-bar-height) + 20px) 16px 48px;
+    width: 100%;
+  }
+
+  .drawerLayer {
+    display: block;
+    inset: 0;
+    position: fixed;
+    z-index: 50;
+  }
+
+  .backdrop {
+    background: rgb(7 26 50 / 55%);
+    border: 0;
+    inset: 0;
+    padding: 0;
+    position: absolute;
+    width: 100%;
+  }
+
+  .drawer {
+    background: linear-gradient(170deg, var(--ink-2), #071a32 78%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: min(88vw, 330px);
+    overflow-y: auto;
+    position: relative;
+    scrollbar-color: rgb(242 112 29 / 55%) rgb(255 255 255 / 6%);
+    scrollbar-width: thin;
+    width: 100%;
+  }
+
+  .drawerHeader {
+    align-items: center;
+    border-bottom: 1px solid rgb(255 255 255 / 9%);
+    display: flex;
+    justify-content: space-between;
+    padding-right: 14px;
+  }
+
+  .drawerHeader .menuButton {
+    border-color: rgb(255 255 255 / 16%);
+  }
+
+  .drawerFooter {
+    border-top: 1px solid rgb(255 255 255 / 9%);
+    color: #9eabc1;
+    display: grid;
+    gap: 12px;
+    margin-top: auto;
+    padding: 18px 14px;
+  }
+
+  .drawerFooter > span {
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navLink {
+    transition: none;
+  }
+}

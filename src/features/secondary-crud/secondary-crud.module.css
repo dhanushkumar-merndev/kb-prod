@@ -1,0 +1,149 @@
+.attendeeFieldset {
+  border: 0;
+  grid-column: 1 / -1;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.attendeeLegend {
+  color: var(--ink);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.055em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.attendeeGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.attendeeOption {
+  align-items: center;
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  min-height: 44px;
+  padding: 9px 11px;
+}
+
+.attendeeOption:focus-within {
+  border-color: var(--saffron);
+  box-shadow: 0 0 0 3px var(--saffron-tint);
+}
+
+.attendeeOption input {
+  accent-color: var(--saffron);
+  height: 18px;
+  margin: 0;
+  width: 18px;
+}
+
+.attendeeName {
+  display: grid;
+  font-weight: 600;
+  gap: 1px;
+}
+
+.attendeeRole {
+  color: var(--slate);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.helper {
+  color: var(--slate);
+  font-size: 12px;
+  margin: 7px 0 0;
+}
+
+.linkRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.calendarLink,
+.meetingLink {
+  align-items: center;
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  display: inline-flex;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 9px 13px;
+  text-decoration: none;
+}
+
+.calendarLink {
+  background: var(--saffron-tint);
+  border-color: #f7cfb3;
+  color: var(--saffron-dark);
+}
+
+.calendarLink:hover,
+.meetingLink:hover {
+  border-color: var(--saffron);
+}
+
+.calendarLink:focus-visible,
+.meetingLink:focus-visible {
+  box-shadow: 0 0 0 3px var(--saffron);
+  outline: none;
+}
+
+.readOnlyNote {
+  background: var(--hair-2);
+  border-radius: var(--radius-sm);
+  color: var(--slate);
+  margin: 14px 0 0;
+  padding: 10px 12px;
+}
+
+.feedbackLoading {
+  background: var(--indigo-tint);
+  border-color: #c9d3e6;
+  color: var(--ink);
+}
+
+.buttonSpinner {
+  animation: secondary-crud-spin 0.75s linear infinite;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  display: inline-block;
+  height: 14px;
+  margin-right: 8px;
+  width: 14px;
+}
+
+@keyframes secondary-crud-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 700px) {
+  .attendeeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buttonSpinner {
+    animation: none;
+  }
+}

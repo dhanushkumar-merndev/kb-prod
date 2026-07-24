@@ -1,0 +1,2690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khana Banao · Kitchen CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink:#0B2545; --ink-2:#123061; --slate:#5B6B85; --hair:#E1E6EF; --hair-2:#F0F3F8;
+  --canvas:#F5F7FA; --card:#FFFFFF;
+  --saffron:#F2701D; --saffron-dk:#C9560E; --saffron-tint:#FFF1E6;
+  --haldi:#E8A33D; --mint:#1E9E6A; --mint-tint:#E5F4EE;
+  --chilli:#D93A2B; --chilli-tint:#FBEAE8;
+  --indigo:#0B2545; --indigo-tint:#E7ECF5;
+  --display:'Bricolage Grotesque',system-ui,sans-serif;
+  --body:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --r-sm:8px; --r-md:13px; --r-lg:18px;
+  --sh-sm:0 1px 2px rgba(11,37,69,.05), 0 1px 1px rgba(11,37,69,.04);
+  --sh-md:0 6px 20px rgba(11,37,69,.09);
+  --sh-lg:0 20px 48px rgba(11,37,69,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--canvas);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button{font-family:inherit;cursor:pointer;transition:.15s ease}
+a,.btn,.nav button,.breakbtn,.tbl tbody tr,input,select,textarea{transition:.15s ease}
+*:focus-visible{outline:2px solid var(--saffron);outline-offset:2px;border-radius:4px}
+input,select,textarea{font-family:inherit;font-size:14px;width:100%;padding:10px 12px;border:1.5px solid var(--hair);border-radius:var(--r-sm);background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--saffron);outline-offset:1px;border-color:transparent}
+textarea{resize:vertical;min-height:70px}
+.hide{display:none!important}
+.mono{font-family:var(--mono)}
+.muted{color:var(--slate)}
+.small{font-size:12.5px}
+a{color:var(--saffron-dk);cursor:pointer;font-weight:600}
+a:hover{color:var(--saffron)}
+
+/* ══ AUTH ══ */
+#auth{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr}
+.auth-brandside{background:linear-gradient(160deg,var(--ink) 0%,var(--ink-2) 100%);color:#fff;padding:52px 48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.auth-brandside::after{content:"";position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(242,112,29,.18) 0%,transparent 70%);top:-180px;right:-180px}
+.logo{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:-.02em;position:relative}
+.logo em{font-style:normal;color:var(--saffron)}
+.auth-brandside h1{font-family:var(--display);font-weight:800;font-size:42px;line-height:1.08;letter-spacing:-.03em;margin:auto 0 16px;position:relative}
+.auth-brandside p{color:#A7B0C4;max-width:34ch;font-size:14.5px;line-height:1.55;position:relative}
+.rolecards{display:flex;flex-direction:column;gap:10px;margin-top:28px;border-top:1px solid rgba(255,255,255,.12);padding-top:22px;position:relative}
+.rolecards div{display:flex;gap:12px;font-size:12.5px;color:#A7B0C4}
+.rolecards b{color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;min-width:78px}
+.auth-formside{display:flex;align-items:center;justify-content:center;padding:32px}
+.authbox{width:100%;max-width:392px}
+.authbox h2{font-family:var(--display);font-size:27px;letter-spacing:-.02em;margin-bottom:5px;font-weight:800}
+.roletabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:22px 0 20px}
+.roletabs label{text-align:center;padding:10px 4px;border:1.5px solid var(--hair);border-radius:var(--r-sm);font-size:12px;font-weight:600;color:var(--slate);cursor:pointer;transition:.14s}
+.roletabs label:hover{border-color:var(--ink);color:var(--ink)}
+.roletabs input{display:none}
+.roletabs label:has(input:checked){border-color:var(--ink);background:var(--ink);color:#fff;box-shadow:var(--sh-sm)}
+.roletabs label:has(input[value="manager"]:checked){background:var(--indigo);border-color:var(--indigo)}
+.roletabs label:has(input[value="chef"]:checked){background:var(--saffron);border-color:var(--saffron)}
+.roletabs label:has(input[value="sales"]:checked){background:var(--mint);border-color:var(--mint)}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--slate);margin-bottom:6px;font-weight:600}
+.btn-primary{width:100%;padding:13px;border:none;border-radius:var(--r-sm);background:var(--ink);color:#fff;font-weight:700;font-size:14.5px;box-shadow:var(--sh-sm)}
+.btn-primary:hover{background:var(--ink-2);box-shadow:var(--sh-md);transform:translateY(-1px)}
+.authnote{margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);background:var(--hair-2);font-size:12.5px;color:var(--slate);border:1px solid var(--hair)}
+.err{background:var(--chilli-tint);color:var(--chilli);border-radius:var(--r-sm);padding:10px 13px;font-size:13px;margin-bottom:12px;font-weight:600;border:1px solid rgba(217,58,43,.2)}
+
+/* ══ SHELL ══ */
+#app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.rail{background:linear-gradient(180deg,var(--ink) 0%,var(--ink-2) 100%);color:#fff;padding:22px 14px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.rail .logo{font-size:20px;padding:0 8px 20px}
+.who{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-sm);padding:12px 13px;margin-bottom:16px}
+.who .nm{font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.005em}
+.badge{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:5px;margin-top:6px;font-weight:700}
+.b-owner{background:#fff;color:var(--ink)} .b-manager{background:var(--saffron);color:#fff}
+.b-sales{background:var(--mint);color:#fff} .b-chef{background:var(--saffron);color:#fff}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto}
+.nav button{background:none;border:none;border-left:3px solid transparent;color:#A7B0C4;text-align:left;padding:9px 10px;border-radius:0 8px 8px 0;font-size:13.5px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+.nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav button.on{background:rgba(242,112,29,.16);color:#fff;font-weight:700;border-left-color:var(--saffron)}
+.nav .pill{font-family:var(--mono);font-size:10px;background:var(--chilli);color:#fff;border-radius:20px;padding:1px 6px}
+.nav button.on .pill{background:var(--chilli)}
+.railout{border:1.5px solid rgba(255,255,255,.14);background:none;color:#A7B0C4;border-radius:var(--r-sm);padding:10px;font-weight:600;font-size:13px;margin-top:10px}
+.railout:hover{border-color:var(--chilli);color:#fff;background:rgba(217,58,43,.12)}
+.sesscode{font-size:11px;color:#8992A6;line-height:1.65;margin-bottom:14px}
+.sesscode b{color:#fff;font-family:var(--mono)}
+.breakrow{display:flex;gap:5px;margin-bottom:16px}
+.breakbtn{flex:1;background:none;border:1.5px solid rgba(255,255,255,.14);color:#A7B0C4;border-radius:7px;padding:7px 3px;font-size:10.5px;font-weight:700;text-align:center}
+.breakbtn:hover{border-color:var(--saffron);color:var(--saffron)}
+.breakbtn.on{background:var(--saffron);border-color:var(--saffron);color:#fff}
+main{padding:32px 34px 64px;max-width:1180px}
+.pgh{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.pgh h1{font-family:var(--display);font-size:28px;letter-spacing:-.025em;font-weight:800;color:var(--ink)}
+.pgh p{color:var(--slate);font-size:13px;margin-top:4px;line-height:1.5}
+.btn{padding:9px 16px;border-radius:var(--r-sm);border:1.5px solid var(--hair);background:#fff;font-weight:600;font-size:13px;color:var(--ink)}
+.btn:hover{border-color:var(--ink);box-shadow:var(--sh-sm)}
+.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:var(--sh-sm)}
+.btn.dark:hover{background:var(--ink-2);border-color:var(--ink-2);transform:translateY(-1px);box-shadow:var(--sh-md)}
+.btn.sm{padding:5px 11px;font-size:12px;border-radius:6px}
+.btn.ok{background:var(--mint);border-color:var(--mint);color:#fff}
+.btn.ok:hover{background:#188456;border-color:#188456}
+.btn.no{background:#fff;border-color:var(--chilli);color:var(--chilli)}
+.btn.no:hover{background:var(--chilli-tint)}
+
+/* ══ CARDS / KPI ══ */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:var(--card);border:1px solid var(--hair);border-left:3px solid var(--saffron);border-radius:var(--r-md);padding:15px 16px;box-shadow:var(--sh-sm)}
+.kpi .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--slate);font-weight:600}
+.kpi .v{font-family:var(--display);font-size:27px;font-weight:800;letter-spacing:-.02em;margin-top:7px;color:var(--ink)}
+.kpi .s{font-size:11.5px;color:var(--slate);margin-top:3px}
+.kpi.alert{border-color:var(--chilli);background:var(--chilli-tint)}
+.kpi.alert .v{color:var(--chilli)}
+.card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:19px 20px;margin-bottom:18px;box-shadow:var(--sh-sm)}
+.card h3{font-family:var(--display);font-size:16.5px;letter-spacing:-.01em;margin-bottom:3px;font-weight:700;color:var(--ink)}
+.card .sub{color:var(--slate);font-size:12.5px;margin-bottom:15px;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:880px){.grid2,.f2{grid-template-columns:1fr}}
+
+/* ══ TABLE ══ */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--slate);text-align:left;padding:0 10px 10px;border-bottom:1.5px solid var(--hair);white-space:nowrap;font-weight:700}
+.tbl td{padding:12px 10px;border-bottom:1px solid var(--hair-2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover{background:var(--hair-2)}
+.num{font-family:var(--mono);font-weight:600;text-align:right;white-space:nowrap}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;letter-spacing:.01em}
+.t-new{background:var(--indigo-tint);color:var(--indigo)}
+.t-warm{background:var(--saffron-tint);color:var(--saffron-dk)}
+.t-won{background:var(--mint-tint);color:var(--mint)}
+.t-lost{background:var(--hair-2);color:var(--slate)}
+.t-pend{background:var(--saffron-tint);color:var(--saffron-dk)}
+.t-ok{background:var(--mint-tint);color:var(--mint)}
+.t-no{background:var(--chilli-tint);color:var(--chilli)}
+.empty{text-align:center;padding:42px 20px;color:var(--slate)}
+.empty b{display:block;font-family:var(--display);font-size:16.5px;color:var(--ink);margin-bottom:5px;font-weight:700}
+
+/* ══ DOCKET (signature) ══ */
+.dockets{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.docket{background:#fff;border:1px solid var(--hair);border-radius:4px 4px 10px 10px;padding:16px 15px 14px;position:relative;box-shadow:var(--sh-sm)}
+.docket::before{content:"";position:absolute;top:-1px;left:0;right:0;height:5px;
+  background:repeating-linear-gradient(90deg,var(--ink) 0 5px,transparent 5px 10px)}
+.docket .code{font-family:var(--mono);font-size:11px;color:var(--slate);letter-spacing:.06em}
+.docket .cl{font-family:var(--display);font-size:17px;font-weight:800;letter-spacing:-.01em;margin:3px 0 8px}
+.docket dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12.5px}
+.docket dt{color:var(--slate);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px;font-weight:600}
+.docket dd{font-weight:500}
+.docket .ft{margin-top:11px;padding-top:10px;border-top:1px dashed var(--hair);display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+/* ══ CLOCK ══ */
+.clock{background:linear-gradient(135deg,var(--ink) 0%,var(--ink-2) 100%);color:#fff;border-radius:var(--r-lg);padding:24px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:18px;box-shadow:var(--sh-md)}
+.clock .st{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#A7B0C4}
+.clock .tm{font-family:var(--display);font-size:34px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+.clock .el{color:#A7B0C4;font-size:12.5px;margin-top:2px}
+.clock button{border:none;border-radius:var(--r-sm);padding:15px 30px;font-weight:800;font-size:15px;font-family:var(--display);box-shadow:var(--sh-sm)}
+.clock button:hover{transform:translateY(-1px);box-shadow:var(--sh-md)}
+.cin{background:var(--mint);color:#fff}
+.cout{background:var(--saffron);color:#fff}
+.live{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mint);margin-right:6px;animation:p 1.6s infinite}
+@keyframes p{50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ══ MODAL ══ */
+.mask{position:fixed;inset:0;background:rgba(11,37,69,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:60;backdrop-filter:blur(2px)}
+.modal{background:#fff;border-radius:var(--r-lg);padding:24px;width:100%;max-width:480px;max-height:90vh;overflow:auto;box-shadow:var(--sh-lg)}
+.modal h3{font-family:var(--display);font-size:20px;letter-spacing:-.02em;margin-bottom:4px;font-weight:800;color:var(--ink)}
+.modal .sub{color:var(--slate);font-size:12.5px;margin-bottom:17px;line-height:1.5}
+.mrow{display:flex;gap:9px;margin-top:16px}
+.mrow .btn{flex:1;text-align:center;padding:11px}
+.drop{border:1.5px dashed var(--hair);border-radius:var(--r-sm);padding:16px;text-align:center;color:var(--slate);font-size:13px;cursor:pointer;background:var(--hair-2)}
+.drop:hover{border-color:var(--saffron);color:var(--saffron-dk)}
+.drop.has{border-style:solid;border-color:var(--mint);background:var(--mint-tint);color:var(--mint)}
+.thumb{max-height:120px;border-radius:var(--r-sm);margin-top:9px;border:1px solid var(--hair)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 22px;border-radius:var(--r-sm);font-weight:600;font-size:13.5px;z-index:90;box-shadow:var(--sh-lg)}
+@media(max-width:820px){
+  #auth{grid-template-columns:1fr} .auth-brandside{display:none}
+  #app{grid-template-columns:1fr} .rail{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
+  .rail .logo,.who{display:none} .nav{flex-direction:row;flex-wrap:wrap} main{padding:20px 16px 50px}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ AUTH ════════ -->
+<div id="auth">
+  <div class="auth-brandside">
+    <div class="logo">Khana<em>Banao</em></div>
+    <h1>One kitchen.<br>Four desks.<br>Nothing shared<br>by accident.</h1>
+    <p>Every role opens a different CRM. What a chef sees is not what a manager sees, and neither of them sees what the director sees.</p>
+    <div class="rolecards">
+      <div><b>Director</b><span>The whole business — sales, kitchen, staff, money.</span></div>
+      <div><b>Manager</b><span>Runs the operation. No payouts, no margins, no accounts.</span></div>
+      <div><b>Sales</b><span>Every enquiry call, follow-up and conversion.</span></div>
+      <div><b>Chef</b><span>Today's job, clock in/out, and expenses with bills.</span></div>
+    </div>
+  </div>
+
+  <div class="auth-formside">
+    <div class="authbox">
+      <!-- LOADING -->
+      <div id="loadingView">
+        <h2>Loading…</h2>
+        <p class="muted small">Connecting to your business's data.</p>
+      </div>
+      <!-- FIRST RUN -->
+      <div id="setupView" class="hide">
+        <h2>Set up your business</h2>
+        <p class="muted small">This CRM starts empty. Create the director account — you'll add managers, sales staff and chefs from inside.</p>
+        <div id="setupErr" class="err hide"></div>
+        <div style="margin-top:20px">
+          <div class="fld"><label>Business name</label><input id="sBiz" placeholder="e.g. Khana Banao Bengaluru"></div>
+          <div class="fld"><label>Your name</label><input id="sName" placeholder="Director's full name"></div>
+          <div class="f2">
+            <div class="fld"><label>Phone</label><input id="sPhone" inputmode="numeric" placeholder="10-digit"></div>
+            <div class="fld"><label>Password</label><input id="sPass" type="password" placeholder="min 6 characters"></div>
+          </div>
+          <button class="btn-primary" onclick="createOwner()">Create director account</button>
+        </div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="loginView" class="hide">
+        <h2 id="liTitle">Log in</h2>
+        <p class="muted small" id="liSub">Pick your desk, then sign in.</p>
+        <div class="roletabs">
+          <label><input type="radio" name="lr" value="owner" onchange="paintLogin()"><span>Director</span></label>
+          <label><input type="radio" name="lr" value="manager" onchange="paintLogin()"><span>Manager</span></label>
+          <label><input type="radio" name="lr" value="hr" onchange="paintLogin()"><span>HR</span></label>
+          <label><input type="radio" name="lr" value="sales_manager" onchange="paintLogin()"><span>Sales Manager</span></label>
+          <label><input type="radio" name="lr" value="sales" checked onchange="paintLogin()"><span>Sales</span></label>
+          <label><input type="radio" name="lr" value="chef" onchange="paintLogin()"><span>Chef</span></label>
+          <label><input type="radio" name="lr" value="parttime" onchange="paintLogin()"><span>Part-time Chef</span></label>
+        </div>
+        <div id="loginErr" class="err hide"></div>
+        <div class="fld"><label>Phone number</label><input id="liPhone" inputmode="numeric" placeholder="10-digit phone"></div>
+        <div class="fld"><label>Password</label><input id="liPass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="btn-primary" onclick="doLogin()">Log in</button>
+        <div class="authnote" id="liNote"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ APP ════════ -->
+<div id="app" class="hide">
+  <aside class="rail">
+    <div class="logo">Khana<em>Banao</em></div>
+    <div class="who"><div class="nm" id="whoName"></div><span class="badge" id="whoBadge"></span></div>
+    <div class="sesscode" id="sessInfo"></div>
+    <div class="breakrow" id="breakRow"></div>
+    <nav class="nav" id="nav"></nav>
+    <button class="railout" onclick="doLogout()">Log out</button>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div id="modalHost"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   KHANA BANAO · KITCHEN CRM  v15
+   Single file. No backend. Starts with zero data and zero
+   credentials — the first person to open it becomes the owner.
+   ═══════════════════════════════════════════════════════════ */
+
+const K = 'kb15_';
+const DEFAULT_LIMIT = 5000;           // manager can approve expenses up to this
+const DB = {users:[],leads:[],bookings:[],staff:[],attendance:[],expenses:[],meta:{},sessions:[],breaks:[],messages:[],tasks:[],leaves:[],documents:[],meetings:[],ptPayments:[],scores:[]};
+let ME = null, VIEW = '', MY_SESSION = null;
+
+/* ── storage — talks directly to Supabase's REST API (PostgREST) with
+   plain fetch(), instead of going through the @supabase/supabase-js
+   client library. This removes a whole layer that could silently mishandle
+   the newer "sb_publishable_..." key format, and surfaces the exact HTTP
+   status + message if something is still wrong, instead of a vague
+   wrapped error object. One row per DB key in a shared "kb_data" table,
+   so every device that opens this page reads/writes the same business's
+   data. Falls back to plain localStorage (this device only) if the API
+   can't be reached, so the app still works, it just won't sync across
+   devices. ── */
+const SUPABASE_URL = "https://REDACTED-PROJECT.supabase.co";
+const SUPABASE_ANON_KEY = "REDACTED_PUBLISHABLE_KEY";
+const REST_URL = SUPABASE_URL + "/rest/v1/kb_data";
+const REST_HEADERS = {
+  "apikey": SUPABASE_ANON_KEY,
+  "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+  "Content-Type": "application/json",
+};
+let storageOK = false;
+let lastStorageError = "";
+
+async function cloudGet(key){
+  const res = await fetch(REST_URL + "?key=eq." + encodeURIComponent(key) + "&select=value", {
+    headers: REST_HEADERS,
+  });
+  if (!res.ok){
+    const body = await res.text().catch(()=> "");
+    throw new Error("HTTP " + res.status + " " + res.statusText + (body ? " — " + body.slice(0,300) : ""));
+  }
+  const rows = await res.json();
+  return rows.length ? rows[0].value : null;
+}
+async function cloudSet(key, val){
+  const res = await fetch(REST_URL, {
+    method: "POST",
+    headers: { ...REST_HEADERS, "Prefer": "resolution=merge-duplicates" },
+    body: JSON.stringify([{ key, value: val, updated_at: new Date().toISOString() }]),
+  });
+  if (!res.ok){
+    const body = await res.text().catch(()=> "");
+    throw new Error("HTTP " + res.status + " " + res.statusText + (body ? " — " + body.slice(0,300) : ""));
+  }
+}
+async function testCloudConnection(){
+  try {
+    const probe = "ok-" + Date.now();
+    await cloudSet("kb15_conn_test", probe);
+    const ok = (await cloudGet("kb15_conn_test")) === probe;
+    if (!ok) lastStorageError = "Wrote test data but couldn't read it back — check the table and RLS policies.";
+    return ok;
+  } catch(e){
+    lastStorageError = e && e.message ? e.message : String(e);
+    console.error("Khana Banao storage self-test failed:", lastStorageError);
+    return false;
+  }
+}
+function showStorageWarning(show){
+  let el = document.getElementById("storageWarning");
+  if (!el){
+    el = document.createElement("div");
+    el.id = "storageWarning";
+    el.className = "err";
+    el.style.display = "none";
+    const box = document.querySelector(".authbox");
+    if (box) box.insertBefore(el, box.firstChild.nextSibling);
+  }
+  el.innerHTML = "Cloud sync isn't reachable right now — this device will keep working on its own copy, but it won't stay in sync with other devices until this is fixed."
+    + (lastStorageError ? "<br><br><b>Error detail:</b> " + lastStorageError.replace(/[<>]/g,"") : "")
+    + "<br><br>If you're the developer: create a public <code>kb_data</code> table in Supabase (columns: <code>key</code> text primary key, <code>value</code> text, <code>updated_at</code> timestamptz) with Row Level Security policies that allow the anon key to select/insert/update it.";
+  el.style.display = show ? "block" : "none";
+}
+/* ── storage ── */
+async function load(){
+  storageOK = await testCloudConnection();
+  showStorageWarning(!storageOK);
+  for (const k of Object.keys(DB)){
+    try{
+      let raw = null;
+      if (storageOK){ raw = await cloudGet(K+k); }
+      else { raw = localStorage.getItem(K+k); }
+      if (raw) DB[k] = JSON.parse(raw);
+    } catch(e){
+      try{ const raw = localStorage.getItem(K+k); if(raw) DB[k] = JSON.parse(raw); }catch(e2){}
+    }
+  }
+  if(!DB.meta.limit) DB.meta.limit = DEFAULT_LIMIT;
+}
+async function save(k){
+  const json = JSON.stringify(DB[k]);
+  try{ localStorage.setItem(K+k, json); }
+  catch(e){ toast('Local storage full — delete an old receipt image.'); }
+  if (storageOK){
+    try{ await cloudSet(K+k, json); }
+    catch(e){ console.error("Cloud save failed for", k, ":", e && e.message ? e.message : e); }
+  }
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const sessCode = () => String(Math.floor(100000 + Math.random()*900000));
+
+/* ── passwords: salted SHA-256, never stored in plain text ── */
+const salt = () => [...crypto.getRandomValues(new Uint8Array(12))].map(b=>b.toString(16).padStart(2,'0')).join('');
+async function hash(pw, s){
+  if(crypto.subtle){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s+':'+pw));
+    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  let h=0; const str=s+':'+pw; for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i)|0;} return 'w'+h;
+}
+
+/* ── helpers ── */
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rs  = n => '₹' + Number(n||0).toLocaleString('en-IN');
+const today = () => new Date().toISOString().slice(0,10);
+const dmy = d => d ? new Date(d+'T00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) : '—';
+const hhmm = t => t ? new Date(t).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '—';
+const hrs = (a,b) => ((( b||Date.now()) - a)/36e5);
+const $ = id => document.getElementById(id);
+function toast(m){ const d=document.createElement('div'); d.className='toast'; d.textContent=m;
+  document.body.appendChild(d); setTimeout(()=>d.remove(),2600); }
+function nameOf(id){ return (DB.users.find(u=>u.id===id)||{}).name || '—'; }
+const ROLE_LABEL = {owner:'Director',manager:'Manager',hr:'HR',sales:'Sales',sales_manager:'Sales Manager',chef:'Chef',parttime:'Part-time Chef'};
+
+/* ═══════════ AUTH ═══════════ */
+async function boot(){
+  $('loadingView').classList.remove('hide');
+  $('setupView').classList.add('hide'); $('loginView').classList.add('hide');
+  $('auth').classList.remove('hide'); $('app').classList.add('hide');
+  await load();
+  reapStaleSessions();
+  $('loadingView').classList.add('hide');
+  const sid = localStorage.getItem(K+'session');
+  const u = sid && DB.users.find(x=>x.id===sid && x.active);
+  if(u){
+    ME = u;
+    // Resume — reattach to whichever session record is still open for this
+    // user (created at their last login). If the reap above just closed
+    // it (stale beyond 10 minutes), this opens a clean new one instead of
+    // reviving a session that should have ended.
+    let s = DB.sessions.find(x=>x.userId===u.id && !x.logoutAt);
+    if(!s){ s = openSession(u); }
+    MY_SESSION = s.id;
+    openApp(); return;
+  }
+  const first = DB.users.length===0;
+  $('setupView').classList.toggle('hide', !first);
+  $('loginView').classList.toggle('hide', first);
+  if(!first) paintLogin();
+  if(sessionStorage.getItem('kb_logout_reason')==='away'){
+    sessionStorage.removeItem('kb_logout_reason');
+    setTimeout(()=>toast("Logged out — you were away from the tab for 10 minutes."), 300);
+  }
+}
+function openSession(u){
+  const s = {id:uid(), userId:u.id, name:u.name, role:u.role, code:sessCode(), loginAt:Date.now(), logoutAt:null, lastSeen:Date.now()};
+  DB.sessions.unshift(s); save('sessions');
+  return s;
+}
+/* ═══════════ STALE SESSION CLEANUP ═══════════
+   A JS timer inside a browser tab cannot be trusted to run "log me out
+   after 10 minutes away" — if the tab is actually closed, the phone
+   kills the app in the background, or the browser is force-stopped, that
+   timer never fires and the session sits showing "Active" forever (this
+   is exactly the stuck 25h+/30h+ rows the director was seeing). The
+   fix that actually holds up: every open session carries a lastSeen
+   heartbeat updated only while the tab is genuinely open and in the
+   foreground; and every time ANYONE'S app loads fresh data, we sweep
+   for open sessions whose heartbeat has gone quiet for 10+ minutes and
+   close them right there. So the very next person to open the app (or
+   the director opening Login Activity) is what cleans up the list —
+   no server/cron needed, and it can't get permanently stuck. */
+const STALE_SESSION_MS = 10*60*1000;
+function reapStaleSessions(){
+  const cutoff = Date.now() - STALE_SESSION_MS;
+  let changed = false;
+  DB.sessions.forEach(s=>{
+    if(!s.logoutAt){
+      const last = s.lastSeen || s.loginAt;
+      if(last < cutoff){ s.logoutAt = last; s.away = true; changed = true; }
+    }
+  });
+  if(changed) save('sessions');
+}
+/* Heartbeat for MY session — only ticks while this tab is actually the
+   foreground tab, so a minimised/backgrounded tab stops refreshing it
+   and will get reaped by the next person who loads the app. */
+setInterval(()=>{
+  if(!ME || !MY_SESSION || document.hidden) return;
+  const s = DB.sessions.find(x=>x.id===MY_SESSION); if(!s) return;
+  s.lastSeen = Date.now(); s.away = false; save('sessions');
+}, 60000);
+function closeSession(){
+  if(!MY_SESSION) return;
+  const s = DB.sessions.find(x=>x.id===MY_SESSION);
+  if(s && !s.logoutAt){ s.logoutAt = Date.now(); save('sessions'); }
+  MY_SESSION = null;
+}
+/* Best-effort — catches a real tab/browser close. Deliberately NOT using
+   visibilitychange, since that also fires on a simple tab-switch or phone
+   screen lock and would falsely mark someone as logged out mid-shift. */
+window.addEventListener('beforeunload', closeSession);
+function paintLogin(){
+  const r = document.querySelector('input[name=lr]:checked').value;
+  const copy = {
+    owner:  ['Director desk','You see everything: pipeline, kitchen, staff cost, profit.','Only the director can add or remove people and set the approval limit.'],
+    manager:['Manager desk','Run today: assign chefs, mark staff, clear expenses.','A manager cannot see payouts, margins or the team list — and can only approve expenses up to the limit the director set.'],
+    hr:     ['HR desk','Leave requests, documents, meetings and payroll.','You handle people-ops — not bookings, chefs, or client work.'],
+    sales:  ['Sales desk','Log every enquiry call and turn it into a booking.','You see your own calls and the bookings you closed. Kitchen costs stay with the kitchen.'],
+    sales_manager: ['Sales Manager desk','Same as Sales, plus the whole team\'s calls and bookings.','You can see and reassign every sales person\'s work, not just your own.'],
+    chef:   ['Chef desk','Clock in, cook the job, claim your bills.','Log in here to start your shift. Log out and your shift is closed and the hours are counted.'],
+    parttime: ['Part-time Chef desk','Pay the one-time ₹500 unlock fee to see client jobs.','Once the director confirms your payment, you work exactly like a regular chef.']
+  }[r];
+  $('liTitle').textContent = copy[0]; $('liSub').textContent = copy[1]; $('liNote').textContent = copy[2];
+  $('loginErr').classList.add('hide');
+}
+async function createOwner(){
+  const biz=$('sBiz').value.trim(), name=$('sName').value.trim(),
+        phone=$('sPhone').value.replace(/\D/g,''), pass=$('sPass').value;
+  const e = $('setupErr'); e.classList.add('hide');
+  const bad = m => { e.textContent=m; e.classList.remove('hide'); };
+  if(!biz || !name) return bad('Business name and your name are both needed.');
+  if(phone.length!==10) return bad('Enter a 10-digit phone number.');
+  if(pass.length<6)    return bad('Password must be at least 6 characters.');
+  const s = salt();
+  DB.users.push({id:uid(),name,phone,role:'owner',salt:s,hash:await hash(pass,s),active:true,createdAt:Date.now()});
+  DB.meta = {biz, limit:DEFAULT_LIMIT}; save('users'); save('meta');
+  ME = DB.users[0]; localStorage.setItem(K+'session', ME.id);
+  MY_SESSION = openSession(ME).id;
+  openApp();
+  toast('Business created. Add your team from Team & Access.');
+}
+async function doLogin(){
+  const role = document.querySelector('input[name=lr]:checked').value;
+  const phone = $('liPhone').value.replace(/\D/g,''), pass = $('liPass').value;
+  const e = $('loginErr'); e.classList.add('hide');
+  const bad = m => { e.textContent=m; e.classList.remove('hide'); };
+  if(!phone || !pass) return bad('Enter your phone number and password.');
+  const u = DB.users.find(x=>x.phone===phone);
+  if(!u) return bad('No account with that phone number. Ask the director to add you.');
+  if(!u.active) return bad('This account has been switched off. Ask the director to turn it back on.');
+  if(u.role !== role) return bad(`This phone is registered as ${ROLE_LABEL[u.role]}. Pick the ${ROLE_LABEL[u.role]} tab.`);
+  if(await hash(pass, u.salt) !== u.hash) return bad('Wrong password.');
+  ME = u; localStorage.setItem(K+'session', u.id);
+  MY_SESSION = openSession(u).id;
+  if(u.role==='chef' || (u.role==='parttime' && u.ptUnlocked)){ clockIn(true); }        // chef login = shift starts
+  openApp();
+}
+function doLogout(){
+  const isChefLike = ME.role==='chef' || (ME.role==='parttime' && ME.ptUnlocked);
+  const open = isChefLike && DB.attendance.find(a=>a.userId===ME.id && !a.outAt);
+  if(open){
+    confirmBox('Close your shift?', `You clocked in at ${hhmm(open.inAt)}. Logging out will clock you out after ${hrs(open.inAt).toFixed(1)} hours.`,'Clock out & log out',()=>{
+      clockOut(true); finishLogout();
+    });
+    return;
+  }
+  finishLogout();
+}
+function finishLogout(){
+  stopGeofenceWatch(); stopLocationShare();
+  closeSession();
+  ME=null; localStorage.removeItem(K+'session');
+  $('app').classList.add('hide'); $('auth').classList.remove('hide');
+  $('liPhone').value=''; $('liPass').value=''; boot();
+}
+
+/* ═══════════ NAV / SHELL ═══════════ */
+const NAV = {
+  owner:   [['dash','Dashboard'],['calls','Calls & Leads'],['book','Bookings'],['chefs','Chefs'],
+            ['staff','Staff & Attendance'],['exp','Expenses'],['msgs','Messages'],['team','Team & Access'],
+            ['tasks','Assign Work'],['hr','HR Overview'],['leave','Leave'],['docs','Documents'],['meetings','Meetings'],['payroll','Payroll'],['rep','Money Report'],['integrations','Integrations']],
+  manager: [['dash','Dashboard'],['book','Bookings'],['chefs','Chefs on duty'],
+            ['staff','Staff & Attendance'],['exp','Expense approvals'],['calls','Enquiry board'],['msgs','Messages'],['team','Add People'],['sessions','Login Activity'],
+            ['tasks','Assign Work'],['hr','HR Overview'],['leave','Leave Requests'],['meetings','Meetings']],
+  hr:      [['payroll','Payroll'],['leave','Leave Requests']],
+  sales:   [['dash','My Dashboard'],['calls','Call Register'],['book','My Bookings'],['score','My Compliance Score'],['chefs','Chefs available'],['exp','My Expenses'],
+            ['tasks','My Tasks'],['leave','Leave'],['docs','My Documents'],['meetings','Meetings']],
+  sales_manager: [['dash','My Dashboard'],['calls','Team Calls'],['book','Team Bookings'],['score','Score Team'],['chefs','Chefs available'],['exp','My Expenses'],
+            ['team','Add Sales'],['tasks','Assign Work'],['leave','Leave Requests'],['docs','My Documents'],['meetings','Meetings']],
+  chef:    [['dash','My Day'],['jobs','My Jobs'],['exp','My Expenses'],['pay','My Earnings'],['tasks','My Tasks'],['leave','Leave'],['docs','My Documents'],['meetings','Meetings']],
+  parttime:[['dash','My Day'],['jobs','My Jobs'],['exp','My Expenses'],['pay','My Earnings'],['tasks','My Tasks'],['leave','Leave'],['docs','My Documents'],['meetings','Meetings']]
+};
+function isChefLikeRole(role){ return role==='chef' || role==='parttime'; }
+function isSalesLikeRole(role){ return role==='sales' || role==='sales_manager'; }
+function openApp(){
+  $('auth').classList.add('hide'); $('app').classList.remove('hide');
+  $('whoName').textContent = ME.name;
+  $('whoBadge').className = 'badge b'+'-'+ME.role;
+  $('whoBadge').textContent = ROLE_LABEL[ME.role];
+  renderSidebarExtras();
+  if(ME.role==='parttime' && !ME.ptUnlocked){ vUnlock(); return; }
+  // Reopening the app mid-shift (e.g. after a refresh) should resume
+  // live location + the geofence away-timer, not silently drop them.
+  if(isChefLikeRole(ME.role) && DB.attendance.find(a=>a.userId===ME.id && !a.outAt)){
+    startLocationShare(); startGeofenceWatch();
+  }
+  go(NAV[ME.role][0][0]);
+}
+/* ── Lunch / Break / Superfone — pure time tracking, same idea as chef
+   clock-in but generalised to every desk. No dialing, no external
+   connection — start it, stop it, the duration is logged. ── */
+function myOpenBreak(){ return DB.breaks.find(b=>b.userId===ME.id && !b.end); }
+function toggleBreakType(type){
+  const open = myOpenBreak();
+  if(open && open.type===type){ open.end = Date.now(); save('breaks'); }
+  else if(open){ toast(`End ${open.type} first.`); return; }
+  else { DB.breaks.unshift({id:uid(), userId:ME.id, name:ME.name, role:ME.role, type, start:Date.now(), end:null}); save('breaks'); }
+  renderSidebarExtras();
+}
+function renderSidebarExtras(){
+  const s = DB.sessions.find(x=>x.id===MY_SESSION);
+  $('sessInfo').innerHTML = s ? `Session code <b>${esc(s.code)}</b><br>Signed in ${hhmm(s.loginAt)}` : '';
+  const open = myOpenBreak();
+  $('breakRow').innerHTML = ['Lunch','Break','Superfone'].map(t =>
+    `<button class="breakbtn ${open && open.type===t ? 'on':''}" onclick="toggleBreakType('${t}')">${t}</button>`).join('');
+}
+function pending(){ return DB.expenses.filter(e=>e.status==='pending'); }
+function drawNav(){
+  $('nav').innerHTML = NAV[ME.role].map(([v,l])=>{
+    let pill='';
+    if(v==='exp' && (ME.role==='owner'||ME.role==='manager')){
+      const n = ME.role==='manager' ? pending().filter(e=>e.amount<=DB.meta.limit).length : pending().length;
+      if(n) pill = `<span class="pill">${n}</span>`;
+    }
+    if(v==='calls' && ME.role==='sales'){
+      const n = DB.leads.filter(l=>l.ownerId===ME.id && l.nextFollowUp && l.nextFollowUp<=today() && !['won','lost'].includes(l.status)).length;
+      if(n) pill = `<span class="pill">${n}</span>`;
+    }
+    return `<button class="${v===VIEW?'on':''}" onclick="go('${v}')">${l}${pill}</button>`;
+  }).join('');
+}
+function go(v){ VIEW=v; drawNav(); window.scrollTo(0,0);
+  ({dash:vDash,calls:vCalls,book:vBook,chefs:vChefs,staff:vStaff,exp:vExp,team:vTeam,rep:vRep,jobs:vJobs,pay:vPay,
+    sessions:vSessions,tasks:vTasks,hr:vHrOverview,hrdash:vHrDash,leave:vLeave,docs:vDocs,meetings:vMeetings,payroll:vPayroll,score:vScore,msgs:vMsgs,integrations:vIntegrations}[v])(); }
+/* Booking dashboard re-renders itself every 20s so the revenue-vs-target
+   bar and KPIs stay live without the director needing to refresh — only
+   while they're actually sitting on that screen, so it doesn't fight
+   with modals or other views. */
+setInterval(()=>{ if(ME && VIEW==='dash' && !document.hidden && !$('modalHost').innerHTML) go('dash'); }, 20000);
+function head(t,s,btn=''){ return `<div class="pgh"><div><h1>${t}</h1><p>${s}</p></div><div>${btn}</div></div>`; }
+function empty(t,s){ return `<div class="empty"><b>${t}</b>${s}</div>`; }
+
+/* ═══════════ MODALS ═══════════ */
+function modal(html){ $('modalHost').innerHTML = `<div class="mask" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`; }
+function closeModal(){ $('modalHost').innerHTML=''; }
+function confirmBox(t,s,label,fn){
+  window.__ok = fn;
+  modal(`<h3>${esc(t)}</h3><div class="sub">${esc(s)}</div>
+    <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+    <button class="btn dark" onclick="closeModal();window.__ok()">${esc(label)}</button></div>`);
+}
+
+/* ═══════════ BROADCAST MESSAGES ═══════════
+   Director can message everyone. Manager can message sales or chefs —
+   not the director and not other managers. Sales manager can only reach
+   their own sales team. Everyone who can broadcast can also pick
+   specific people (up to 8) instead of a whole group. */
+function broadcastForm(){
+  const audienceOptions = ME.role==='owner'
+    ? [['all','Everyone'],['manager','Managers'],['sales','Sales team'],['chef','Chefs'],['people','Pick specific people']]
+    : ME.role==='sales_manager'
+    ? [['sales','Sales team'],['people','Pick specific people']]
+    : [['sales','Sales team'],['chef','Chefs'],['people','Pick specific people']];
+  const people = assignableScope();
+  modal(`<h3>Message everyone</h3><div class="sub">Goes straight to their dashboard — no email, no SMS, just shows up when they open the app.</div>
+  <div class="fld"><label>Send to</label><select id="mAud" onchange="document.getElementById('mPeople').style.display=this.value==='people'?'block':'none'">${audienceOptions.map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></div>
+  <div id="mPeople" style="display:none;max-height:200px;overflow-y:auto;border:1px solid var(--hair-2);border-radius:8px;padding:8px;margin-bottom:12px">
+    ${people.map(u=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 2px">
+      <input type="checkbox" class="msgPerson" value="${u.id}" onchange="capSelection('.msgPerson',8)">
+      <span>${esc(u.name)} <span class="small muted">— ${ROLE_LABEL[u.role]}</span></span></label>`).join('')}
+  </div>
+  <div class="fld"><label>Message</label><textarea id="mTxt" rows="3" placeholder="Keep it short — this shows up as a banner on their dashboard."></textarea></div>
+  <div class="fld"><label>Show until <span class="muted small">(optional — defaults to 3 days)</span></label><input id="mExpiry" type="date"></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveBroadcast()">Send</button></div>`);
+}
+function saveBroadcast(){
+  const text = $('mTxt').value.trim(), audience = $('mAud').value;
+  if(!text) return toast('Write a message first.');
+  let toIds = null;
+  if(audience==='people'){
+    toIds = [...document.querySelectorAll('.msgPerson:checked')].map(b=>b.value);
+    if(!toIds.length) return toast('Pick at least one person.');
+  }
+  const expiryInput = $('mExpiry').value;
+  const expiresAt = expiryInput ? new Date(expiryInput+'T23:59:59').getTime() : Date.now()+3*864e5;
+  DB.messages.unshift({id:uid(), from:ME.id, fromName:ME.name, fromRole:ME.role, text, audience, toIds, at:Date.now(), expiresAt});
+  save('messages'); closeModal(); toast(audience==='people'?`Sent to ${toIds.length} ${toIds.length>1?'people':'person'}.`:'Sent.'); go(VIEW);
+}
+function myMessages(){
+  return DB.messages.filter(m => {
+    const exp = m.expiresAt || (m.at + 3*864e5); // legacy messages: expire 3 days after they were sent
+    return exp>=Date.now() && (m.audience==='all' || m.audience===ME.role || (m.audience==='people' && m.toIds && m.toIds.includes(ME.id)));
+  }).slice(0,5);
+}
+function announcementsHTML(){
+  const msgs = myMessages();
+  if(!msgs.length) return '';
+  return `<div class="card"><h3>Announcements</h3><div class="sub">From the director and management</div>
+    ${msgs.map(m=>`<div style="padding:10px 0;border-bottom:1px solid var(--hair-2)">
+      <div style="font-size:12.5px"><b>${esc(m.fromName)}</b> <span class="muted">· ${ROLE_LABEL[m.fromRole]} · ${dmy(new Date(m.at).toISOString().slice(0,10))} ${hhmm(m.at)}</span></div>
+      <div style="margin-top:3px">${esc(m.text)}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+/* ═══════════ 1 · DASHBOARDS (one per desk) ═══════════ */
+function vDash(){ ({owner:dashOwner,manager:dashManager,sales:dashSales,sales_manager:dashSales,chef:dashChef,parttime:dashChef}[ME.role])(); }
+
+function money(){
+  const done = DB.bookings.filter(b=>b.status!=='cancelled');
+  const rev  = done.reduce((s,b)=>s+ (+b.value||0),0);
+  const chef = done.reduce((s,b)=>s+ (+b.chefPay||0),0);
+  const lab  = DB.attendance.filter(a=>a.staffId).reduce((s,a)=>s+(+a.pay||0),0);
+  const exp  = DB.expenses.filter(e=>e.status==='approved').reduce((s,e)=>s+(+e.amount||0),0);
+  const advance = done.reduce((s,b)=>s+ (+b.advance||0),0);
+  const pending = done.reduce((s,b)=>s+ Math.max(0,(+b.value||0)-(+b.advance||0)),0);
+  return {rev, cost: chef+lab+exp, chef, lab, exp, advance, pending, margin: rev-(chef+lab+exp)};
+}
+function bookingPending(b){ return Math.max(0, (+b.value||0)-(+b.advance||0)); }
+function breakTotalToday(userId, type){
+  const t0 = new Date(); t0.setHours(0,0,0,0);
+  return DB.breaks.filter(b=>b.userId===userId && b.type===type && b.start>=t0.getTime())
+    .reduce((s,b)=>s+((b.end||Date.now())-b.start),0);
+}
+function fmtHrs(ms){ const h = ms/36e5; return h<0.05 ? '—' : h.toFixed(1)+'h'; }
+function dashOwner(){
+  reapStaleSessions();
+  const m = money();
+  const onDuty = DB.attendance.filter(a=>!a.outAt);
+  const won    = DB.leads.filter(l=>l.status==='won').length;
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+  const monthStartStr = monthStart.toISOString().slice(0,10);
+  const board  = DB.users.filter(u=>u.role==='sales'&&u.active).map(u=>{
+    const wonThisMonth = DB.leads.filter(l=>l.ownerId===u.id&&l.status==='won'&&l.at>=monthStart.getTime());
+    const val = wonThisMonth.reduce((s,l)=>s+(+l.value||0),0);
+    return {n:u.name, calls:DB.leads.filter(l=>l.ownerId===u.id).length, won:wonThisMonth.length, val,
+      target:u.target||0, pct: u.target? Math.min(100,Math.round(val/u.target*100)) : null};
+  }).sort((a,b)=>b.val-a.val);
+  const chefBoard = DB.users.filter(u=>u.role==='chef'&&u.active).map(u=>{
+    const jobsThisMonth = DB.bookings.filter(b=>b.chefId===u.id && b.status==='done' && b.date>=monthStartStr);
+    return {n:u.name, jobs:jobsThisMonth.length, hrs:DB.attendance.filter(a=>a.userId===u.id&&a.outAt&&a.inAt>=monthStart.getTime()).reduce((s,a)=>s+hrs(a.inAt,a.outAt),0),
+      target:u.target||0, pct: u.target? Math.min(100,Math.round(jobsThisMonth.length/u.target*100)) : null};
+  }).sort((a,b)=>b.jobs-a.jobs);
+  const t0 = new Date(); t0.setHours(0,0,0,0);
+  const activeToday = [...new Set(DB.breaks.filter(b=>b.start>=t0.getTime()).map(b=>b.userId))]
+    .map(id => DB.users.find(u=>u.id===id)).filter(Boolean);
+
+  $('main').innerHTML = head('Booking dashboard',(DB.meta.biz?DB.meta.biz+' — ':'')+'The whole business on one screen — nobody else sets this view.',
+    `<button class="btn dark" onclick="broadcastForm()">Message everyone</button>`) + `
+  <div class="kpis">
+    <div class="kpi"><div class="k">Total revenue</div><div class="v">${rs(m.rev)}</div><div class="s">${DB.bookings.length} bookings</div></div>
+    <div class="kpi"><div class="k">Advance collected</div><div class="v">${rs(m.advance)}</div><div class="s">across all bookings</div></div>
+    <div class="kpi"><div class="k">Pending</div><div class="v">${rs(m.pending)}</div><div class="s">still to be collected</div></div>
+    <div class="kpi"><div class="k">Total expense</div><div class="v">${rs(m.cost)}</div><div class="s">Chef ${rs(m.chef)} · Staff ${rs(m.lab)} · Bills ${rs(m.exp)}</div></div>
+    <div class="kpi"><div class="k">Leads won</div><div class="v">${won}</div><div class="s">of ${DB.leads.length} calls logged</div></div>
+  </div>
+  <div class="card" id="revTargetCard"><h3>Revenue vs. target <span class="live" style="margin-left:6px"></span></h3>
+    <div class="sub">${DB.meta.revenueTarget? 'Updates live as bookings come in.' : 'Set a monthly target in Team & Access to track progress here.'}</div>
+    ${DB.meta.revenueTarget? (()=>{ const pct=Math.min(100,Math.round(m.rev/DB.meta.revenueTarget*100));
+      return `<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+        <span><b>${rs(m.rev)}</b> booked</span><span class="muted">Target ${rs(DB.meta.revenueTarget)}</span></div>
+      <div style="height:16px;background:var(--hair-2);border-radius:8px;overflow:hidden">
+        <div style="height:100%;width:${Math.max(2,pct)}%;background:${pct>=100?'var(--mint)':'var(--saffron)'};border-radius:8px;transition:width .4s"></div>
+      </div>
+      <div class="small muted" style="margin-top:6px">${pct}% of target${pct>=100?' — target reached':''}</div>`;})()
+    : ''}
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Bookings by status</h3><div class="sub">${DB.bookings.length} total</div>
+      <div style="height:220px;position:relative">${DB.bookings.length? `<canvas id="chartStatus"></canvas>` : empty('No bookings yet','Nothing to chart.')}</div>
+    </div>
+    <div class="card"><h3>Revenue booked — last 14 days</h3><div class="sub">By the day the booking was made, not the event date</div>
+      <div style="height:220px;position:relative"><canvas id="chartRevenue"></canvas></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Clocked in right now</h3><div class="sub">Chefs and staff currently on the floor</div>
+      ${onDuty.length? `<table class="tbl"><thead><tr><th>Person</th><th>Role</th><th>In</th><th class="num">Hours</th></tr></thead><tbody>
+        ${onDuty.map(a=>`<tr><td><b>${esc(a.name)}</b></td><td><span class="tag ${a.role==='chef'?'t-warm':'t-new'}">${esc(a.role)}</span></td>
+        <td class="mono">${hhmm(a.inAt)}</td><td class="num"><span class="live"></span>${hrs(a.inAt).toFixed(1)}${a.overtimeStartAt?' <span class="tag t-warm">OT</span>':''}</td></tr>`).join('')}
+      </tbody></table>` : empty('Kitchen is quiet','Nobody is clocked in.')}
+    </div>
+    <div class="card"><h3>Sales leaderboard</h3><div class="sub">This month's won value vs. target</div>
+      ${board.length? `<table class="tbl"><thead><tr><th>Sales person</th><th class="num">Calls</th><th class="num">Won</th><th class="num">Value</th><th class="num">Target</th></tr></thead><tbody>
+        ${board.map(b=>`<tr><td><b>${esc(b.n)}</b></td><td class="num">${b.calls}</td><td class="num">${b.won}</td><td class="num">${rs(b.val)}</td>
+          <td class="num">${b.target?`${rs(b.target)} <span class="small muted">(${b.pct}%)</span>`:'<span class="small muted">not set</span>'}</td></tr>`).join('')}
+      </tbody></table>` : empty('No sales team yet','Add sales people in Team & Access.')}
+    </div>
+    <div class="card"><h3>Chef leaderboard</h3><div class="sub">Completed jobs this month vs. target</div>
+      ${chefBoard.length? `<table class="tbl"><thead><tr><th>Chef</th><th class="num">Jobs done</th><th class="num">Hours</th><th class="num">Target</th></tr></thead><tbody>
+        ${chefBoard.map(c=>`<tr><td><b>${esc(c.n)}</b></td><td class="num">${c.jobs}</td><td class="num">${c.hrs.toFixed(1)}</td>
+          <td class="num">${c.target?`${c.target} jobs <span class="small muted">(${c.pct}%)</span>`:'<span class="small muted">not set</span>'}</td></tr>`).join('')}
+      </tbody></table>` : empty('No chefs yet','Add chef logins in Team & Access.')}
+    </div>
+  </div>
+  <div class="card"><h3>Team time today</h3><div class="sub">Lunch, break and Superfone time — every desk, today only</div>
+    ${activeToday.length? `<table class="tbl"><thead><tr><th>Name</th><th>Desk</th><th class="num">Lunch</th><th class="num">Break</th><th class="num">Superfone</th></tr></thead><tbody>
+      ${activeToday.map(u=>`<tr><td><b>${esc(u.name)}</b></td><td><span class="tag t-new">${ROLE_LABEL[u.role]}</span></td>
+        <td class="num">${fmtHrs(breakTotalToday(u.id,'Lunch'))}</td>
+        <td class="num">${fmtHrs(breakTotalToday(u.id,'Break'))}</td>
+        <td class="num">${fmtHrs(breakTotalToday(u.id,'Superfone'))}</td></tr>`).join('')}
+    </tbody></table>` : empty('Nothing logged yet today','Lunch, break and Superfone time will show up here as the team uses it.')}
+  </div>`;
+  renderOwnerCharts();
+}
+/* Chart.js instances get destroyed and rebuilt each time the dashboard
+   re-renders (including the 20s live refresh) — Chart.js throws if you
+   re-init a canvas that already has a chart on it. */
+let CHART_STATUS=null, CHART_REVENUE=null;
+function renderOwnerCharts(){
+  if(typeof Chart==='undefined') return; // CDN blocked/offline — dashboard still works without charts
+  const palette = {saffron:'#F2701D', mint:'#1E9E6A', chilli:'#D93A2B', haldi:'#E8A33D', slate:'#5B6B85', ink:'#0B2545'};
+  Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+  Chart.defaults.color = palette.slate;
+
+  const statusEl = document.getElementById('chartStatus');
+  if(statusEl){
+    if(CHART_STATUS) CHART_STATUS.destroy();
+    const counts = {confirmed:0, prep:0, done:0, cancelled:0};
+    DB.bookings.forEach(b=>{ counts[b.status] = (counts[b.status]||0)+1; });
+    CHART_STATUS = new Chart(statusEl, { type:'doughnut',
+      data:{ labels:['Confirmed','In prep','Completed','Cancelled'],
+        datasets:[{ data:[counts.confirmed,counts.prep,counts.done,counts.cancelled],
+          backgroundColor:[palette.saffron, palette.haldi, palette.mint, palette.chilli], borderWidth:2, borderColor:'#fff' }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:14, font:{size:12} } } } }
+    });
+  }
+
+  const revEl = document.getElementById('chartRevenue');
+  if(revEl){
+    if(CHART_REVENUE) CHART_REVENUE.destroy();
+    const days = [...Array(14)].map((_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(13-i)); d.setHours(0,0,0,0); return d; });
+    const values = days.map(d=>{
+      const next = new Date(d); next.setDate(next.getDate()+1);
+      return DB.bookings.filter(b=>b.createdAt>=d.getTime() && b.createdAt<next.getTime() && b.status!=='cancelled')
+        .reduce((s,b)=>s+(+b.value||0),0);
+    });
+    CHART_REVENUE = new Chart(revEl, { type:'line',
+      data:{ labels:days.map(d=>d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'})),
+        datasets:[{ label:'Revenue booked', data:values, borderColor:palette.saffron, backgroundColor:'rgba(242,112,29,0.1)',
+          fill:true, tension:0.35, pointRadius:2, pointBackgroundColor:palette.saffron }] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'₹'+(v>=1000?(v/1000)+'k':v) } }, x:{ ticks:{ font:{size:10} } } },
+        plugins:{ legend:{ display:false } } }
+    });
+  }
+}
+function dashManager(){
+  const t = today();
+  const todays = DB.bookings.filter(b=>b.date===t && b.status!=='cancelled');
+  const unassigned = DB.bookings.filter(b=>!b.chefId && b.status==='confirmed');
+  const mine = pending().filter(e=>e.amount<=DB.meta.limit);
+  const blocked = pending().filter(e=>e.amount>DB.meta.limit);
+  const onDuty = DB.attendance.filter(a=>!a.outAt);
+
+  $('main').innerHTML = head('Operations dashboard','Today\'s floor. Money, payouts and the team list sit with the director.',
+    `<button class="btn dark" onclick="broadcastForm()">Message team</button>`) + announcementsHTML() + `
+  <div class="kpis">
+    <div class="kpi"><div class="k">Events today</div><div class="v">${todays.length}</div><div class="s">${todays.reduce((s,b)=>s+(+b.guests||0),0)} guests to feed</div></div>
+    <div class="kpi"><div class="k">On the floor</div><div class="v">${onDuty.length}</div><div class="s">clocked in now</div></div>
+    <div class="kpi ${unassigned.length?'alert':''}"><div class="k">No chef assigned</div><div class="v">${unassigned.length}</div><div class="s">assign before the event date</div></div>
+    <div class="kpi"><div class="k">You can approve</div><div class="v">${mine.length}</div><div class="s">up to ${rs(DB.meta.limit)} each</div></div>
+    <div class="kpi"><div class="k">Sent to director</div><div class="v">${blocked.length}</div><div class="s">over your limit</div></div>
+  </div>
+  <div class="card"><h3>Today's run sheet</h3><div class="sub">${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+    ${todays.length? `<div class="dockets">${todays.map(dockOps).join('')}</div>` : empty('No events today','Nothing is booked for today.')}
+  </div>`;
+}
+function dashSales(){
+  const mine = DB.leads.filter(l=>l.ownerId===ME.id);
+  const due  = mine.filter(l=>l.nextFollowUp && l.nextFollowUp<=today() && !['won','lost'].includes(l.status));
+  const won  = mine.filter(l=>l.status==='won');
+  const open = mine.filter(l=>!['won','lost'].includes(l.status));
+  const pipe = open.reduce((s,l)=>s+(+l.value||0),0);
+  const conv = mine.length ? Math.round(won.length/mine.length*100) : 0;
+
+  $('main').innerHTML = head(ME.role==='sales_manager'?'My sales desk':'My sales desk','Your calls, your follow-ups, your conversions.',
+    `<button class="btn dark" onclick="leadForm()">Log a call</button>${ME.role==='sales_manager'?' <button class="btn" onclick="broadcastForm()">Message team</button>':''}`) + announcementsHTML() + `
+  <div class="kpis">
+    <div class="kpi"><div class="k">Calls logged</div><div class="v">${mine.length}</div><div class="s">all time</div></div>
+    <div class="kpi ${due.length?'alert':''}"><div class="k">Follow-ups due</div><div class="v">${due.length}</div><div class="s">today or overdue</div></div>
+    <div class="kpi"><div class="k">Open pipeline</div><div class="v">${rs(pipe)}</div><div class="s">${open.length} live enquiries</div></div>
+    <div class="kpi"><div class="k">Won</div><div class="v">${won.length}</div><div class="s">${rs(won.reduce((s,l)=>s+(+l.value||0),0))} closed</div></div>
+    <div class="kpi"><div class="k">Conversion</div><div class="v">${conv}%</div><div class="s">calls to bookings</div></div>
+  </div>
+  <div class="card"><h3>Call back today</h3><div class="sub">Sorted by how long they've been waiting</div>
+    ${due.length? `<table class="tbl"><thead><tr><th>Client</th><th>Phone</th><th>Wants</th><th>Promised</th><th></th></tr></thead><tbody>
+      ${due.sort((a,b)=>a.nextFollowUp.localeCompare(b.nextFollowUp)).map(l=>`<tr>
+        <td><b>${esc(l.client)}</b></td><td class="mono">${esc(l.phone)}</td>
+        <td>${esc(l.need||'—')}</td>
+        <td><span class="tag ${l.nextFollowUp<today()?'t-no':'t-pend'}">${dmy(l.nextFollowUp)}</span></td>
+        <td style="text-align:right"><button class="btn sm" onclick="leadForm('${l.id}')">Update call</button></td></tr>`).join('')}
+    </tbody></table>` : empty('Nothing pending','No follow-ups are due. Log a fresh call.')}
+  </div>`;
+}
+function dashChef(){
+  const open = DB.attendance.find(a=>a.userId===ME.id && !a.outAt);
+  const jobs = DB.bookings.filter(b=>b.chefId===ME.id && b.status!=='cancelled').sort((a,b)=>a.date.localeCompare(b.date));
+  const t = today();
+  const now = jobs.find(b=>b.date===t);
+  const next = jobs.filter(b=>b.date>t).slice(0,3);
+  const week = DB.attendance.filter(a=>a.userId===ME.id && a.outAt && a.date>= new Date(Date.now()-6*864e5).toISOString().slice(0,10))
+                            .reduce((s,a)=>s+hrs(a.inAt,a.outAt),0);
+  const myPend = DB.expenses.filter(e=>e.byId===ME.id && e.status==='pending');
+  const newJobs = jobs.filter(b=>b.seenByChef===false);
+
+  $('main').innerHTML = head('My day','Clock in, cook, claim your bills.',
+    `<button class="btn dark" onclick="expForm()">Add expense</button>`) + announcementsHTML() +
+  (newJobs.length? `<div class="card" style="border-color:var(--saffron);background:var(--saffron-tint)">
+    <h3 style="color:var(--saffron-dk)">New job${newJobs.length>1?'s':''} assigned</h3>
+    <div class="sub" style="color:var(--saffron-dk)">Sales just assigned you ${newJobs.length>1?'these':'this'} — take a look.</div>
+    ${newJobs.map(b=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid rgba(0,0,0,.08)">
+      <div><b>${b.code}</b> · ${esc(b.client)} · ${dmy(b.date)}</div>
+      <button class="btn sm dark" onclick="ackJob('${b.id}')">Got it</button>
+    </div>`).join('')}
+  </div>` : '') + `
+  <div class="clock">
+    <div>
+      <div class="st">${open?'<span class="live"></span>Shift running':'Shift not started'}</div>
+      <div class="tm">${open?hrs(open.inAt).toFixed(1)+' hrs':'—'}${open && open.overtimeStartAt?' <span class="tag t-warm">Overtime · '+hrs(open.overtimeStartAt).toFixed(1)+'h</span>':''}</div>
+      <div class="el">${open?`Clocked in at ${hhmm(open.inAt)}${hrs(open.inAt)>=8 && !open.overtimeStartAt?' — you\'ve passed the 8-hour shift.':''}`:'Your shift starts when you clock in.'}</div>
+    </div>
+    <button class="${open?'cout':'cin'}" onclick="${open?'clockOut()':'clockIn()'}">${open?'Clock out':'Clock in'}</button>
+  </div>
+  ${open && hrs(open.inAt)>=8 && !open.overtimeStartAt?`<div class="card" style="border-color:var(--saffron);display:flex;justify-content:space-between;align-items:center">
+    <div><h3 style="margin-bottom:2px;color:var(--saffron-dk)">You're past your 8-hour shift</h3><div class="sub" style="margin-bottom:0">Mark the rest of today as overtime so it's counted and visible to the director.</div></div>
+    <button class="btn dark" onclick="startOvertime()">Start overtime</button>
+  </div>`:''}
+  <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+    <div><h3 style="margin-bottom:2px">Live location</h3><div class="sub" style="margin-bottom:0">${ME.sharingLocation?'The office can see where you are right now.':'Turn this on so the office can see you\'re on the way / on site.'}</div></div>
+    <button class="btn ${ME.sharingLocation?'no':'dark'}" onclick="${ME.sharingLocation?'stopLocationShare()':'startLocationShare()'}">${ME.sharingLocation?'Stop sharing':'Share my location'}</button>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Hours this week</div><div class="v">${week.toFixed(1)}</div><div class="s">closed shifts only</div></div>
+    <div class="kpi"><div class="k">Jobs assigned</div><div class="v">${jobs.length}</div><div class="s">${next.length} coming up</div></div>
+    <div class="kpi ${myPend.length?'alert':''}"><div class="k">Bills waiting</div><div class="v">${myPend.length}</div><div class="s">${rs(myPend.reduce((s,e)=>s+(+e.amount||0),0))} to be cleared</div></div>
+  </div>
+  <div class="card"><h3>Today's job</h3><div class="sub">${now?'Everything you need for the kitchen':'No event assigned to you today'}</div>
+    ${now? `<div class="dockets">${dockChef(now)}</div>` : empty('No job today','You have nothing on the board for today.')}
+  </div>
+  ${next.length? `<div class="card"><h3>Coming up</h3><div class="sub">Next ${next.length} jobs</div>
+    <div class="dockets">${next.map(dockChef).join('')}</div></div>`:''}`;
+}
+
+/* ═══════════ LIVE LOCATION SHARING (chef) ═══════════
+   Browser Geolocation only — no third-party tracking service. Position
+   updates are throttled to once every ~20s so we don't hammer storage. */
+let LOC_WATCH_ID = null, LOC_LAST_SAVE = 0;
+function startLocationShare(){
+  if(!navigator.geolocation) return toast('Location is not supported on this device.');
+  if(LOC_WATCH_ID) return;
+  LOC_WATCH_ID = navigator.geolocation.watchPosition(pos=>{
+    const u = DB.users.find(x=>x.id===ME.id); if(!u) return;
+    u.lastLoc = {lat:pos.coords.latitude, lng:pos.coords.longitude, at:Date.now()};
+    u.sharingLocation = true; ME.sharingLocation = true; ME.lastLoc = u.lastLoc;
+    if(Date.now()-LOC_LAST_SAVE > 20000){ LOC_LAST_SAVE = Date.now(); save('users'); }
+  }, err=>{ toast('Could not get your location: '+err.message); }, {enableHighAccuracy:true, maximumAge:15000, timeout:20000});
+  const u = DB.users.find(x=>x.id===ME.id); if(u) u.sharingLocation = true;
+  ME.sharingLocation = true; save('users'); toast('Sharing your live location while this tab is open.'); go('dash');
+}
+function stopLocationShare(){
+  if(LOC_WATCH_ID){ navigator.geolocation.clearWatch(LOC_WATCH_ID); LOC_WATCH_ID=null; }
+  const u = DB.users.find(x=>x.id===ME.id); if(u) u.sharingLocation = false;
+  ME.sharingLocation = false; save('users'); toast('Location sharing stopped.'); go('dash');
+}
+function timeAgo(ts){
+  if(!ts) return '—';
+  const m = Math.round((Date.now()-ts)/60000);
+  if(m<1) return 'just now'; if(m<60) return m+'m ago';
+  return Math.round(m/60)+'h ago';
+}
+
+/* ═══════════ 2 · CLOCK IN / OUT ═══════════ */
+function clockIn(silent){
+  if(DB.attendance.find(a=>a.userId===ME.id && !a.outAt)) return;
+  const rec = {id:uid(),userId:ME.id,name:ME.name,role:ME.role,date:today(),inAt:Date.now(),outAt:null,anchorLoc:null};
+  DB.attendance.push(rec);
+  save('attendance');
+  // Chef/part-time shifts start with live location sharing on — the anchor
+  // point (where they were when they clocked in) is what the 10-minute
+  // away-from-site auto-logout below measures distance from.
+  if(isChefLikeRole(ME.role)){
+    startLocationShare();
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(pos=>{
+        rec.anchorLoc = {lat:pos.coords.latitude, lng:pos.coords.longitude};
+        save('attendance');
+      }, ()=>{}, {enableHighAccuracy:true, timeout:20000});
+    }
+    startGeofenceWatch();
+  }
+  if(!silent){ toast('Clocked in. Shift running.'); go('dash'); }
+}
+function clockOut(silent){
+  const a = DB.attendance.find(x=>x.userId===ME.id && !x.outAt); if(!a) return;
+  a.outAt = Date.now(); save('attendance');
+  stopGeofenceWatch(); stopLocationShare();
+  if(!silent){ toast(`Clocked out — ${hrs(a.inAt,a.outAt).toFixed(1)} hours logged.`); go('dash'); }
+}
+function startOvertime(){
+  const a = DB.attendance.find(x=>x.userId===ME.id && !x.outAt); if(!a || a.overtimeStartAt) return;
+  a.overtimeStartAt = Date.now(); save('attendance');
+  toast('Overtime started — tracked separately from here.'); go('dash');
+}
+
+/* ═══════════ GEOFENCE AUTO-LOGOUT (chef shifts only) ═══════════
+   While a chef's shift is open, we check every 30s whether their live
+   location has drifted more than GEOFENCE_RADIUS_M from where they
+   clocked in. If they stay outside that radius for GEOFENCE_AWAY_MS
+   continuously, they get a warning toast and are auto clocked-out and
+   logged out. This only runs while the browser tab is open — it is not
+   a background service, so if the tab or app is closed the timer stops
+   with it. A true always-on version would need a native mobile app. */
+const GEOFENCE_RADIUS_M = 300;      // metres from the clock-in point
+const GEOFENCE_AWAY_MS  = 10*60*1000; // 10 minutes
+let GEOFENCE_TIMER = null, GEOFENCE_AWAY_SINCE = null, GEOFENCE_WARNED = false;
+function distM(a,b){
+  if(!a||!b) return 0;
+  const R=6371000, toRad=d=>d*Math.PI/180;
+  const dLat=toRad(b.lat-a.lat), dLng=toRad(b.lng-a.lng);
+  const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(s));
+}
+function startGeofenceWatch(){
+  if(GEOFENCE_TIMER) return;
+  GEOFENCE_AWAY_SINCE = null; GEOFENCE_WARNED = false;
+  GEOFENCE_TIMER = setInterval(checkGeofence, 30000);
+}
+function stopGeofenceWatch(){
+  if(GEOFENCE_TIMER){ clearInterval(GEOFENCE_TIMER); GEOFENCE_TIMER=null; }
+  GEOFENCE_AWAY_SINCE = null; GEOFENCE_WARNED = false;
+}
+function checkGeofence(){
+  if(!ME || !isChefLikeRole(ME.role)) return stopGeofenceWatch();
+  const shift = DB.attendance.find(a=>a.userId===ME.id && !a.outAt);
+  if(!shift) return stopGeofenceWatch();
+  if(!shift.anchorLoc || !ME.lastLoc) return; // no fix yet, nothing to compare
+  const d = distM(shift.anchorLoc, ME.lastLoc);
+  if(d <= GEOFENCE_RADIUS_M){ GEOFENCE_AWAY_SINCE = null; GEOFENCE_WARNED = false; return; }
+  if(!GEOFENCE_AWAY_SINCE) GEOFENCE_AWAY_SINCE = Date.now();
+  const awayFor = Date.now() - GEOFENCE_AWAY_SINCE;
+  if(!GEOFENCE_WARNED){
+    GEOFENCE_WARNED = true;
+    toast(`You're more than ${GEOFENCE_RADIUS_M}m from where you clocked in. You'll be logged out in 10 minutes if you don't return.`);
+  }
+  if(awayFor >= GEOFENCE_AWAY_MS){
+    toast('Logged out automatically — away from your check-in location for over 10 minutes.');
+    clockOut(true);
+    finishLogout();
+  }
+}
+
+/* ═══════════ TAB-AWAY AUTO-LOGOUT (every desk) ═══════════
+   Switching away from this tab, minimising it, or locking the screen
+   counts as "away" the moment it happens — if it stays away continuously
+   for 10 minutes, the session is force-closed automatically and the
+   person is shown why the next time they open the tab. This only tracks
+   this specific browser tab; it can't detect anything once the tab or
+   browser process itself is shut, that's covered separately on reload. */
+const TAB_AWAY_MS = 10*60*1000;
+let TAB_AWAY_TIMER = null;
+document.addEventListener('visibilitychange', ()=>{
+  if(!ME) return;
+  const s = DB.sessions.find(x=>x.id===MY_SESSION);
+  if(document.hidden){
+    if(s){ s.away = true; save('sessions'); }
+    if(TAB_AWAY_TIMER) clearTimeout(TAB_AWAY_TIMER);
+    TAB_AWAY_TIMER = setTimeout(()=>{
+      if(!ME) return;
+      sessionStorage.setItem('kb_logout_reason','away');
+      if(isChefLikeRole(ME.role)) clockOut(true);
+      stopGeofenceWatch(); stopLocationShare();
+      finishLogout();
+    }, TAB_AWAY_MS);
+  } else {
+    if(s){ s.away = false; save('sessions'); }
+    if(TAB_AWAY_TIMER){ clearTimeout(TAB_AWAY_TIMER); TAB_AWAY_TIMER = null; }
+  }
+});
+
+/* ═══════════ 3 · CALLS & LEADS (sales owns this) ═══════════ */
+function vCalls(){
+  const roleKey = {sales_manager:'sales', parttime:'chef', hr:'manager'}[ME.role] || ME.role;
+  const canEdit = ME.role==='sales' || ME.role==='sales_manager' || ME.role==='owner';
+  const rows = ME.role==='sales' ? DB.leads.filter(l=>l.ownerId===ME.id) : DB.leads;
+  const sorted = [...rows].sort((a,b)=>b.at-a.at);
+
+  // Deliberately different columns per desk:
+  const cols = {
+    sales:  ['Logged','Client','Phone','Requirement','Event','Quote','Status','Call back',''],
+    owner:  ['Logged','Client','Phone','Source','Sales person','Quote','Status','',''],
+    manager:['Client','Event date','Guests','Requirement','Status']   // no phone, no money
+  }[roleKey];
+
+  const cell = l => ({
+    sales: `<td class="mono small">${dmy(l.at2)}</td><td><b>${esc(l.client)}</b></td><td class="mono">${esc(l.phone)}</td>
+      <td>${esc(l.need||'—')}<div class="small muted">${esc((l.notes||'').slice(0,48))}</div></td>
+      <td class="small">${dmy(l.date)}<div class="muted">${l.guests||'—'} guests</div></td>
+      <td class="num">${l.value?rs(l.value):'—'}</td><td>${leadTag(l)}</td>
+      <td class="mono small">${l.nextFollowUp?dmy(l.nextFollowUp):'—'}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn sm" onclick="leadForm('${l.id}')">Edit</button>
+        ${l.status!=='won'&&l.status!=='lost'?`<button class="btn sm dark" onclick="convert('${l.id}')">Book it</button>`:''}</td>`,
+    owner: `<td class="mono small">${dmy(l.at2)}</td><td><b>${esc(l.client)}</b></td><td class="mono">${esc(l.phone)}</td>
+      <td class="small">${esc(l.source||'—')}</td><td>${esc(nameOf(l.ownerId))}</td>
+      <td class="num">${l.value?rs(l.value):'—'}</td><td>${leadTag(l)}</td>
+      <td style="text-align:right">${l.bookingId?`<span class="tag t-won">Booked</span>`:''}</td>
+      <td style="text-align:right;white-space:nowrap"><button class="btn sm" onclick="leadForm('${l.id}')">Edit</button>
+        <button class="btn sm no" onclick="deleteLead('${l.id}')">Delete</button></td>`,
+    manager: `<td><b>${esc(l.client)}</b></td><td class="mono small">${dmy(l.date)}</td>
+      <td class="num">${l.guests||'—'}</td><td>${esc(l.need||'—')}</td><td>${leadTag(l)}</td>`
+  }[roleKey]);
+
+  $('main').innerHTML = head(
+    ME.role==='sales'?'Call register':ME.role==='owner'?'All calls & leads':'Enquiry board',
+    ME.role==='sales'?'Every enquiry call goes in here first — number, name, what they want.'
+      :ME.role==='owner'?'Every call logged by every sales person — editable here.'
+      :'Read-only. What is coming down the pipe, minus the client numbers and pricing.',
+    canEdit?`<button class="btn dark" onclick="leadForm()">Log a call</button>`:'') + `
+  <div class="card" style="padding:18px 14px;overflow-x:auto">
+    ${sorted.length? `<table class="tbl"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${sorted.map(l=>`<tr>${cell(l)}</tr>`).join('')}</tbody></table>`
+     : empty('No calls yet', canEdit?'Log your first enquiry call.':'Sales hasn\'t logged any calls yet.')}
+  </div>`;
+}
+function deleteLead(id){
+  const l = DB.leads.find(x=>x.id===id); if(!l) return;
+  if(l.bookingId) return toast('This call already became a booking — delete the booking instead, from Bookings.');
+  confirmBox('Delete this call?', `${l.client}'s enquiry will be permanently removed. This can't be undone.`,'Delete call',()=>{
+    DB.leads = DB.leads.filter(x=>x.id!==id); save('leads'); toast('Call deleted.'); go('calls');
+  });
+}
+function leadTag(l){
+  const m = {new:['t-new','New'],followup:['t-warm','Following up'],quoted:['t-warm','Quoted'],won:['t-won','Won'],lost:['t-lost','Lost']}[l.status]||['t-new','New'];
+  return `<span class="tag ${m[0]}">${m[1]}</span>`;
+}
+function leadForm(id){
+  const l = DB.leads.find(x=>x.id===id) || {};
+  modal(`<h3>${id?'Update call':'Log an enquiry call'}</h3>
+  <div class="sub">Who called, what they want, and when you'll call back.</div>
+  <div class="f2">
+    <div class="fld"><label>Client name</label><input id="lC" value="${esc(l.client||'')}"></div>
+    <div class="fld"><label>Phone</label><input id="lP" inputmode="numeric" value="${esc(l.phone||'')}"></div>
+  </div>
+  <div class="fld"><label>What do they want</label><input id="lN" placeholder="e.g. North Indian veg buffet, house party" value="${esc(l.need||'')}"></div>
+  <div class="f2">
+    <div class="fld"><label>Event date</label><input id="lD" type="date" value="${esc(l.date||'')}"></div>
+    <div class="fld"><label>Guests</label><input id="lG" type="number" min="0" value="${esc(l.guests||'')}"></div>
+  </div>
+  <div class="f2">
+    <div class="fld"><label>Quote (₹)</label><input id="lV" type="number" min="0" value="${esc(l.value||'')}"></div>
+    <div class="fld"><label>Where from</label>
+      <select id="lS">${['Phone call','WhatsApp','Website','Referral','Walk-in','Repeat client'].map(s=>`<option ${l.source===s?'selected':''}>${s}</option>`).join('')}</select></div>
+  </div>
+  <div class="f2">
+    <div class="fld"><label>Status</label>
+      <select id="lSt">${[['new','New enquiry'],['followup','Following up'],['quoted','Quote sent'],['lost','Lost']].map(([v,t])=>`<option value="${v}" ${l.status===v?'selected':''}>${t}</option>`).join('')}</select></div>
+    <div class="fld"><label>Call back on</label><input id="lF" type="date" value="${esc(l.nextFollowUp||'')}"></div>
+  </div>
+  <div class="fld"><label>How did the call go</label><textarea id="lNo" placeholder="Two or three lines — budget talk, menu preference, objections.">${esc(l.notes||'')}</textarea></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveLead('${id||''}')">${id?'Save call':'Log call'}</button></div>`);
+}
+function saveLead(id){
+  const client=$('lC').value.trim(), phone=$('lP').value.replace(/\D/g,'');
+  if(!client || phone.length<10) return toast('Client name and a 10-digit phone are needed.');
+  const rec = {client, phone, need:$('lN').value.trim(), date:$('lD').value, guests:+$('lG').value||0,
+    value:+$('lV').value||0, source:$('lS').value, status:$('lSt').value, nextFollowUp:$('lF').value, notes:$('lNo').value.trim()};
+  if(id){ Object.assign(DB.leads.find(x=>x.id===id), rec); }
+  else { DB.leads.push({id:uid(), at:Date.now(), at2:today(), ownerId:ME.id, bookingId:null, ...rec}); }
+  save('leads'); closeModal(); toast(id?'Call updated.':'Call logged.'); go(VIEW);
+}
+function convert(id){
+  const l = DB.leads.find(x=>x.id===id);
+  confirmBox('Turn this call into a booking?', `${l.client} · ${l.guests||0} guests · ${l.value?rs(l.value):'no quote yet'}. The kitchen will see it immediately.`,'Create booking',()=>{
+    const code = 'KB-'+String(DB.bookings.length+1).padStart(3,'0');
+    DB.bookings.push({id:uid(), code, leadId:l.id, client:l.client, phone:l.phone, venue:'', date:l.date||today(),
+      time:'', guests:l.guests||0, menu:l.need||'', value:l.value||0, chefId:null, chefPay:0, status:'confirmed',
+      advance:0, invoiceSent:false, invoiceAt:null,
+      soldBy:ME.id, createdAt:Date.now()});
+    l.status='won'; l.bookingId = DB.bookings.at(-1).id; l.nextFollowUp='';
+    save('bookings'); save('leads');
+    const nb = DB.bookings.at(-1);
+    if(autoMsgOn('bookingConfirmed')){
+      const msg = `Hi ${nb.client}, your booking ${nb.code} with ${DB.meta.biz||'Khana Banao'} is confirmed for ${dmy(nb.date)}${nb.guests?' · '+nb.guests+' guests':''}${nb.value?' · '+rs(nb.value):''}. We'll share the chef and menu details shortly. — ${DB.meta.biz||'Khana Banao'}`;
+      waSend(nb.phone, msg, {type:'bookingConfirmed', bookingId:nb.id, bookingCode:nb.code, to:nb.client, trigger:'auto'});
+    }
+    toast(`Booking ${code} created.`); go('book');
+  });
+}
+
+/* ═══════════ 4 · BOOKINGS (columns change by desk) ═══════════ */
+function vBook(){
+  const roleKey = {sales_manager:'sales', parttime:'chef'}[ME.role] || ME.role;
+  let rows = DB.bookings;
+  if(ME.role==='sales') rows = rows.filter(b=>b.soldBy===ME.id);
+  rows = [...rows].sort((a,b)=>a.date.localeCompare(b.date));
+
+  const cols = {
+    owner:  ['Booking ID','Client','Date','Guests','Chef','Booking amount','Balance amount','Expenses','Total amount','Status',''],
+    manager:['Booking ID','Client','Date & time','Guests','Menu','Chef','Prep',''],
+    sales:  ['Booking ID','Client','Phone','Event date','Guests','Chef','Total amount','Status','']
+  }[roleKey];
+
+  const billsOf = b => DB.expenses.filter(e=>e.bookingId===b.id && e.status==='approved').reduce((s,e)=>s+(+e.amount||0),0);
+  const cell = b => ({
+    owner: (()=>{ const exp=(+b.chefPay||0)+billsOf(b), pend=bookingPending(b); return `
+      <td class="mono small">${b.code}</td><td><b>${esc(b.client)}</b></td><td class="mono small">${dmy(b.date)}</td>
+      <td class="num">${b.guests}</td><td>${b.chefId?esc(nameOf(b.chefId)):'<span class="tag t-no">Unassigned</span>'}</td>
+      <td class="num">${rs(b.advance)}</td>
+      <td class="num" style="color:${pend>0?'var(--chilli)':'var(--mint)'}">${pend>0?rs(pend):'Cleared'}</td>
+      <td class="num">${rs(exp)}</td><td class="num">${rs(b.value)}</td>
+      <td>${bookTag(b)}</td>
+      <td style="text-align:right"><button class="btn sm" onclick="bookingActions('${b.id}')">Actions</button></td>`;})(),
+    manager: `<td class="mono small">${b.code}</td><td><b>${esc(b.client)}</b></td>
+      <td class="mono small">${dmy(b.date)}<div class="muted">${esc(b.time||'—')}</div></td>
+      <td class="num">${b.guests}</td><td class="small">${esc(b.menu||'—')}</td>
+      <td>${b.chefId?esc(nameOf(b.chefId)):'<span class="tag t-no">Unassigned</span>'}</td>
+      <td>${bookTag(b)}</td>
+      <td style="text-align:right"><button class="btn sm" onclick="bookingActions('${b.id}')">Actions</button></td>`,
+    sales: `<td class="mono small">${b.code}</td><td><b>${esc(b.client)}</b></td><td class="mono">${esc(b.phone)}</td>
+      <td class="mono small">${dmy(b.date)}</td><td class="num">${b.guests}</td>
+      <td>${b.chefId?esc(nameOf(b.chefId)):'<span class="tag t-no">Unassigned</span>'}</td>
+      <td class="num">${rs(b.value)}</td><td>${bookTag(b)}</td>
+      <td style="text-align:right"><button class="btn sm" onclick="bookingActions('${b.id}')">Actions</button></td>`
+  }[roleKey]);
+
+  const deleteRequests = ME.role==='owner' ? DB.bookings.filter(b=>b.deleteRequestedBy) : [];
+  $('main').innerHTML = head(
+    ME.role==='sales'?'My bookings':'Bookings',
+    ME.role==='owner'?'Booking amount, balance still due, expenses and the total on every booking — invoice status is in Actions.'
+      :ME.role==='manager'?'Assign the chef, set the time, move it through prep. Payouts are not your screen.'
+      :'The deals you closed. Kitchen cost is not shown to sales.') + `
+  ${deleteRequests.length? `<div class="card" style="border-color:var(--chilli)">
+    <h3>Booking delete requests</h3><div class="sub">A manager wants these removed — approve or decline.</div>
+    ${deleteRequests.map(b=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--hair-2)">
+      <div><b>${b.code} · ${esc(b.client)}</b><div class="small muted">Requested by ${esc(nameOf(b.deleteRequestedBy))}${b.deleteRequestNote?' — '+esc(b.deleteRequestNote):''}</div></div>
+      <div><button class="btn sm no" onclick="deleteBooking('${b.id}')">Approve delete</button>
+      <button class="btn sm" onclick="declineDeleteRequest('${b.id}')">Decline</button></div>
+    </div>`).join('')}
+  </div>` : ''}
+  <div class="card" style="padding:18px 14px;overflow-x:auto">
+    ${rows.length? `<table class="tbl"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(b=>`<tr>${cell(b)}</tr>`).join('')}</tbody></table>`
+     : empty('No bookings yet','Bookings appear when sales converts a call.')}
+  </div>`;
+}
+/* One "Actions" button per row instead of 4-5 side-by-side buttons — on a
+   phone-width table those were getting pushed off-screen (Edit/Delete
+   unreachable without scrolling). This opens everything applicable to
+   that booking in a modal instead. */
+function bookingActions(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  const pend = bookingPending(b);
+  const isOwner = ME.role==='owner';
+  const isManager = ME.role==='manager';
+  modal(`<h3>${b.code} · ${esc(b.client)}</h3>
+  <div class="sub">${isOwner?(b.invoiceSent?`Invoice sent ${dmy(new Date(b.invoiceAt).toISOString().slice(0,10))}.`:'Invoice not sent yet.'):'What do you want to do with this booking?'}</div>
+  ${b.deleteRequestedBy?`<div class="authnote" style="margin-bottom:12px">Delete requested by ${esc(nameOf(b.deleteRequestedBy))}${b.deleteRequestNote?' — '+esc(b.deleteRequestNote):''}${isOwner?'':' — waiting on the director.'}</div>`:''}
+  <div class="mrow" style="flex-wrap:wrap;justify-content:flex-start;gap:8px">
+    <button class="btn dark" onclick="closeModal();assignForm('${id}')">Edit</button>
+    ${b.chefId?`<button class="btn" onclick="closeModal();waChef('${id}')">WhatsApp chef</button>`:''}
+    ${isOwner && pend>0?`<button class="btn ok" onclick="closeModal();markPaymentClear('${id}')">Mark payment clear</button>`:''}
+    ${isOwner && b.status==='done' && !b.invoiceSent?`<button class="btn" onclick="closeModal();sendInvoice('${id}')">Send invoice</button>`:''}
+    ${isOwner && b.deleteRequestedBy?`<button class="btn no" onclick="closeModal();deleteBooking('${id}')">Approve delete</button>
+      <button class="btn" onclick="closeModal();declineDeleteRequest('${id}')">Decline request</button>`:''}
+    ${isOwner && !b.deleteRequestedBy?`<button class="btn no" onclick="closeModal();deleteBooking('${id}')">Delete booking</button>`:''}
+    ${isManager && !b.deleteRequestedBy?`<button class="btn no" onclick="closeModal();requestDeleteBooking('${id}')">Request delete</button>`:''}
+    ${isManager && b.deleteRequestedBy?`<button class="btn" disabled style="opacity:.6">Delete requested — waiting on director</button>`:''}
+  </div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+function requestDeleteBooking(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  modal(`<h3>Request to delete this booking?</h3><div class="sub">${b.code} · ${esc(b.client)} — the director will review this before it's removed.</div>
+  <div class="fld"><label>Reason <span class="muted small">(optional)</span></label>
+    <textarea id="delReqNote" rows="3" placeholder="e.g. Duplicate entry, client cancelled twice over"></textarea></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn no" onclick="confirmRequestDelete('${id}')">Send request</button></div>`);
+}
+function confirmRequestDelete(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  b.deleteRequestedBy = ME.id; b.deleteRequestedAt = Date.now(); b.deleteRequestNote = $('delReqNote').value.trim();
+  save('bookings'); closeModal(); toast('Delete request sent to the director.'); go(VIEW);
+}
+function declineDeleteRequest(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  b.deleteRequestedBy = null; b.deleteRequestedAt = null; b.deleteRequestNote = '';
+  save('bookings'); toast('Delete request declined.'); go(VIEW);
+}
+/* ═══════════ AUTOMATED WHATSAPP TRIGGERS ═══════════
+   Still no backend, no API keys, no silent sending — a browser physically
+   cannot dial WhatsApp on its own. What this DOES do: the moment a
+   lifecycle event happens (booking confirmed, chef assigned, balance due),
+   it opens WhatsApp pre-filled automatically, in the same click that
+   caused the event, instead of someone having to remember to go find
+   the right button in Actions. One tap inside WhatsApp still sends it.
+   Every attempt — sent, or skipped for missing a phone number — is
+   logged to DB.messages so the office has a record of what went out. */
+function autoMsgOn(key){ return !DB.meta.autoMsg || DB.meta.autoMsg[key]!==false; }
+function logMsg(entry){ DB.messages.unshift({id:uid(), at:Date.now(), ...entry}); save('messages'); }
+/* If a WhatsApp Business API (Meta Cloud API) token + phone number ID
+   are saved in Integrations, this tries a real automated send first —
+   no tap required. It only works for numbers that messaged this
+   business within the last 24h, or with a pre-approved template; outside
+   that, Meta's API will reject it, and we fall back to the wa.me
+   click-to-send link, same as before. So this never breaks — it just
+   sometimes gets to skip the manual tap. */
+async function waSend(phone, msg, meta){
+  const digits = String(phone||'').replace(/\D/g,'').slice(-10);
+  if(!digits){ logMsg({...meta, phone:phone||'', status:'skipped', text:msg}); return false; }
+  const num = '91'+digits;
+
+  // Try Superfone's WhatsApp API first, if connected.
+  const sf = DB.meta.integrations && DB.meta.integrations.superfoneWa;
+  if(sf && sf.endpoint){
+    try{
+      const res = await fetch(sf.endpoint, {
+        method:'POST',
+        headers:{ 'apikey': SUPABASE_ANON_KEY, 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type':'application/json' },
+        body: JSON.stringify({ recipient:num, message:msg })
+      });
+      if(res.ok){ logMsg({...meta, phone:num, status:'sent', via:'superfone', text:msg}); return true; }
+    }catch(err){ /* format may not match Superfone's real API yet — fall through */ }
+  }
+
+  // Then direct-Meta Cloud API, if that's what's connected instead.
+  const cfg = DB.meta.integrations && DB.meta.integrations.wa;
+  if(cfg && cfg.token && cfg.phoneId){
+    try{
+      const res = await fetch(`https://graph.facebook.com/v20.0/${cfg.phoneId}/messages`, {
+        method:'POST',
+        headers:{ 'Authorization':`Bearer ${cfg.token}`, 'Content-Type':'application/json' },
+        body: JSON.stringify({ messaging_product:'whatsapp', to:num, type:'text', text:{ body: msg } })
+      });
+      if(res.ok){ logMsg({...meta, phone:num, status:'sent', via:'api', text:msg}); return true; }
+    }catch(err){ /* network/CORS failure — fall through to wa.me below */ }
+  }
+
+  // Neither configured, or both failed — the one path that always works.
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`,'_blank');
+  logMsg({...meta, phone:num, status:'sent', via:'wa.me', text:msg});
+  return true;
+}
+/* Sends via wa.me — opens WhatsApp (app or web) with the message pre-filled
+   so the sales person just hits send. No API keys, no backend needed. */
+function waChef(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b||!b.chefId) return;
+  const chef = DB.users.find(u=>u.id===b.chefId); if(!chef||!chef.phone) return toast('This chef has no phone number on file.');
+  const msg = `Hi ${chef.name}, booking ${b.code} for ${b.client} on ${dmy(b.date)}${b.time?' at '+b.time:''} (${b.guests} guests) is confirmed. Venue: ${b.venue||'to be shared'}. Menu: ${b.menu||'to be shared'}. — Khana Banao`;
+  waSend(chef.phone, msg, {type:'chefAssigned', bookingId:b.id, bookingCode:b.code, to:chef.name, trigger:'manual'});
+}
+const MSG_TYPE_LABEL = {bookingConfirmed:'Booking confirmed',chefAssigned:'Chef assigned',paymentDue:'Payment due',expenseForward:'Bill forwarded'};
+function vMsgs(){
+  const rows = DB.messages.slice(0,300);
+  $('main').innerHTML = head('Messages','Every WhatsApp message this CRM has opened — automatic and manual — with what went out and to whom.') + `
+  <div class="card" style="padding:18px 14px">
+  ${rows.length ? `<table class="tbl"><thead><tr><th>When</th><th>Type</th><th>Booking</th><th>To</th><th>Phone</th><th>Status</th><th></th></tr></thead><tbody>
+    ${rows.map(m=>`<tr>
+      <td class="small mono">${hhmm(m.at)} · ${new Date(m.at).toLocaleDateString('en-IN',{day:'2-digit',month:'short'})}</td>
+      <td>${esc(MSG_TYPE_LABEL[m.type]||m.type)} <span class="small muted">${m.trigger==='auto'?'· auto':'· manual'}</span></td>
+      <td class="mono small">${esc(m.bookingCode||'—')}</td>
+      <td>${esc(m.to||'—')}</td>
+      <td class="mono small">${m.phone?esc(m.phone):'<span class="muted">no number on file</span>'}</td>
+      <td>${m.status==='sent'?(m.via==='superfone'?'<span class="tag t-ok">Delivered via Superfone</span>':m.via==='api'?'<span class="tag t-ok">Delivered via API</span>':'<span class="tag t-ok">Opened</span>'):'<span class="tag t-no">Skipped</span>'}</td>
+      <td style="text-align:right">${m.status==='skipped'?`<button class="btn sm" onclick="resendMsg('${m.id}')">Retry</button>`:`<button class="btn sm" onclick="resendMsg('${m.id}')">Resend</button>`}</td>
+    </tr>`).join('')}
+  </tbody></table>` : empty('No messages yet','Auto-triggered WhatsApp messages will show up here as bookings move through their lifecycle.')}
+  </div>`;
+}
+function resendMsg(id){
+  const m = DB.messages.find(x=>x.id===id); if(!m) return;
+  if(!m.phone){ toast('No phone number on file for this one — add it on the booking first.'); return; }
+  window.open(`https://wa.me/${m.phone}?text=${encodeURIComponent(m.text)}`,'_blank');
+}
+function markPaymentClear(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  confirmBox('Mark payment cleared?', `${b.code} · ${b.client} — remaining ${rs(bookingPending(b))} will be marked as collected.`,'Mark clear',()=>{
+    b.advance = +b.value||0; save('bookings'); toast('Payment marked cleared.'); go(VIEW);
+  });
+}
+function deleteBooking(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  confirmBox('Delete this booking?', `${b.code} · ${b.client} will be permanently removed, including its cost and margin history. This can't be undone.`,'Delete booking',()=>{
+    DB.bookings = DB.bookings.filter(x=>x.id!==id); save('bookings'); toast('Booking deleted.'); go(VIEW);
+  });
+}
+function sendInvoice(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  const bl = DB.expenses.filter(e=>e.bookingId===b.id && e.status==='approved').reduce((s,e)=>s+(+e.amount||0),0);
+  const subject = `Invoice — ${b.code} — ${b.client}`;
+  const body = [`Booking ID: ${b.code}`,`Client: ${b.client}`,`Event date: ${dmy(b.date)}`,`Guests: ${b.guests}`,
+    `Total value: ${rs(b.value)}`,`Advance received: ${rs(b.advance)}`,`Expenses: ${rs(bl)}`,`Balance due: ${rs(bookingPending(b))}`,
+    '', `Prepared from ${DB.meta.biz||'Khana Banao'} CRM.`].join('\n');
+  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,'_blank');
+  b.invoiceSent = true; b.invoiceAt = Date.now(); save('bookings'); toast('Invoice draft opened in your email app.'); go(VIEW);
+}
+function bookTag(b){
+  const m={confirmed:['t-new','Confirmed'],prep:['t-warm','In prep'],done:['t-won','Completed'],cancelled:['t-lost','Cancelled']}[b.status]||['t-new','Confirmed'];
+  return `<span class="tag ${m[0]}">${m[1]}</span>`;
+}
+function dockOps(b){ return `<div class="docket">
+  <div class="code">${b.code}</div><div class="cl">${esc(b.client)}</div>
+  <dl><dt>Time</dt><dd>${esc(b.time||'not set')}</dd>
+      <dt>Guests</dt><dd>${b.guests}</dd>
+      <dt>Venue</dt><dd>${esc(b.venue||'not set')}</dd>
+      <dt>Chef</dt><dd>${b.chefId?esc(nameOf(b.chefId)):'<span style="color:var(--chilli)">unassigned</span>'}</dd></dl>
+  <div class="ft">${bookTag(b)}<button class="btn sm" onclick="assignForm('${b.id}')">Open</button></div></div>`; }
+function dockChef(b){ return `<div class="docket">
+  <div class="code">${b.code} · ${dmy(b.date)}</div><div class="cl">${esc(b.client)}</div>
+  <dl><dt>Time</dt><dd>${esc(b.time||'—')}</dd>
+      <dt>Venue</dt><dd>${esc(b.venue||'—')}</dd>
+      <dt>Guests</dt><dd>${b.guests}</dd>
+      <dt>Menu</dt><dd>${esc(b.menu||'—')}</dd>
+      ${b.dishes&&b.dishes.length?`<dt>Dishes</dt><dd>${b.dishes.map(esc).join(', ')}</dd>`:''}
+      <dt>Your pay</dt><dd><b>${rs(b.chefPay)}</b></dd></dl>
+  <div class="ft">${bookTag(b)}<button class="btn sm" onclick="chefStatusForm('${b.id}')">Update status</button><button class="btn sm" onclick="expForm(null,'${b.id}')">Add bill</button></div></div>`; }
+function chefStatusForm(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  modal(`<h3>${b.code} · ${esc(b.client)}</h3><div class="sub">Update how this job is progressing. Only status is yours to change.</div>
+  <div class="fld"><label>Status</label><select id="cS">
+    ${[['confirmed','Confirmed'],['prep','In prep'],['done','Completed']].map(([v,t])=>`<option value="${v}" ${b.status===v?'selected':''}>${t}</option>`).join('')}</select></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveChefStatus('${id}')">Save</button></div>`);
+}
+function saveChefStatus(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  b.status = $('cS').value; save('bookings'); closeModal(); toast('Status updated.'); go(VIEW);
+}
+
+function assignForm(id){
+  const b = DB.bookings.find(x=>x.id===id);
+  const chefs = DB.users.filter(u=>u.active && (u.role==='chef' || (u.role==='parttime' && u.ptUnlocked)));
+  const isOwner = ME.role==='owner';
+  const canMoney = ME.role==='owner' || ME.role==='manager';
+  const dishes = (b.dishes && b.dishes.length) ? b.dishes : [''];
+  const selectedIsPT = b.chefId && DB.users.find(u=>u.id===b.chefId)?.role==='parttime';
+  modal(`<h3>${b.code} · ${esc(b.client)}</h3><div class="sub">${b.guests} guests · ${dmy(b.date)}</div>
+  <div class="f2">
+    <div class="fld"><label>Event time</label><input id="bT" placeholder="e.g. 7:30 PM" value="${esc(b.time||'')}"></div>
+    <div class="fld"><label>Venue</label><input id="bV" placeholder="Address / hall" value="${esc(b.venue||'')}"></div>
+  </div>
+  <div class="fld"><label>Menu for the kitchen</label><textarea id="bM" placeholder="What the chef must cook.">${esc(b.menu||'')}</textarea></div>
+  <div class="fld"><label>Dishes / add-ons <span class="muted small">(up to 8)</span></label>
+    <div id="dishRows">
+      ${dishes.map(d=>`<input class="dishInput" style="margin-bottom:6px" placeholder="e.g. Paneer Butter Masala" value="${esc(d)}">`).join('')}
+    </div>
+    <button type="button" class="btn sm" onclick="addDishRow()">+ Add dish</button>
+  </div>
+  <div class="f2">
+    <div class="fld"><label>Chef</label><select id="bC" onchange="toggleSecurityGate()">
+      <option value="">— unassigned —</option>
+      ${chefs.map(c=>`<option value="${c.id}" data-pt="${c.role==='parttime'?1:0}" ${b.chefId===c.id?'selected':''}>${esc(c.name)} (${c.role==='parttime'?'Part-time':'Full-time'}${c.city?', '+esc(c.city):''})</option>`).join('')}</select></div>
+      <div class="small muted" style="margin-top:4px">Job venue: ${esc(b.venue||b.client)} — match a part-time chef whose city is nearby.</div>
+    <div class="fld"><label>Status</label><select id="bS">
+      ${[['confirmed','Confirmed'],['prep','In prep'],['done','Completed'],['cancelled','Cancelled']].map(([v,t])=>`<option value="${v}" ${b.status===v?'selected':''}>${t}</option>`).join('')}</select></div>
+  </div>
+  <div id="ptSecurityGate" style="${selectedIsPT?'':'display:none'}" class="fld">
+    <label><input type="checkbox" id="bPTSec" ${b.ptSecurityPaid?'checked':''}> ₹500 security deposit collected from this part-time chef</label>
+    <div class="small muted">Part-time chefs pay ₹500 security per order — don't confirm the job to them until it's collected.</div>
+  </div>
+  <div class="f2">
+    <div class="fld"><label>Total value (₹)${canMoney?'':' — set by director/manager'}</label><input id="bVal" type="number" min="0" value="${esc(b.value||0)}" ${canMoney?'':'disabled'}></div>
+    <div class="fld"><label>Advance booking (₹)${canMoney?'':' — set by director/manager'}</label><input id="bAdv" type="number" min="0" value="${esc(b.advance||0)}" ${canMoney?'':'disabled'}></div>
+  </div>
+  ${isOwner?`<div class="fld"><label>Chef payout (₹) — director only</label><input id="bP" type="number" min="0" value="${esc(b.chefPay||0)}"></div>`:
+    `<div class="authnote">Chef payout is set by the director. You won't see it here.</div>`}
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveBooking('${id}')">Save booking</button></div>`);
+}
+function toggleSecurityGate(){
+  const sel = $('bC'); const opt = sel.options[sel.selectedIndex];
+  const isPT = opt && opt.dataset.pt === '1';
+  $('ptSecurityGate').style.display = isPT ? '' : 'none';
+}
+function addDishRow(){
+  const container = document.getElementById('dishRows');
+  if (!container) return;
+  if (container.children.length >= 8) { toast('Maximum 8 dishes on one booking.'); return; }
+  const inp = document.createElement('input');
+  inp.className = 'dishInput';
+  inp.style.marginBottom = '6px';
+  inp.placeholder = 'e.g. Dal Makhani';
+  container.appendChild(inp);
+}
+function ackJob(id){
+  const b = DB.bookings.find(x=>x.id===id); if(!b) return;
+  b.seenByChef = true; save('bookings'); go('dash');
+}
+function saveBooking(id){
+  const b = DB.bookings.find(x=>x.id===id);
+  const prevChefId = b.chefId;
+  const prevStatus = b.status;
+  const newChefId = $('bC').value || null;
+  const newChef = newChefId ? DB.users.find(u=>u.id===newChefId) : null;
+  if(newChef && newChef.role==='parttime' && !$('bPTSec').checked){
+    return toast("Confirm the ₹500 security deposit is collected before assigning this part-time chef.");
+  }
+  b.time=$('bT').value.trim(); b.venue=$('bV').value.trim(); b.menu=$('bM').value.trim();
+  b.dishes = [...document.querySelectorAll('.dishInput')].map(i=>i.value.trim()).filter(Boolean);
+  b.chefId = newChefId; b.status=$('bS').value;
+  b.ptSecurityPaid = newChef && newChef.role==='parttime' ? $('bPTSec').checked : false;
+  if(ME.role==='owner' || ME.role==='manager'){ b.value = +$('bVal').value||0; b.advance = +$('bAdv').value||0; }
+  if(ME.role==='owner') b.chefPay = +$('bP').value||0;
+  // Auto-notify: assigning (or reassigning) a chef flags the job as new/unseen
+  // for them — no external SMS/push, but it surfaces the moment they open the app.
+  const chefJustAssigned = b.chefId && b.chefId!==prevChefId;
+  const justCompleted = b.status==='done' && prevStatus!=='done';
+  if(chefJustAssigned) b.seenByChef = false;
+  save('bookings'); closeModal(); toast('Booking updated.'); go(VIEW);
+  // Only one WhatsApp popup per save — a chef assignment matters more in the
+  // moment than a payment reminder, so it takes priority if both happened.
+  if(chefJustAssigned && autoMsgOn('chefAssigned') && newChef){
+    const msg = `Hi ${newChef.name}, booking ${b.code} for ${b.client} on ${dmy(b.date)}${b.time?' at '+b.time:''} (${b.guests} guests) is confirmed. Venue: ${b.venue||'to be shared'}. Menu: ${b.menu||'to be shared'}. — ${DB.meta.biz||'Khana Banao'}`;
+    waSend(newChef.phone, msg, {type:'chefAssigned', bookingId:b.id, bookingCode:b.code, to:newChef.name, trigger:'auto'});
+  } else if(justCompleted && autoMsgOn('paymentDue') && bookingPending(b) > 0){
+    const msg = `Hi ${b.client}, thanks for choosing ${DB.meta.biz||'Khana Banao'} for booking ${b.code} on ${dmy(b.date)}. The balance due is ${rs(bookingPending(b))}. Please let us know a convenient time to settle it. — ${DB.meta.biz||'Khana Banao'}`;
+    waSend(b.phone, msg, {type:'paymentDue', bookingId:b.id, bookingCode:b.code, to:b.client, trigger:'auto'});
+  }
+}
+
+/* ═══════════ 5 · CHEFS ═══════════ */
+function vChefs(){
+  const chefs = DB.users.filter(u=>u.role==='chef' || (u.role==='parttime' && u.ptUnlocked));
+  const isSalesDesk = ME.role==='sales' || ME.role==='sales_manager';
+  $('main').innerHTML = head(ME.role==='manager'?'Chefs on duty':'Chefs',
+    ME.role==='owner'?'Hours worked, jobs cooked, what you paid them.':'Who is in, who is free, who is on a job.') + `
+  ${isSalesDesk ? `<div class="card" style="padding:14px"><input id="chefLocSearch" placeholder="Filter by city / area, to match a part-time chef near the client" oninput="filterChefsByLoc()"></div>` : ''}
+  <div class="card" style="padding:18px 14px">
+  ${chefs.length? `<table class="tbl" id="chefsTable"><thead><tr>
+    <th>Chef</th><th>Type</th><th>City / area</th><th>Status</th><th>Today's job</th><th class="num">Hours (7d)</th><th class="num">Jobs</th><th>Location</th>
+    ${ME.role==='owner'?'<th class="num">Paid out</th><th class="num">Bills raised</th>':''}
+  </tr></thead><tbody>
+    ${chefs.map(c=>{
+      const open = DB.attendance.find(a=>a.userId===c.id && !a.outAt);
+      const wk = DB.attendance.filter(a=>a.userId===c.id && a.outAt && a.date>=new Date(Date.now()-6*864e5).toISOString().slice(0,10))
+                              .reduce((s,a)=>s+hrs(a.inAt,a.outAt),0);
+      const jobs = DB.bookings.filter(b=>b.chefId===c.id && b.status!=='cancelled');
+      const now = jobs.find(b=>b.date===today());
+      const paid = jobs.reduce((s,b)=>s+(+b.chefPay||0),0);
+      const bills = DB.expenses.filter(e=>e.byId===c.id && e.status==='approved').reduce((s,e)=>s+(+e.amount||0),0);
+      return `<tr data-loc="${esc((c.city||'').toLowerCase())}"><td><b>${esc(c.name)}</b><div class="small muted mono">${esc(c.phone)}</div></td>
+        <td><span class="tag ${c.role==='parttime'?'t-warm':'t-new'}">${c.role==='parttime'?'Part-time':'Full-time'}</span></td>
+        <td class="small">${esc(c.city||'—')}</td>
+        <td>${open?`<span class="tag t-ok"><span class="live"></span>In since ${hhmm(open.inAt)}</span>`:`<span class="tag t-lost">Off</span>`}</td>
+        <td class="small">${now?`${now.code} · ${esc(now.client)}`:'—'}</td>
+        <td class="num">${wk.toFixed(1)}</td><td class="num">${jobs.length}</td>
+        <td class="small">${c.sharingLocation && c.lastLoc?`<a href="https://www.google.com/maps?q=${c.lastLoc.lat},${c.lastLoc.lng}" target="_blank">View map</a><div class="muted" style="font-size:11px">${timeAgo(c.lastLoc.at)}</div>`:'<span class="muted">Not sharing</span>'}</td>
+        ${ME.role==='owner'?`<td class="num">${rs(paid)}</td><td class="num">${rs(bills)}</td>`:''}</tr>`;
+    }).join('')}
+  </tbody></table>` : empty('No chefs yet', ME.role==='owner'?'Add chef logins in Team & Access.':'The director hasn\'t added chefs yet.')}
+  </div>`;
+}
+function filterChefsByLoc(){
+  const term = ($('chefLocSearch').value||'').toLowerCase().trim();
+  document.querySelectorAll('#chefsTable tbody tr').forEach(tr=>{
+    tr.style.display = (!term || tr.dataset.loc.includes(term)) ? '' : 'none';
+  });
+}
+
+/* ═══════════ 6 · STAFF & ATTENDANCE (helpers/attendants) ═══════════ */
+function vStaff(){
+  const today_ = today();
+  $('main').innerHTML = head('Staff & attendance','Kitchen helpers, servers and cleaners — mark who came in and the day cost is counted.',
+    `<button class="btn dark" onclick="staffForm()">Add staff</button>`) + `
+  <div class="card"><h3>Mark today · ${dmy(today_)}</h3><div class="sub">One tap per person. Marked days feed straight into cost.</div>
+  ${DB.staff.filter(s=>s.active).length? `<table class="tbl"><thead><tr>
+    <th>Name</th><th>Job</th><th>Phone</th><th class="num">Day rate</th><th>Today</th><th class="num">Days (30d)</th>
+  </tr></thead><tbody>
+    ${DB.staff.filter(s=>s.active).map(s=>{
+      const marked = DB.attendance.find(a=>a.staffId===s.id && a.date===today_);
+      const d30 = DB.attendance.filter(a=>a.staffId===s.id && a.date>=new Date(Date.now()-29*864e5).toISOString().slice(0,10)).length;
+      return `<tr><td><b>${esc(s.name)}</b></td><td><span class="tag t-new">${esc(s.job)}</span></td>
+        <td class="mono small">${esc(s.phone||'—')}</td><td class="num">${rs(s.rate)}</td>
+        <td>${marked?`<button class="btn sm ok" onclick="unmark('${marked.id}')">Present ✓</button>`
+                    :`<button class="btn sm" onclick="mark('${s.id}')">Mark present</button>`}</td>
+        <td class="num">${d30}</td></tr>`;
+    }).join('')}
+  </tbody></table>` : empty('No staff on the roster','Add your helpers, servers and cleaners.')}
+  </div>`;
+}
+function mark(sid){
+  const s = DB.staff.find(x=>x.id===sid);
+  DB.attendance.push({id:uid(), staffId:s.id, name:s.name, role:s.job, date:today(), inAt:Date.now(), outAt:Date.now(), pay:s.rate});
+  save('attendance'); toast(`${s.name} marked present — ${rs(s.rate)} counted.`); go('staff');
+}
+function unmark(id){ DB.attendance = DB.attendance.filter(a=>a.id!==id); save('attendance'); go('staff'); }
+function staffForm(){
+  modal(`<h3>Add a staff member</h3><div class="sub">Helpers and attendants don't get a login — they get marked present.</div>
+  <div class="fld"><label>Name</label><input id="stN"></div>
+  <div class="f2">
+    <div class="fld"><label>Job</label><select id="stJ">${['Kitchen helper','Server','Bar Tender','Cleaner','Driver'].map(j=>`<option>${j}</option>`).join('')}</select></div>
+    <div class="fld"><label>Day rate (₹)</label><input id="stR" type="number" min="0" placeholder="e.g. 700"></div>
+  </div>
+  <div class="fld"><label>Phone (optional)</label><input id="stP" inputmode="numeric"></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveStaff()">Add staff</button></div>`);
+}
+function saveStaff(){
+  const name=$('stN').value.trim(); if(!name) return toast('Name is needed.');
+  DB.staff.push({id:uid(),name,job:$('stJ').value,rate:+$('stR').value||0,phone:$('stP').value.replace(/\D/g,''),active:true});
+  save('staff'); closeModal(); toast('Staff added.'); go('staff');
+}
+
+/* ═══════════ 7 · EXPENSES (attachment + description + amount) ═══════════ */
+let ATT = null;   // {name, type, data}
+function vExp(){
+  const roleKey = {parttime:'chef', sales_manager:'sales', hr:'owner'}[ME.role] || ME.role;
+  const own = ME.role==='chef' || ME.role==='parttime';
+  let rows;
+  if (own) rows = DB.expenses.filter(e=>e.byId===ME.id);
+  else if (ME.role==='sales' || ME.role==='sales_manager'){
+    // Sales sees their own raised expenses, AND anything a chef raised
+    // against a booking sales sold — that's the "chef sends it to sales" step.
+    // Sales Manager sees this across the whole team's bookings.
+    const myBookingIds = (ME.role==='sales_manager' ? DB.bookings : DB.bookings.filter(b=>b.soldBy===ME.id)).map(b=>b.id);
+    rows = DB.expenses.filter(e => e.byId===ME.id || myBookingIds.includes(e.bookingId));
+  }
+  else rows = DB.expenses;
+  rows = [...rows].sort((a,b)=>b.at-a.at);
+  const limit = DB.meta.limit;
+
+  const cols = {
+    owner:  ['Date','Raised by','Booking','Category','Amount','Note','Bill','Status',''],
+    manager:['Date','Raised by','Booking','Category','Amount','Note','Bill','Status',''],
+    chef:   ['Date','Booking','Category','Amount','What it was for','Bill','Status'],
+    sales:  ['Date','Raised by','Booking','Category','Amount','What it was for','Bill','Status','']
+  }[roleKey];
+
+  const bookOf = e => { const b=DB.bookings.find(x=>x.id===e.bookingId); return b?`<span class="mono small">${b.code}</span>`:'<span class="muted">—</span>'; };
+  const bill = e => e.att ? `<a onclick="viewBill('${e.id}')">View bill</a>` : '<span class="muted small">No bill</span>';
+  const act = e => {
+    if(e.status==='hold') return `<span class="small muted">On hold${e.holdNote?' — '+esc(e.holdNote):''}</span>
+      <div style="margin-top:4px">
+      <button class="btn sm ok" onclick="decide('${e.id}',1)">Approve</button>
+      <button class="btn sm no" onclick="decide('${e.id}',0)">Reject</button>
+      ${(ME.role==='owner'||ME.role==='manager')?`<button class="btn sm" onclick="editExpenseForm('${e.id}')">Edit</button> <button class="btn sm no" onclick="deleteExpense('${e.id}')">Delete</button>`:''}
+      </div>`;
+    if(e.status!=='pending') return `<span class="small muted">${e.status==='approved'?'Cleared by':'Rejected by'} ${esc(nameOf(e.byDecider))}${e.rejectNote?' — '+esc(e.rejectNote):''}</span>
+      ${(ME.role==='owner'||ME.role==='manager')?`<div style="margin-top:4px"><button class="btn sm" onclick="editExpenseForm('${e.id}')">Edit</button> <button class="btn sm no" onclick="deleteExpense('${e.id}')">Delete</button></div>`:''}`;
+    if(ME.role==='manager' && e.amount>limit) return `<span class="tag t-no">Over your limit</span>`;
+    return `<button class="btn sm ok" onclick="decide('${e.id}',1)">Approve</button>
+            <button class="btn sm no" onclick="decide('${e.id}',0)">Reject</button>
+            <button class="btn sm" onclick="holdExpenseForm('${e.id}')">Hold</button>
+            ${(ME.role==='owner'||ME.role==='manager')?`<button class="btn sm" onclick="editExpenseForm('${e.id}')">Edit</button> <button class="btn sm no" onclick="deleteExpense('${e.id}')">Delete</button>`:''}`;
+  };
+  const sendToClient = e => {
+    const b = DB.bookings.find(x=>x.id===e.bookingId);
+    if (!b || !b.phone) return '<span class="small muted">No client to send to</span>';
+    return `<button class="btn sm" onclick="sendExpenseWA('${e.id}')">Send to client</button>`;
+  };
+  const cell = e => ({
+    owner: `<td class="mono small">${dmy(e.date)}</td><td><b>${esc(e.byName)}</b><div class="small muted">${ROLE_LABEL[e.byRole]}${(e.byRole==='chef'||e.byRole==='parttime')?' · <span class="tag t-warm">Chef expense</span>':''}</div></td>
+      <td>${bookOf(e)}</td><td>${esc(e.cat)}</td><td class="num">${rs(e.amount)}</td>
+      <td class="small" style="max-width:220px">${esc(e.note)}</td><td>${bill(e)}</td><td>${expTag(e)}</td>
+      <td style="text-align:right;white-space:nowrap">${act(e)}</td>`,
+    manager: `<td class="mono small">${dmy(e.date)}</td><td><b>${esc(e.byName)}</b><div class="small muted">${ROLE_LABEL[e.byRole]}${(e.byRole==='chef'||e.byRole==='parttime')?' · <span class="tag t-warm">Chef expense</span>':''}</div></td>
+      <td>${bookOf(e)}</td><td>${esc(e.cat)}</td><td class="num">${rs(e.amount)}</td>
+      <td class="small" style="max-width:220px">${esc(e.note)}</td><td>${bill(e)}</td><td>${expTag(e)}</td>
+      <td style="text-align:right;white-space:nowrap">${act(e)}</td>`,
+    chef: `<td class="mono small">${dmy(e.date)}</td><td>${bookOf(e)}</td><td>${esc(e.cat)}</td>
+      <td class="num">${rs(e.amount)}</td><td class="small" style="max-width:260px">${esc(e.note)}</td>
+      <td>${bill(e)}</td><td>${expTag(e)}</td>`,
+    sales: `<td class="mono small">${dmy(e.date)}</td><td>${esc(e.byName)}${e.byId===ME.id?'':' <span class="small muted">(chef)</span>'}</td><td>${bookOf(e)}</td><td>${esc(e.cat)}</td><td class="num">${rs(e.amount)}</td>
+      <td class="small" style="max-width:220px">${esc(e.note)}</td><td>${bill(e)}</td><td>${expTag(e)}</td>
+      <td style="text-align:right;white-space:nowrap">${sendToClient(e)}</td>`
+  }[roleKey]);
+
+  const pend = rows.filter(e=>e.status==='pending');
+  const chefRows = rows.filter(e=>e.byRole==='chef'||e.byRole==='parttime');
+  $('main').innerHTML = head(
+    (ME.role==='chef'||ME.role==='parttime')?'My expenses':ME.role==='manager'?'Expense approvals':(ME.role==='sales'||ME.role==='sales_manager')?'My expenses':'All expenses',
+    (ME.role==='chef'||ME.role==='parttime')?'Attach the bill, write two lines about it, put the amount. That\'s it.'
+      :ME.role==='manager'?`You can clear anything up to ${rs(limit)}. Bigger bills go to the director.`
+      :(ME.role==='sales'||ME.role==='sales_manager')?'Your own bills, plus anything a chef raised on your bookings — forward the approved ones to the client on WhatsApp.'
+      :'Every rupee anyone spent, with the bill attached.',
+    (ME.role==='chef'||ME.role==='parttime'||ME.role==='sales'||ME.role==='sales_manager')?`<button class="btn dark" onclick="expForm()">Add expense</button>`:'') + `
+  <div class="kpis">
+    <div class="kpi"><div class="k">Pending</div><div class="v">${rs(pend.reduce((s,e)=>s+(+e.amount||0),0))}</div><div class="s">${pend.length} bills</div></div>
+    <div class="kpi"><div class="k">Approved</div><div class="v">${rs(rows.filter(e=>e.status==='approved').reduce((s,e)=>s+(+e.amount||0),0))}</div><div class="s">cleared</div></div>
+    ${(ME.role==='owner'||ME.role==='manager')?`<div class="kpi"><div class="k">Chef expenses</div><div class="v">${rs(chefRows.reduce((s,e)=>s+(+e.amount||0),0))}</div><div class="s">${chefRows.length} bills raised by chefs</div></div>`:''}
+    ${ME.role==='manager'?`<div class="kpi"><div class="k">Approval limit</div><div class="v">${rs(limit)}</div><div class="s">set by the director</div></div>`:''}
+  </div>
+  <div class="card" style="padding:18px 14px">
+    ${rows.length? `<table class="tbl"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(e=>`<tr>${cell(e)}</tr>`).join('')}</tbody></table>`
+     : empty('No expenses yet', (ME.role==='chef'||ME.role==='sales')?'Add your first bill — you can attach a photo of the receipt.':'Nothing has been claimed yet.')}
+  </div>`;
+}
+function sendExpenseWA(id){
+  const e = DB.expenses.find(x=>x.id===id);
+  const b = DB.bookings.find(x=>x.id===e.bookingId);
+  if (!b || !b.phone) { toast('This expense has no linked client to send to.'); return; }
+  const text = `Hi ${b.client}, here's the expense for your event (${b.code}):\n\n${e.cat} — ${rs(e.amount)}\n${e.note}\n\n— ${DB.meta.biz||'Khana Banao'}`;
+  waSend(b.phone, text, {type:'expenseForward', bookingId:b.id, bookingCode:b.code, to:b.client, trigger:'manual'});
+}
+function expTag(e){
+  const m={pending:['t-pend','Pending'],approved:['t-ok','Approved'],rejected:['t-no','Rejected'],hold:['t-warm','On hold']}[e.status];
+  return `<span class="tag ${m[0]}">${m[1]}</span>`;
+}
+/* Hold — parks a bill without approving or rejecting it, e.g. while
+   waiting on a clearer bill photo or a second opinion. It stays visible
+   with an Approve/Reject pair so it can be resolved later. */
+function holdExpenseForm(id){
+  const e = DB.expenses.find(x=>x.id===id); if(!e) return;
+  modal(`<h3>Put this bill on hold?</h3><div class="sub">${esc(e.byName)} · ${rs(e.amount)} · ${esc(e.cat)}</div>
+  <div class="fld"><label>Note <span class="muted small">(optional)</span></label>
+    <textarea id="holdNote" rows="3" placeholder="e.g. Checking with the client first"></textarea></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="confirmHold('${id}')">Hold expense</button></div>`);
+}
+function confirmHold(id){
+  const e = DB.expenses.find(x=>x.id===id); if(!e) return;
+  e.status='hold'; e.holdNote=$('holdNote').value.trim(); e.holdBy=ME.id; e.holdAt=Date.now();
+  save('expenses'); closeModal(); toast('Expense put on hold.'); go(VIEW);
+}
+function expForm(_,bookingId){
+  ATT = null;
+  const myBooks = ((ME.role==='chef'||ME.role==='parttime') ? DB.bookings.filter(b=>b.chefId===ME.id)
+    : ME.role==='sales' ? DB.bookings.filter(b=>b.soldBy===ME.id)
+    : DB.bookings).filter(b=>b.status!=='cancelled');
+  modal(`<h3>Add an expense</h3><div class="sub">Bill photo, two lines about it, and the amount. Your manager clears it.</div>
+  <div class="f2">
+    <div class="fld"><label>Date</label><input id="eD" type="date" value="${today()}"></div>
+    <div class="fld"><label>Amount (₹)</label><input id="eA" type="number" min="1" placeholder="0"></div>
+  </div>
+  <div class="f2">
+    <div class="fld"><label>Category</label><select id="eC">
+      ${['Grocery','Vegetables & meat','Gas / fuel','Travel','Packaging','Equipment rental','Staff advance','Other'].map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <div class="fld"><label>Against booking</label><select id="eB"><option value="">— general / not a job —</option>
+      ${myBooks.map(b=>`<option value="${b.id}" ${bookingId===b.id?'selected':''}>${b.code} · ${esc(b.client)}</option>`).join('')}</select></div>
+  </div>
+  <div class="fld"><label>What it was for</label>
+    <textarea id="eN" rows="3" placeholder="Two or three lines. e.g. Bought 12 kg paneer and vegetables from Russell Market for the Sharma reception. Auto charge included."></textarea></div>
+  <div class="fld"><label>Bill / receipt document</label>
+    <div class="drop" id="eDrop" onclick="document.getElementById('eF').click()">Tap to upload a photo, PDF or Word document of the bill</div>
+    <input type="file" id="eF" class="hide" accept="image/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="pickFile(this)">
+    <div id="eThumb"></div>
+  </div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveExp()">Submit expense</button></div>`);
+}
+function pickFile(inp){
+  const f = inp.files[0]; if(!f) return;
+  if(f.size > 4*1024*1024) return toast('That file is too big. Keep it under 4 MB.');
+  const done = (data,type)=>{
+    ATT = {name:f.name, type, data};
+    $('eDrop').classList.add('has'); $('eDrop').textContent = '✓ ' + f.name;
+    $('eThumb').innerHTML = type.startsWith('image') ? `<img class="thumb" src="${data}">` : '';
+  };
+  const r = new FileReader();
+  r.onload = () => {
+    if(!f.type.startsWith('image')) return done(r.result, f.type);
+    const img = new Image();                       // shrink photos so storage doesn't blow up
+    img.onload = () => {
+      const sc = Math.min(1, 1000/Math.max(img.width,img.height));
+      const c = document.createElement('canvas');
+      c.width = img.width*sc; c.height = img.height*sc;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      done(c.toDataURL('image/jpeg',.62), 'image/jpeg');
+    };
+    img.src = r.result;
+  };
+  r.readAsDataURL(f);
+}
+let PT_ATT = null;
+function pickPtProof(inp){
+  const f = inp.files[0]; if(!f) return;
+  if(f.size > 4*1024*1024) return toast('That file is too big. Keep it under 4 MB.');
+  const done = (data,type)=>{
+    PT_ATT = {name:f.name, type, data};
+    $('ptDrop').classList.add('has'); $('ptDrop').textContent = '✓ ' + f.name;
+    $('ptThumb').innerHTML = type.startsWith('image') ? `<img class="thumb" src="${data}">` : '';
+  };
+  const r = new FileReader();
+  r.onload = () => {
+    if(!f.type.startsWith('image')) return done(r.result, f.type);
+    const img = new Image();
+    img.onload = () => {
+      const sc = Math.min(1, 1000/Math.max(img.width,img.height));
+      const c = document.createElement('canvas');
+      c.width = img.width*sc; c.height = img.height*sc;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      done(c.toDataURL('image/jpeg',.62), 'image/jpeg');
+    };
+    img.src = r.result;
+  };
+  r.readAsDataURL(f);
+}
+/* ═══════════ PART-TIME CHEF — ₹500 unlock ═══════════ */
+function vUnlock(){
+  const mine = DB.ptPayments.filter(p=>p.userId===ME.id).sort((a,b)=>b.submittedAt-a.submittedAt);
+  const latest = mine[0];
+  $('main').innerHTML = `<div class="pgh"><div><h1>Unlock your account</h1>
+    <p>Pay the one-time ₹500 unlock fee outside the app (UPI/cash to the director), then upload proof here. Once the director confirms it, you'll see client jobs exactly like a regular chef.</p></div></div>
+  <div class="card" style="max-width:520px">
+    ${latest && latest.status==='pending' ? `
+      <div class="tag t-warm" style="margin-bottom:10px">Waiting for director confirmation</div>
+      <p class="sub">You uploaded ${dmy(new Date(latest.submittedAt).toISOString().slice(0,10))}. The director will confirm once they've checked the payment.</p>
+    ` : latest && latest.status==='rejected' ? `
+      <div class="tag t-no" style="margin-bottom:10px">Last proof wasn't accepted</div>
+      <p class="sub">${esc(latest.note||'Ask the director why, then upload a clearer proof below.')}</p>
+      <div class="fld"><label>Payment proof</label>
+        <div class="drop" id="ptDrop" onclick="document.getElementById('ptF').click()">Tap to upload a screenshot or photo of the ₹500 payment</div>
+        <input type="file" id="ptF" class="hide" accept="image/*,application/pdf" onchange="pickPtProof(this)">
+        <div id="ptThumb"></div>
+      </div>
+      <button class="btn dark" onclick="submitPtProof()" style="margin-top:10px">Submit proof</button>
+    ` : `
+      <div class="fld"><label>Payment proof</label>
+        <div class="drop" id="ptDrop" onclick="document.getElementById('ptF').click()">Tap to upload a screenshot or photo of the ₹500 payment</div>
+        <input type="file" id="ptF" class="hide" accept="image/*,application/pdf" onchange="pickPtProof(this)">
+        <div id="ptThumb"></div>
+      </div>
+      <button class="btn dark" onclick="submitPtProof()" style="margin-top:10px">Submit proof</button>
+    `}
+  </div>
+  <button class="btn" style="margin-top:16px" onclick="doLogout()">Log out</button>`;
+}
+function submitPtProof(){
+  if(!PT_ATT) return toast('Upload the payment screenshot first.');
+  DB.ptPayments.unshift({id:uid(), userId:ME.id, name:ME.name, phone:ME.phone, att:PT_ATT, status:'pending', submittedAt:Date.now(), note:''});
+  save('ptPayments'); PT_ATT=null; toast('Submitted — waiting for the director to confirm.'); vUnlock();
+}
+function ptDecide(payId, ok){
+  const p = DB.ptPayments.find(x=>x.id===payId); if(!p) return;
+  p.status = ok?'approved':'rejected'; p.decidedAt = Date.now(); p.decidedBy = ME.name;
+  if(ok){ const u = DB.users.find(x=>x.id===p.userId); if(u) u.ptUnlocked = true; save('users'); }
+  save('ptPayments'); toast(ok?'Unlocked.':'Rejected.'); go(VIEW);
+}
+function viewPtProof(payId){
+  const p = DB.ptPayments.find(x=>x.id===payId); if(!p||!p.att) return;
+  if(p.att.type.startsWith('image')) modal(`<h3>Payment proof — ${esc(p.name)}</h3><img src="${p.att.data}" style="width:100%;border-radius:10px">`);
+  else { const w=window.open(); w.document.write(`<iframe src="${p.att.data}" style="width:100%;height:100vh;border:0"></iframe>`); }
+}
+function saveExp(){
+  const amt = +$('eA').value, note = $('eN').value.trim();
+  if(!amt || amt<=0)  return toast('Enter the amount.');
+  if(note.length<10)  return toast('Write two lines about what this was for.');
+  DB.expenses.push({id:uid(), at:Date.now(), date:$('eD').value||today(), byId:ME.id, byName:ME.name, byRole:ME.role,
+    bookingId:$('eB').value||null, cat:$('eC').value, amount:amt, note, att:ATT, status:'pending', byDecider:null, decidedAt:null});
+  save('expenses'); ATT=null; closeModal(); toast('Expense submitted for approval.'); go(VIEW==='dash'?'dash':'exp');
+}
+function decide(id, ok){
+  const e = DB.expenses.find(x=>x.id===id);
+  if(ME.role==='manager' && e.amount>DB.meta.limit) return toast('Above your limit — the director has to clear this one.');
+  if(!ok){ rejectExpenseForm(id); return; }
+  e.status = 'approved'; e.byDecider = ME.id; e.decidedAt = Date.now();
+  save('expenses'); toast(`${rs(e.amount)} approved.`); go(VIEW);
+}
+/* Rejecting a bill now requires a short reason — so the person who
+   raised it knows what to fix instead of just seeing "Rejected". */
+function rejectExpenseForm(id){
+  const e = DB.expenses.find(x=>x.id===id); if(!e) return;
+  modal(`<h3>Reject this expense?</h3><div class="sub">${esc(e.byName)} · ${rs(e.amount)} · ${esc(e.cat)}</div>
+  <div class="fld"><label>Reason <span class="muted small">(they'll see this)</span></label>
+    <textarea id="rejNote" rows="3" placeholder="e.g. Bill is blurry, please re-upload"></textarea></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn no" onclick="confirmReject('${id}')">Reject expense</button></div>`);
+}
+function confirmReject(id){
+  const note = $('rejNote').value.trim();
+  if(!note) return toast('Give a short reason so they know what to fix.');
+  const e = DB.expenses.find(x=>x.id===id); if(!e) return;
+  e.status='rejected'; e.byDecider=ME.id; e.decidedAt=Date.now(); e.rejectNote=note;
+  save('expenses'); closeModal(); toast('Expense rejected.'); go(VIEW);
+}
+function editExpenseForm(id){
+  const e = DB.expenses.find(x=>x.id===id); if(!e) return;
+  modal(`<h3>Edit expense</h3><div class="sub">${esc(e.byName)} · ${dmy(e.date)}</div>
+  <div class="f2">
+    <div class="fld"><label>Category</label><input id="exC" value="${esc(e.cat)}"></div>
+    <div class="fld"><label>Amount (₹)</label><input id="exA" type="number" min="0" value="${esc(e.amount)}"></div>
+  </div>
+  <div class="fld"><label>Note</label><textarea id="exN" rows="3">${esc(e.note||'')}</textarea></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveExpenseEdit('${id}')">Save</button></div>`);
+}
+function saveExpenseEdit(id){
+  const e = DB.expenses.find(x=>x.id===id); if(!e) return;
+  e.cat = $('exC').value.trim(); e.amount = +$('exA').value||0; e.note = $('exN').value.trim();
+  save('expenses'); closeModal(); toast('Expense updated.'); go(VIEW);
+}
+function deleteExpense(id){
+  const e = DB.expenses.find(x=>x.id===id); if(!e) return;
+  confirmBox('Delete this expense?', `${esc(e.byName)}'s ${rs(e.amount)} ${esc(e.cat)} entry will be permanently removed.`,'Delete expense',()=>{
+    DB.expenses = DB.expenses.filter(x=>x.id!==id); save('expenses'); toast('Expense deleted.'); go(VIEW);
+  });
+}
+function viewBill(id){
+  const e = DB.expenses.find(x=>x.id===id); if(!e.att) return;
+  modal(`<h3>${esc(e.cat)} · ${rs(e.amount)}</h3>
+    <div class="sub">${esc(e.byName)} · ${dmy(e.date)}</div>
+    <p style="margin-bottom:14px">${esc(e.note)}</p>
+    ${e.att.type.startsWith('image')
+      ? `<img src="${e.att.data}" style="width:100%;border-radius:10px;border:1px solid var(--hair)">`
+      : `<div class="authnote">${esc(e.att.name)}</div>`}
+    <div class="mrow"><a class="btn" style="text-align:center;text-decoration:none;padding:11px" href="${e.att.data}" download="${esc(e.att.name)}">Download bill</a>
+    <button class="btn dark" onclick="closeModal()">Close</button></div>`);
+}
+
+/* ═══════════ 8 · TEAM & ACCESS (owner only) ═══════════ */
+function vTeam(){
+  const isDirector = ME.role==='owner';
+  const isSalesManagerDesk = ME.role==='sales_manager';
+  const pendingPt = DB.ptPayments.filter(p=>p.status==='pending');
+  const teamRows = isSalesManagerDesk ? DB.users.filter(u=>u.role==='sales') : DB.users;
+  $('main').innerHTML = head(isSalesManagerDesk?'Add sales':'Team & access',
+    isDirector?'Who can log in, and to which desk. Only you can open this screen.'
+      :isSalesManagerDesk?'Add and manage logins for your sales team only.'
+      :'Add new logins for the team — sales, chefs, and support desks.',
+    `<button class="btn dark" onclick="userForm()">Add a login</button>`) + `
+  ${(isDirector||ME.role==='manager') && pendingPt.length? `<div class="card" style="border-color:var(--saffron)">
+    <h3>Part-time unlock requests</h3><div class="sub">₹500 payment proofs waiting for your confirmation</div>
+    ${pendingPt.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--hair-2)">
+      <div><b>${esc(p.name)}</b> <span class="small muted">· ${esc(p.phone)} · ${dmy(new Date(p.submittedAt).toISOString().slice(0,10))}</span></div>
+      <div>
+        <button class="btn sm" onclick="viewPtProof('${p.id}')">View proof</button>
+        <button class="btn sm ok" onclick="ptDecide('${p.id}',1)">Confirm ₹500</button>
+        <button class="btn sm no" onclick="ptDecide('${p.id}',0)">Reject</button>
+      </div>
+    </div>`).join('')}
+  </div>` : ''}
+  <div class="card" style="padding:18px 14px">
+  <table class="tbl"><thead><tr><th>Name</th><th>Desk</th><th>Phone</th><th>City</th><th>Added</th><th>Target</th><th>Access</th><th></th></tr></thead><tbody>
+  ${teamRows.map(u=>{
+    const locked = u.id===ME.id || (u.role==='owner' && !isDirector);
+    return `<tr>
+    <td><b>${esc(u.name)}</b>${u.id===ME.id?' <span class="small muted">(you)</span>':''}</td>
+    <td><span class="tag ${u.role==='owner'?'t-lost':u.role==='manager'||u.role==='hr'?'t-new':u.role==='sales'||u.role==='sales_manager'?'t-won':'t-warm'}">${ROLE_LABEL[u.role]}</span>
+      ${u.role==='parttime'?`<div class="small muted">${u.ptUnlocked?'Unlocked':'Locked — awaiting ₹500'}</div>`:''}</td>
+    <td class="mono">${esc(u.phone)}</td><td class="small">${esc(u.city||'—')}</td>
+    <td class="mono small">${dmy(new Date(u.createdAt).toISOString().slice(0,10))}</td>
+    <td>${u.role==='sales'||u.role==='sales_manager'||u.role==='chef'||u.role==='parttime' ? `<span class="mono small">${u.target?((u.role==='sales'||u.role==='sales_manager')?rs(u.target):u.target+' jobs'):'not set'}</span> <button class="btn sm" onclick="targetForm('${u.id}')">Edit</button>` : '—'}</td>
+    <td>${u.active?'<span class="tag t-ok">Can log in</span>':'<span class="tag t-no">Switched off</span>'}</td>
+    <td style="text-align:right;white-space:nowrap">${locked?'':`
+      <button class="btn sm" onclick="resetPw('${u.id}')">Reset password</button>
+      <button class="btn sm ${u.active?'no':'ok'}" onclick="toggleUser('${u.id}')">${u.active?'Switch off':'Switch on'}</button>
+      ${isDirector?`<button class="btn sm no" onclick="deleteUser('${u.id}')">Delete</button>`:''}`}</td>
+  </tr>`;}).join('')}
+  </tbody></table></div>
+  ${isDirector?`<div class="card"><h3>Manager approval limit</h3>
+    <div class="sub">Managers can clear expenses up to this amount on their own. Anything bigger lands on your desk.</div>
+    <div style="display:flex;gap:10px;max-width:340px">
+      <input id="lim" type="number" min="0" value="${DB.meta.limit}">
+      <button class="btn dark" onclick="setLimit()" style="white-space:nowrap">Save limit</button>
+    </div>
+  </div>
+  <div class="card"><h3>Monthly revenue target</h3>
+    <div class="sub">Drives the live progress bar on the Booking Dashboard.</div>
+    <div style="display:flex;gap:10px;max-width:340px">
+      <input id="revTarget" type="number" min="0" value="${DB.meta.revenueTarget||0}" placeholder="e.g. 500000">
+      <button class="btn dark" onclick="setRevenueTarget()" style="white-space:nowrap">Save target</button>
+    </div>
+  </div>
+  <div class="card"><h3>Automated WhatsApp messages</h3>
+    <div class="sub">When one of these happens, WhatsApp opens automatically with the message pre-filled — whoever's on that screen just hits send. Still no silent auto-sending; that needs the WhatsApp Business API, not a browser. Turn any of these off if you'd rather send manually from Actions.</div>
+    ${[['bookingConfirmed','Booking confirmed','Client gets a confirmation the moment a call is converted to a booking.'],
+       ['chefAssigned','Chef assigned','Chef gets the job brief the moment they are assigned or reassigned.'],
+       ['paymentDue','Payment due','Client gets a balance-due reminder the moment a job is marked completed with money still owed.']]
+      .map(([k,t,d])=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--bd,#eee)">
+        <div><b>${t}</b><div class="small muted">${d}</div></div>
+        <button class="btn sm ${autoMsgOn(k)?'ok':'no'}" onclick="toggleAutoMsg('${k}')">${autoMsgOn(k)?'On':'Off'}</button>
+      </div>`).join('')}
+  </div>`:''}`;
+}
+function toggleAutoMsg(k){
+  DB.meta.autoMsg = DB.meta.autoMsg || {};
+  DB.meta.autoMsg[k] = !autoMsgOn(k);
+  save('meta'); go('team');
+}
+function setRevenueTarget(){ DB.meta.revenueTarget = +$('revTarget').value||0; save('meta'); toast('Revenue target saved.'); go('team'); }
+function vIntegrations(){
+  const wa = (DB.meta.integrations && DB.meta.integrations.wa) || {};
+  const waConfigured = !!(wa.token && wa.phoneId);
+  const sfwa = (DB.meta.integrations && DB.meta.integrations.superfoneWa) || {};
+  const sfwaConfigured = !!(sfwa.endpoint);
+  $('main').innerHTML = head('Integrations','Connect the outside services this CRM can talk to. Keys are stored on this business\'s account only.') + `
+  <div class="card">
+    <h3>WhatsApp via Superfone ${sfwaConfigured?'<span class="tag t-ok">Connected</span>':'<span class="tag t-warm">Not connected</span>'}</h3>
+    <div class="sub">Sends now route through a Supabase Edge Function (so your Superfone key stays off the browser). Deploy the "send-whatsapp" function, add your key as its SUPERFONE_API_KEY secret, then just save the URL below.</div>
+    <div class="f2">
+      <div class="fld"><label>Edge function URL</label><input id="sfEndpoint" placeholder="https://REDACTED-PROJECT.supabase.co/functions/v1/swift-api" value="${esc(sfwa.endpoint||'https://REDACTED-PROJECT.supabase.co/functions/v1/swift-api')}"></div>
+    </div>
+    <div class="mrow" style="justify-content:flex-start;gap:8px">
+      <button class="btn dark" onclick="saveSuperfoneWa()">Save</button>
+      ${sfwaConfigured?`<button class="btn no" onclick="clearSuperfoneWa()">Disconnect</button>`:''}
+    </div>
+    <div class="authnote" style="margin-top:12px">This sends a plain text message via Superfone's "Send custom message" endpoint — no pre-approved template required. If the function isn't deployed yet, or Superfone rejects a number (e.g. it's outside their allowed window), the send fails quietly and falls back to the click-to-send WhatsApp link — nothing breaks either way.</div>
+  </div>
+  <div class="card">
+    <h3>WhatsApp direct with Meta ${waConfigured?'<span class="tag t-ok">Connected</span>':'<span class="tag t-warm">Not connected</span>'}</h3>
+    <div class="sub">Only needed if you go directly through Meta's Cloud API instead of Superfone — skip this if Superfone above is your route.</div>
+    <div class="f2">
+      <div class="fld"><label>Access token</label><input id="waTok" type="password" placeholder="EAAxxxxxxxx..." value="${esc(wa.token||'')}"></div>
+      <div class="fld"><label>Phone number ID</label><input id="waPhoneId" placeholder="e.g. 104xxxxxxxx" value="${esc(wa.phoneId||'')}"></div>
+    </div>
+    <div class="mrow" style="justify-content:flex-start;gap:8px">
+      <button class="btn dark" onclick="saveWaIntegration()">Save</button>
+      ${waConfigured?`<button class="btn no" onclick="clearWaIntegration()">Disconnect</button>`:''}
+    </div>
+  </div>
+  <div class="card">
+    <h3>Invoice email <span class="tag t-warm">Manual send</span></h3>
+    <div class="sub">"Send invoice" opens a pre-filled email in whatever mail app is on the device — one tap to send, no setup needed. Fully automatic sending (no tap, straight from the CRM) needs a backend — email providers block direct browser calls. If you want that, it's a small Supabase Edge Function away; ask and I'll build it once you've picked a provider (Resend, SendGrid, etc.) and have an API key.</div>
+  </div>
+  <div class="card">
+    <h3>Superfone call/lead sync</h3>
+    <div class="sub">Separate from WhatsApp sending above — this is for pulling call history and leads into the CRM automatically. Needs a webhook or polling Edge Function; see the setup guide already shared. Once that Edge Function is deployed, its URL goes in here too.</div>
+  </div>`;
+}
+function saveSuperfoneWa(){
+  const endpoint = $('sfEndpoint').value.trim();
+  if(!endpoint) return toast('The edge function URL is needed.');
+  DB.meta.integrations = DB.meta.integrations || {};
+  DB.meta.integrations.superfoneWa = { endpoint };
+  save('meta'); toast('Superfone WhatsApp connected.'); go('integrations');
+}
+function clearSuperfoneWa(){
+  confirmBox('Disconnect Superfone WhatsApp?', 'Messages will go back to the click-to-send link — nothing breaks, it just needs a tap again.','Disconnect',()=>{
+    if(DB.meta.integrations) delete DB.meta.integrations.superfoneWa;
+    save('meta'); toast('Disconnected.'); go('integrations');
+  });
+}
+function saveWaIntegration(){
+  const token = $('waTok').value.trim(), phoneId = $('waPhoneId').value.trim();
+  if(!token || !phoneId) return toast('Both the access token and phone number ID are needed.');
+  DB.meta.integrations = DB.meta.integrations || {};
+  DB.meta.integrations.wa = { token, phoneId };
+  save('meta'); toast('WhatsApp API connected.'); go('integrations');
+}
+function clearWaIntegration(){
+  confirmBox('Disconnect WhatsApp API?', 'Messages will go back to the click-to-send link — nothing breaks, it just needs a tap again.','Disconnect',()=>{
+    if(DB.meta.integrations) delete DB.meta.integrations.wa;
+    save('meta'); toast('Disconnected.'); go('integrations');
+  });
+}
+function targetForm(id){
+  const u = DB.users.find(x=>x.id===id);
+  const isSales = u.role==='sales';
+  modal(`<h3>Set target — ${esc(u.name)}</h3>
+  <div class="sub">${isSales?'Monthly booking value target, in rupees.':'Monthly completed-jobs target.'}</div>
+  <div class="fld"><label>${isSales?'Target value (₹)':'Target jobs'}</label>
+    <input id="tV" type="number" min="0" value="${u.target||''}" placeholder="${isSales?'e.g. 200000':'e.g. 20'}"></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveTarget('${id}')">Save target</button></div>`);
+}
+function saveTarget(id){
+  const u = DB.users.find(x=>x.id===id);
+  u.target = +$('tV').value || 0;
+  save('users'); closeModal(); toast('Target saved.'); go('team');
+}
+function userForm(){
+  const isDirector = ME.role==='owner';
+  const isSalesManagerDesk = ME.role==='sales_manager';
+  const roleOptions = isDirector
+    ? `<option value="manager">Manager</option><option value="hr">HR</option>
+       <option value="sales_manager">Sales Manager</option><option value="sales">Sales</option>
+       <option value="chef">Chef</option><option value="parttime">Part-time Chef</option>`
+    : isSalesManagerDesk
+    ? `<option value="sales">Sales</option>`
+    : `<option value="sales">Sales</option><option value="chef">Chef</option><option value="parttime">Part-time Chef</option>`;
+  modal(`<h3>Add a login</h3><div class="sub">${isSalesManagerDesk?'Adds a new sales person to your team.':'Pick the desk. The person only ever sees that desk.'}</div>
+  <div class="fld"><label>Name</label><input id="uN"></div>
+  <div class="f2">
+    <div class="fld"><label>Phone (this is their username)</label><input id="uP" inputmode="numeric" placeholder="10-digit"></div>
+    <div class="fld"><label>Desk</label><select id="uR">${roleOptions}</select></div>
+  </div>
+  <div class="fld"><label>City / area <span class="muted small">(chefs only — used to match part-time chefs to nearby jobs)</span></label><input id="uCity" placeholder="e.g. Koramangala, Bengaluru"></div>
+  <div class="fld"><label>Starting password</label><input id="uW" placeholder="min 6 characters — tell them to change it later"></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveUser()">Create login</button></div>`);
+}
+async function saveUser(){
+  const name=$('uN').value.trim(), phone=$('uP').value.replace(/\D/g,''), pw=$('uW').value, role=$('uR').value, city=$('uCity').value.trim();
+  if(!name) return toast('Name is needed.');
+  if(phone.length!==10) return toast('Enter a 10-digit phone number.');
+  if(pw.length<6) return toast('Password must be at least 6 characters.');
+  if(DB.users.some(u=>u.phone===phone)) return toast('That phone already has a login.');
+  const s = salt();
+  DB.users.push({id:uid(),name,phone,role,city,ptUnlocked:role==='parttime'?false:undefined,salt:s,hash:await hash(pw,s),active:true,createdAt:Date.now()});
+  save('users'); closeModal(); toast(`${name} can now log in at the ${ROLE_LABEL[role]} tab.`); go('team');
+}
+async function resetPw(id){
+  const u = DB.users.find(x=>x.id===id);
+  modal(`<h3>Reset password</h3><div class="sub">${esc(u.name)} · ${esc(u.phone)}</div>
+  <div class="fld"><label>New password</label><input id="rp" placeholder="min 6 characters"></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="doReset('${id}')">Set password</button></div>`);
+}
+async function doReset(id){
+  const pw = $('rp').value; if(pw.length<6) return toast('At least 6 characters.');
+  const u = DB.users.find(x=>x.id===id); u.salt = salt(); u.hash = await hash(pw,u.salt);
+  save('users'); closeModal(); toast('Password reset.');
+}
+function toggleUser(id){
+  const u = DB.users.find(x=>x.id===id); u.active = !u.active; save('users');
+  toast(u.active?`${u.name} can log in again.`:`${u.name} is switched off.`); go('team');
+}
+function deleteUser(id){
+  const u = DB.users.find(x=>x.id===id); if(!u) return;
+  confirmBox('Delete this login?', `${u.name}'s account will be permanently removed. Their past bookings, attendance and expense history stay on record, but they'll no longer be able to log in. This can't be undone — switching off is reversible, deleting is not.`,'Delete login',()=>{
+    DB.users = DB.users.filter(x=>x.id!==id); save('users'); toast(`${u.name}'s login was deleted.`); go('team');
+  });
+}
+function setLimit(){ DB.meta.limit = +$('lim').value||0; save('meta'); toast('Limit saved.'); go('team'); }
+
+/* ═══════════ 9 · MONEY REPORT (owner only) ═══════════ */
+/* ═══════════ LOGIN ACTIVITY (owner only) ═══════════ */
+/* ═══════════ TASKS — owner assigns work to anyone ═══════════ */
+function vTasks(){
+  const isOwner = ME.role==='owner';
+  const canAssign = ME.role==='owner' || ME.role==='manager' || ME.role==='sales_manager';
+  // Hierarchy: the director sees every task for oversight. Everyone else —
+  // including managers and sales managers who can assign work — only sees
+  // tasks they personally handed out or were personally handed, not the
+  // whole company's task list.
+  const rows = (isOwner ? DB.tasks : DB.tasks.filter(t=>t.assignedTo===ME.id || t.assignedBy===ME.id)).sort((a,b)=>b.createdAt-a.createdAt);
+  $('main').innerHTML = head(canAssign?'Assign work':'My tasks',
+    canAssign?'Give one or several people something to do — they see it the moment they open the app.':'Things the director has asked you to do.',
+    canAssign?`<button class="btn dark" onclick="taskForm()">Assign a task</button>`:'') + `
+  <div class="card" style="padding:18px 14px">
+  ${rows.length? `<table class="tbl"><thead><tr><th>Title</th>${canAssign?'<th>Assigned to</th><th>By</th>':''}<th>Note</th><th>Due</th><th>Status</th>${canAssign?'<th></th>':'<th></th>'}</tr></thead><tbody>
+    ${rows.map(t=>`<tr><td><b>${esc(t.title)}</b></td>${canAssign?`<td>${esc(nameOf(t.assignedTo))} <span class="small muted">${ROLE_LABEL[DB.users.find(u=>u.id===t.assignedTo)?.role]||''}</span></td><td class="small">${esc(nameOf(t.assignedBy))}</td>`:''}
+      <td class="small" style="max-width:260px">${esc(t.note||'—')}</td>
+      <td class="mono small">${t.due?dmy(t.due):'—'}</td>
+      <td><span class="tag ${t.status==='done'?'t-ok':'t-warm'}">${t.status==='done'?'Done':'Pending'}</span></td>
+      <td style="text-align:right;white-space:nowrap">${t.status!=='done' && t.assignedTo===ME.id?`<button class="btn sm ok" onclick="markTaskDone('${t.id}')">Mark done</button>`:''}</td>
+    </tr>`).join('')}
+  </tbody></table>` : empty('Nothing here', canAssign?'Assign the first task.':'No tasks assigned to you right now.')}
+  </div>`;
+}
+/* Who a given desk is allowed to assign work to / message directly.
+   Sales managers only reach their own sales team; director and manager
+   reach the wider floor. */
+function assignableScope(){
+  if(ME.role==='sales_manager') return DB.users.filter(u=>u.role==='sales' && u.active);
+  return DB.users.filter(u=>u.role!=='owner' && u.active);
+}
+function taskForm(){
+  const people = assignableScope();
+  modal(`<h3>Assign a task</h3><div class="sub">Pick one or several people — up to 8 — the same task goes to everyone you tick.</div>
+  <div class="fld"><label>Title</label><input id="tsT" placeholder="e.g. Confirm venue for the Sharma wedding"></div>
+  <div class="fld"><label>Assign to <span class="muted small">(select up to 8)</span></label>
+    <div style="max-height:220px;overflow-y:auto;border:1px solid var(--hair-2);border-radius:8px;padding:8px">
+      ${people.map(u=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 2px">
+        <input type="checkbox" class="taskAssignee" value="${u.id}" onchange="capSelection('.taskAssignee',8)">
+        <span>${esc(u.name)} <span class="small muted">— ${ROLE_LABEL[u.role]}</span></span></label>`).join('')}
+    </div>
+  </div>
+  <div class="fld"><label>Due date</label><input id="tsD" type="date"></div>
+  <div class="fld"><label>Note</label><textarea id="tsN" rows="3" placeholder="Any detail they need."></textarea></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveTask()">Assign</button></div>`);
+}
+/* Shared checkbox-list cap — used by both task assignment and the
+   "message specific people" picker so nobody accidentally blasts the
+   whole company instead of a working group. */
+function capSelection(selector, max){
+  const boxes = [...document.querySelectorAll(selector)];
+  const checked = boxes.filter(b=>b.checked);
+  if(checked.length > max){ checked[checked.length-1].checked = false; toast(`You can pick up to ${max} people.`); }
+}
+function saveTask(){
+  const title = $('tsT').value.trim();
+  if(!title) return toast('Give the task a title.');
+  const ids = [...document.querySelectorAll('.taskAssignee:checked')].map(b=>b.value);
+  if(!ids.length) return toast('Pick at least one person.');
+  const note = $('tsN').value.trim(), due = $('tsD').value||null;
+  ids.forEach(id=>{
+    DB.tasks.unshift({id:uid(), title, note, assignedTo:id, due, assignedBy:ME.id, status:'pending', createdAt:Date.now()});
+  });
+  save('tasks'); closeModal(); toast(`Task assigned to ${ids.length} ${ids.length>1?'people':'person'}.`); go('tasks');
+}
+function markTaskDone(id){
+  const t = DB.tasks.find(x=>x.id===id); if(!t) return;
+  t.status='done'; t.doneAt=Date.now(); save('tasks'); toast('Marked done.'); go('tasks');
+}
+
+/* ═══════════ HR — leave, documents, meetings, payroll ═══════════ */
+/* Split on purpose: HR Overview / Leave / Meetings are shared with the
+   director and manager, but Documents and Payroll are HR + director
+   only — a manager seeing everyone's ID proofs or salary figures was
+   specifically called out as wrong. */
+const isHrDesk = () => ME.role==='hr' || ME.role==='owner' || ME.role==='manager';
+const isDocsDesk = () => ME.role==='hr' || ME.role==='owner';
+const isPayrollDesk = () => ME.role==='hr' || ME.role==='owner';
+const isLeaveApprover = () => ME.role==='hr' || ME.role==='owner' || ME.role==='manager' || ME.role==='sales_manager';
+/* Who has to sign off on a leave request, in order, before it's approved.
+   A sales person's request needs their sales manager, then the ops
+   manager, then HR; everyone else skips straight to their nearest desk. */
+function leaveStages(role){
+  if(role==='sales') return ['sales_manager','manager','hr'];
+  if(role==='chef' || role==='parttime') return ['manager','hr'];
+  return ['hr'];
+}
+function canDecideLeaveStage(stageRole){
+  if(ME.role==='owner') return true; // director can act at any stage
+  if(stageRole==='hr') return ME.role==='hr';
+  return ME.role===stageRole;
+}
+function vLeave(){
+  const canSeeAll = isLeaveApprover();
+  const rows = (canSeeAll ? DB.leaves : DB.leaves.filter(l=>l.userId===ME.id)).sort((a,b)=>b.createdAt-a.createdAt);
+  $('main').innerHTML = head(canSeeAll?'Leave requests':'Leave',
+    canSeeAll?'Approve or reject time-off requests — routed through the hierarchy, one desk at a time.':'Request time off — it goes through the approval chain automatically.',
+    `<button class="btn dark" onclick="leaveForm()">Request leave</button>`) + `
+  <div class="card" style="padding:18px 14px">
+  ${rows.length? `<table class="tbl"><thead><tr>${canSeeAll?'<th>Person</th>':''}<th>From</th><th>To</th><th>Reason</th><th>Status</th>${canSeeAll?'<th></th>':''}</tr></thead><tbody>
+    ${rows.map(l=>{
+      const stage = l.status==='pending' ? l.stages[l.stageIdx] : null;
+      const canActNow = l.status==='pending' && canDecideLeaveStage(stage);
+      return `<tr>${canSeeAll?`<td><b>${esc(l.name)}</b> <span class="small muted">${ROLE_LABEL[l.role]}</span></td>`:''}
+      <td class="mono small">${dmy(l.from)}</td><td class="mono small">${dmy(l.to)}</td>
+      <td class="small" style="max-width:220px">${esc(l.reason)}</td>
+      <td><span class="tag ${l.status==='approved'?'t-ok':l.status==='rejected'?'t-no':'t-warm'}">${l.status==='pending'?`Waiting on ${ROLE_LABEL[stage]||stage}`:l.status}</span>
+        ${l.status==='rejected'&&l.rejectNote?`<div class="small muted">${esc(l.rejectNote)}</div>`:''}</td>
+      ${canSeeAll?`<td style="text-align:right;white-space:nowrap">${canActNow?`<button class="btn sm ok" onclick="leaveDecide('${l.id}',1)">Approve</button><button class="btn sm no" onclick="leaveRejectForm('${l.id}')">Reject</button>`:l.status==='pending'?`<span class="small muted">Not your stage</span>`:`<span class="small muted">${esc(l.decidedBy||'')}</span>`}</td>`:''}
+    </tr>`;}).join('')}
+  </tbody></table>` : empty('No leave requests', canSeeAll?'Nothing to review right now.':'Nothing requested yet.')}
+  </div>`;
+}
+function leaveForm(){
+  modal(`<h3>Request leave</h3>
+  <div class="f2">
+    <div class="fld"><label>From</label><input id="lvF" type="date" value="${today()}"></div>
+    <div class="fld"><label>To</label><input id="lvT" type="date" value="${today()}"></div>
+  </div>
+  <div class="fld"><label>Reason</label><textarea id="lvR" rows="3" placeholder="Why you need the time off."></textarea></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveLeave()">Submit request</button></div>`);
+}
+function saveLeave(){
+  const from=$('lvF').value, to=$('lvT').value, reason=$('lvR').value.trim();
+  if(!from||!to) return toast('Pick both dates.');
+  if(!reason) return toast('Add a reason.');
+  const stages = leaveStages(ME.role);
+  DB.leaves.unshift({id:uid(), userId:ME.id, name:ME.name, role:ME.role, from, to, reason, status:'pending', stages, stageIdx:0, createdAt:Date.now()});
+  save('leaves'); closeModal(); toast('Leave request submitted.'); go('leave');
+}
+function leaveDecide(id, ok){
+  const l = DB.leaves.find(x=>x.id===id); if(!l) return;
+  const stage = l.stages[l.stageIdx];
+  if(!canDecideLeaveStage(stage)) return toast('This is waiting on someone else in the chain.');
+  if(!ok){ leaveRejectForm(id); return; }
+  if(l.stageIdx < l.stages.length-1){ l.stageIdx++; save('leaves'); toast(`Approved — now waiting on ${ROLE_LABEL[l.stages[l.stageIdx]]}.`); go('leave'); return; }
+  l.status='approved'; l.decidedBy=ME.name; l.decidedAt=Date.now(); save('leaves'); toast('Approved.'); go('leave');
+}
+function leaveRejectForm(id){
+  const l = DB.leaves.find(x=>x.id===id); if(!l) return;
+  modal(`<h3>Reject this leave request?</h3><div class="sub">${esc(l.name)} · ${dmy(l.from)} – ${dmy(l.to)}</div>
+  <div class="fld"><label>Reason <span class="muted small">(they'll see this)</span></label>
+    <textarea id="lvRejNote" rows="3" placeholder="e.g. Too many people already off that week"></textarea></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn no" onclick="confirmLeaveReject('${id}')">Reject request</button></div>`);
+}
+function confirmLeaveReject(id){
+  const note = $('lvRejNote').value.trim();
+  if(!note) return toast('Give a short reason so they know why.');
+  const l = DB.leaves.find(x=>x.id===id); if(!l) return;
+  l.status='rejected'; l.decidedBy=ME.name; l.decidedAt=Date.now(); l.rejectNote=note;
+  save('leaves'); closeModal(); toast('Rejected.'); go('leave');
+}
+
+function vDocs(){
+  const canSeeAll = isDocsDesk();
+  const rows = (canSeeAll ? DB.documents : DB.documents.filter(d=>d.userId===ME.id)).sort((a,b)=>b.at-a.at);
+  if(!canSeeAll){
+    $('main').innerHTML = head('My documents','Upload ID proof, certificates or anything HR asked for.',
+      `<button class="btn dark" onclick="docForm()">Upload a document</button>`) + `
+    <div class="card" style="padding:18px 14px">
+    ${rows.length? `<table class="tbl"><thead><tr><th>Label</th><th>Uploaded</th><th></th></tr></thead><tbody>
+      ${rows.map(d=>`<tr><td>${esc(d.label)}</td><td class="mono small">${dmy(new Date(d.at).toISOString().slice(0,10))}</td>
+        <td style="text-align:right"><a onclick="viewDoc('${d.id}')">View</a></td></tr>`).join('')}
+    </tbody></table>` : empty('No documents yet','Nothing uploaded so far.')}
+    </div>`;
+    return;
+  }
+  // Director + HR view: one folder per employee, not a flat mixed list.
+  const byPerson = {};
+  rows.forEach(d=>{ (byPerson[d.userId] = byPerson[d.userId]||{name:d.name, role:d.role, docs:[]}).docs.push(d); });
+  const folders = Object.entries(byPerson).sort((a,b)=>a[1].name.localeCompare(b[1].name));
+  $('main').innerHTML = head('Documents','ID proofs, certificates and other paperwork — one folder per employee. Visible to HR and the director only.',
+    `<button class="btn dark" onclick="docForm()">Upload a document</button>`) + `
+  <div class="card" style="padding:18px 14px">
+  ${folders.length? folders.map(([uid,p])=>`
+    <details style="border-bottom:1px solid var(--hair-2);padding:10px 0">
+      <summary style="cursor:pointer;font-weight:600">${esc(p.name)} <span class="small muted" style="font-weight:400">— ${ROLE_LABEL[p.role]} · ${p.docs.length} file${p.docs.length>1?'s':''}</span></summary>
+      <table class="tbl" style="margin-top:8px"><thead><tr><th>Label</th><th>Uploaded</th><th></th></tr></thead><tbody>
+        ${p.docs.map(d=>`<tr><td>${esc(d.label)}</td><td class="mono small">${dmy(new Date(d.at).toISOString().slice(0,10))}</td>
+          <td style="text-align:right"><a onclick="viewDoc('${d.id}')">View</a></td></tr>`).join('')}
+      </tbody></table>
+    </details>`).join('') : empty('No documents yet','Nothing uploaded so far.')}
+  </div>`;
+}
+let DOC_ATT = null;
+function docForm(){
+  DOC_ATT = null;
+  modal(`<h3>Upload a document</h3>
+  <div class="fld"><label>What is it</label><input id="dcL" placeholder="e.g. Aadhaar card, driving licence, offer letter"></div>
+  <div class="fld"><label>File</label>
+    <div class="drop" id="dcDrop" onclick="document.getElementById('dcF').click()">Tap to upload a photo, PDF or Word document</div>
+    <input type="file" id="dcF" class="hide" accept="image/*,application/pdf,.doc,.docx" onchange="pickDocFile(this)">
+    <div id="dcThumb"></div>
+  </div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveDoc()">Upload</button></div>`);
+}
+function pickDocFile(inp){
+  const f = inp.files[0]; if(!f) return;
+  if(f.size > 4*1024*1024) return toast('That file is too big. Keep it under 4 MB.');
+  const done = (data,type)=>{
+    DOC_ATT = {name:f.name, type, data};
+    $('dcDrop').classList.add('has'); $('dcDrop').textContent = '✓ ' + f.name;
+    $('dcThumb').innerHTML = type.startsWith('image') ? `<img class="thumb" src="${data}">` : '';
+  };
+  const r = new FileReader();
+  r.onload = () => {
+    if(!f.type.startsWith('image')) return done(r.result, f.type);
+    const img = new Image();
+    img.onload = () => {
+      const sc = Math.min(1, 1000/Math.max(img.width,img.height));
+      const c = document.createElement('canvas');
+      c.width = img.width*sc; c.height = img.height*sc;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      done(c.toDataURL('image/jpeg',.62), 'image/jpeg');
+    };
+    img.src = r.result;
+  };
+  r.readAsDataURL(f);
+}
+function saveDoc(){
+  const label = $('dcL').value.trim();
+  if(!label) return toast('Say what the document is.');
+  if(!DOC_ATT) return toast('Upload a file first.');
+  DB.documents.unshift({id:uid(), userId:ME.id, name:ME.name, role:ME.role, label, att:DOC_ATT, at:Date.now()});
+  save('documents'); DOC_ATT=null; closeModal(); toast('Document uploaded.'); go('docs');
+}
+function viewDoc(id){
+  const d = DB.documents.find(x=>x.id===id); if(!d||!d.att) return;
+  if(d.att.type.startsWith('image')) modal(`<h3>${esc(d.label)} — ${esc(d.name)}</h3><img src="${d.att.data}" style="width:100%;border-radius:10px">`);
+  else { const w=window.open(); w.document.write(`<iframe src="${d.att.data}" style="width:100%;height:100vh;border:0"></iframe>`); }
+}
+
+function vMeetings(){
+  const now9 = Date.now();
+  const rows = DB.meetings.filter(m => m.audience==='all' || m.audience===ME.role || (m.attendeeIds||[]).includes(ME.id))
+    .sort((a,b)=>a.at-b.at);
+  $('main').innerHTML = head('Meetings','Scheduled meetings that involve you.',
+    isHrDesk()?`<button class="btn dark" onclick="meetingForm()">Schedule a meeting</button>`:'') + `
+  <div class="card" style="padding:18px 14px">
+  ${rows.length? `<table class="tbl"><thead><tr><th>Title</th><th>When</th><th>Audience</th><th>Note</th>${isHrDesk()?'<th></th>':''}</tr></thead><tbody>
+    ${rows.map(m=>`<tr><td><b>${esc(m.title)}</b>${m.at<now9?' <span class="tag t-lost">Past</span>':''}</td>
+      <td class="mono small">${dmy(new Date(m.at).toISOString().slice(0,10))} ${hhmm(m.at)}</td>
+      <td class="small">${m.audience==='all'?'Everyone':ROLE_LABEL[m.audience]||'Selected people'}</td>
+      <td class="small" style="max-width:220px">${esc(m.note||'—')}</td>
+      ${isHrDesk()?`<td style="text-align:right"><button class="btn sm no" onclick="deleteMeeting('${m.id}')">Cancel</button></td>`:''}
+    </tr>`).join('')}
+  </tbody></table>` : empty('No meetings scheduled','Nothing on the calendar yet.')}
+  </div>`;
+}
+function meetingForm(){
+  modal(`<h3>Schedule a meeting</h3>
+  <div class="fld"><label>Title</label><input id="mtT" placeholder="e.g. Weekly ops sync"></div>
+  <div class="f2">
+    <div class="fld"><label>Date</label><input id="mtD" type="date" value="${today()}"></div>
+    <div class="fld"><label>Time</label><input id="mtTm" type="time" value="10:00"></div>
+  </div>
+  <div class="fld"><label>Audience</label><select id="mtA">
+    <option value="all">Everyone</option><option value="manager">Managers</option><option value="hr">HR</option>
+    <option value="sales">Sales</option><option value="sales_manager">Sales Managers</option>
+    <option value="chef">Chefs</option><option value="parttime">Part-time Chefs</option></select></div>
+  <div class="fld"><label>Note</label><textarea id="mtN" rows="2" placeholder="Agenda, location, link — whatever they need."></textarea></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveMeeting()">Schedule</button></div>`);
+}
+function saveMeeting(){
+  const title=$('mtT').value.trim(); if(!title) return toast('Give the meeting a title.');
+  const at = new Date(`${$('mtD').value}T${$('mtTm').value}`).getTime();
+  DB.meetings.unshift({id:uid(), title, at, audience:$('mtA').value, note:$('mtN').value.trim(), createdBy:ME.id, createdAt:Date.now()});
+  save('meetings'); closeModal(); toast('Meeting scheduled.'); go('meetings');
+}
+function deleteMeeting(id){
+  DB.meetings = DB.meetings.filter(m=>m.id!==id); save('meetings'); toast('Meeting cancelled.'); go('meetings');
+}
+
+function vPayroll(){
+  if(!isPayrollDesk()){ toast('HR only.'); go('dash'); return; }
+  const isDirector = ME.role==='owner';
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+  const people = DB.users.filter(u=>u.role!=='owner' && u.active);
+  const rows = people.map(u=>{
+    const hoursWorked = DB.attendance.filter(a=>a.userId===u.id && a.outAt && a.inAt>=monthStart.getTime()).reduce((s,a)=>s+hrs(a.inAt,a.outAt),0);
+    const expensesOwed = DB.expenses.filter(e=>e.byId===u.id && e.status==='approved' && e.at>=monthStart.getTime()).reduce((s,e)=>s+(+e.amount||0),0);
+    const key = u.id+'-'+monthStart.toISOString().slice(0,7);
+    const chefEarnAuto = (u.role==='chef'||u.role==='parttime') ? DB.bookings.filter(b=>b.chefId===u.id && b.status==='done' && b.date>=monthStart.toISOString().slice(0,10)).reduce((s,b)=>s+(+b.chefPay||0),0) : 0;
+    const earnOverride = (DB.meta.payrollEarningsOverride||{})[key];
+    const chefEarn = earnOverride!==undefined ? +earnOverride : chefEarnAuto;
+    const paid = (DB.meta.payrollPaid||[]).includes(key);
+    const adj = (DB.meta.payrollAdj||{})[key] || {amount:0, note:''};
+    return {u, hoursWorked, expensesOwed, chefEarn, chefEarnAuto, earnOverridden: earnOverride!==undefined, adj, total: expensesOwed+chefEarn+(+adj.amount||0), paid, key};
+  });
+  $('main').innerHTML = head('Payroll',`This month — ${monthStart.toLocaleDateString('en-IN',{month:'long',year:'numeric'})}${isDirector?'. Amounts are editable — add a bonus or deduction before marking paid.':''}`) + `
+  <div class="card" style="padding:18px 14px">
+  <table class="tbl"><thead><tr><th>Name</th><th>Desk</th><th class="num">Hours</th><th class="num">Job earnings</th><th class="num">Expenses to reimburse</th><th class="num">Adjustment</th><th class="num">Total</th><th>Status</th><th></th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td><b>${esc(r.u.name)}</b></td><td><span class="tag t-new">${ROLE_LABEL[r.u.role]}</span></td>
+      <td class="num">${r.hoursWorked.toFixed(1)}</td>
+      <td class="num">${rs(r.chefEarn)}${r.earnOverridden?`<div class="small muted">auto: ${rs(r.chefEarnAuto)}</div>`:''}${isDirector?`<div><button class="btn sm" onclick="payrollEarningsForm('${r.key}',${r.chefEarnAuto})">Edit</button></div>`:''}</td>
+      <td class="num">${rs(r.expensesOwed)}</td>
+      <td class="num">${(+r.adj.amount||0)!==0?rs(r.adj.amount):'—'}${r.adj.note?`<div class="small muted">${esc(r.adj.note)}</div>`:''}</td>
+      <td class="num"><b>${rs(r.total)}</b></td>
+      <td><span class="tag ${r.paid?'t-ok':'t-warm'}">${r.paid?'Paid':'Pending'}</span></td>
+      <td style="text-align:right;white-space:nowrap">
+        ${isDirector?`<button class="btn sm" onclick="payrollAdjustForm('${r.key}')">Edit</button>`:''}
+        ${!r.paid?`<button class="btn sm ok" onclick="markPayrollPaid('${r.key}')">Mark paid</button>`:''}</td>
+    </tr>`).join('')}
+  </tbody></table>
+  </div>`;
+}
+function payrollEarningsForm(key, auto){
+  const cur = (DB.meta.payrollEarningsOverride||{})[key];
+  modal(`<h3>Edit job earnings</h3><div class="sub">Auto-calculated from this month's completed jobs: ${rs(auto)}. Override it if the payout needs to be different.</div>
+  <div class="fld"><label>Job earnings (₹)</label><input id="peAmt" type="number" value="${esc(cur!==undefined?cur:auto)}"></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  ${cur!==undefined?`<button class="btn no" onclick="clearPayrollEarnings('${key}')">Reset to auto</button>`:''}
+  <button class="btn dark" onclick="savePayrollEarnings('${key}')">Save</button></div>`);
+}
+function savePayrollEarnings(key){
+  DB.meta.payrollEarningsOverride = DB.meta.payrollEarningsOverride || {};
+  DB.meta.payrollEarningsOverride[key] = +$('peAmt').value || 0;
+  save('meta'); closeModal(); toast('Job earnings updated.'); go('payroll');
+}
+function clearPayrollEarnings(key){
+  if(DB.meta.payrollEarningsOverride) delete DB.meta.payrollEarningsOverride[key];
+  save('meta'); closeModal(); toast('Reset to auto-calculated.'); go('payroll');
+}
+function payrollAdjustForm(key){
+  const adj = (DB.meta.payrollAdj||{})[key] || {amount:0, note:''};
+  modal(`<h3>Adjust payroll</h3><div class="sub">Add a bonus (positive) or a deduction (negative) for this month.</div>
+  <div class="fld"><label>Adjustment amount (₹)</label><input id="paAmt" type="number" value="${esc(adj.amount||0)}" placeholder="e.g. 500 or -500"></div>
+  <div class="fld"><label>Note</label><input id="paNote" value="${esc(adj.note||'')}" placeholder="e.g. Diwali bonus / late deduction"></div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="savePayrollAdjust('${key}')">Save</button></div>`);
+}
+function savePayrollAdjust(key){
+  DB.meta.payrollAdj = DB.meta.payrollAdj || {};
+  DB.meta.payrollAdj[key] = {amount:+$('paAmt').value||0, note:$('paNote').value.trim()};
+  save('meta'); closeModal(); toast('Payroll updated.'); go('payroll');
+}
+function markPayrollPaid(key){
+  DB.meta.payrollPaid = DB.meta.payrollPaid || [];
+  DB.meta.payrollPaid.push(key);
+  save('meta'); toast('Marked paid for this month.'); go('payroll');
+}
+
+/* ═══════════ 9b · DAILY SALES COMPLIANCE SCORE (100 marks) ═══════════
+   Sales Manager scores every Sales rep once a day against 8 fixed KPIs.
+   Sales reps see only their own scores and history. One entry per
+   rep per calendar date — scoring again the same day edits it in place. */
+const SCORE_KPIS = [
+  {id:'leadStage',    label:'Lead Stage Updated',                        desc:'Every assigned lead has the correct and latest stage updated.',                                   max:20},
+  {id:'tags',         label:'Tags Applied',                              desc:'Proper and relevant tags added (New, Hot, Warm, Follow-up, etc.)',                                max:15},
+  {id:'custDetails',  label:'Customer Details Complete',                 desc:'All key details captured (Name, Phone, City, Event Date, Members, Budget, Requirement).',        max:15},
+  {id:'callLogs',     label:'Call Logs Updated',                         desc:'Every call attempt and conversation properly logged with clear notes.',                          max:20},
+  {id:'followUp',     label:'Follow-up Date Set',                        desc:'Next action / follow-up date scheduled for all leads.',                                          max:10},
+  {id:'whatsapp',     label:'WhatsApp / Email Updated',                  desc:'All communication recorded (WhatsApp, Email, SMS, etc.)',                                         max:5},
+  {id:'sla',          label:'Response Time (SLA)',                       desc:'New leads contacted within SLA time (5–15 minutes).',                                            max:10},
+  {id:'remarks',      label:'Manager Remarks (Quality & Professionalism)',desc:'Quality of communication, professionalism & accuracy.',                                          max:5},
+];
+const SCORE_MAX = SCORE_KPIS.reduce((s,k)=>s+k.max,0); // 100
+function scoreRating(total){
+  if(total>=95) return {label:'Excellent',          cls:'t-ok',   action:'Incentive + Appreciation'};
+  if(total>=85) return {label:'Very Good',          cls:'t-ok',   action:'Normal Incentive'};
+  if(total>=75) return {label:'Good',               cls:'t-warm', action:'Coaching & Guidance'};
+  if(total>=60) return {label:'Needs Improvement',  cls:'t-warm', action:'Written Warning + Daily Review'};
+  return          {label:'Poor',                    cls:'t-no',   action:'Performance Improvement Plan (PIP)'};
+}
+function scoreTotal(marks){ return SCORE_KPIS.reduce((s,k)=>s+Math.max(0,Math.min(k.max,+marks[k.id]||0)),0); }
+function todaysScore(userId, date=today()){ return DB.scores.find(s=>s.userId===userId && s.date===date); }
+
+function vScore(){ ({sales:vScoreMine, sales_manager:vScoreTeam}[ME.role])(); }
+
+/* — Sales Manager: score every rep, see today's status at a glance — */
+function vScoreTeam(){
+  const reps = DB.users.filter(u=>u.role==='sales' && u.active);
+  const d = today();
+  const rows = reps.map(u=>{ const s = todaysScore(u.id,d); return {u, s, rating: s?scoreRating(s.total):null}; });
+  const scoredCount = rows.filter(r=>r.s).length;
+  const recent = DB.scores.filter(s=>reps.some(u=>u.id===s.userId)).sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt).slice(0,20);
+  $('main').innerHTML = head('Score Team','Daily CRM compliance score — 100 marks, one entry per rep per day.') + `
+  <div class="kpis">
+    <div class="kpi"><div class="k">Team size</div><div class="v">${reps.length}</div><div class="s">active sales reps</div></div>
+    <div class="kpi ${scoredCount<reps.length?'alert':''}"><div class="k">Scored today</div><div class="v">${scoredCount}/${reps.length}</div><div class="s">${dmy(d)}</div></div>
+    <div class="kpi"><div class="k">Team average today</div><div class="v">${scoredCount?Math.round(rows.filter(r=>r.s).reduce((s,r)=>s+r.s.total,0)/scoredCount):'—'}</div><div class="s">out of ${SCORE_MAX}</div></div>
+  </div>
+  <div class="card" style="padding:18px 14px">
+  <table class="tbl"><thead><tr><th>Sales rep</th><th class="num">Today's score</th><th>Rating</th><th>Action</th><th></th></tr></thead><tbody>
+    ${reps.length?rows.map(r=>`<tr><td><b>${esc(r.u.name)}</b></td>
+      <td class="num">${r.s?`<b>${r.s.total}</b>/${SCORE_MAX}`:'<span class="small muted">Not scored</span>'}</td>
+      <td>${r.rating?`<span class="tag ${r.rating.cls}">${r.rating.label}</span>`:'—'}</td>
+      <td class="small muted">${r.rating?r.rating.action:'—'}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn sm" onclick="scoreForm('${r.u.id}')">${r.s?'Edit today':'Score today'}</button>
+        <button class="btn sm" onclick="scoreHistory('${r.u.id}')">History</button></td>
+    </tr>`).join(''):`<tr><td colspan="5">${empty('No sales reps yet','Add sales reps from Team & Access.')}</td></tr>`}
+  </tbody></table>
+  </div>
+  <div class="card" style="padding:18px 14px;margin-top:16px">
+  <h3>Recent scores — whole team</h3>
+  <table class="tbl"><thead><tr><th>Date</th><th>Sales rep</th><th class="num">Score</th><th>Rating</th></tr></thead><tbody>
+    ${recent.length?recent.map(s=>{const rt=scoreRating(s.total);return `<tr><td class="mono small">${dmy(s.date)}</td><td>${esc(nameOf(s.userId))}</td>
+      <td class="num"><b>${s.total}</b>/${SCORE_MAX}</td><td><span class="tag ${rt.cls}">${rt.label}</span></td></tr>`;}).join(''):`<tr><td colspan="4">${empty('No scores logged yet','Score a rep above to get started.')}</td></tr>`}
+  </tbody></table>
+  </div>`;
+}
+function scoreHistory(userId){
+  const rows = DB.scores.filter(s=>s.userId===userId).sort((a,b)=>b.date.localeCompare(a.date));
+  modal(`<h3>Score history — ${esc(nameOf(userId))}</h3>
+  <div class="sub">Last ${rows.length} ${rows.length===1?'entry':'entries'}.</div>
+  <table class="tbl"><thead><tr><th>Date</th><th class="num">Score</th><th>Rating</th></tr></thead><tbody>
+    ${rows.length?rows.map(s=>{const rt=scoreRating(s.total);return `<tr><td class="mono small">${dmy(s.date)}</td>
+      <td class="num"><b>${s.total}</b>/${SCORE_MAX}</td><td><span class="tag ${rt.cls}">${rt.label}</span></td></tr>`;}).join(''):`<tr><td colspan="3">${empty('No history yet','')}</td></tr>`}
+  </tbody></table>
+  <div class="mrow"><button class="btn dark" onclick="closeModal()">Close</button></div>`);
+}
+function scoreForm(userId, date=today()){
+  const existing = todaysScore(userId, date) || {marks:{}, note:''};
+  modal(`<h3>Score ${esc(nameOf(userId))}</h3><div class="sub">${dmy(date)} · CRM compliance — 100 marks total. Saving again today will update this entry.</div>
+  <div id="scoreFields">
+  ${SCORE_KPIS.map(k=>`<div class="fld"><label>${esc(k.label)} — max ${k.max}</label>
+    <input id="sk_${k.id}" type="number" min="0" max="${k.max}" value="${esc(existing.marks[k.id]??'')}" oninput="scoreFormRecalc()" placeholder="0–${k.max}">
+    <div class="small muted" style="margin-top:3px">${esc(k.desc)}</div></div>`).join('')}
+  </div>
+  <div class="fld"><label>Note (optional)</label><textarea id="skNote" rows="2" placeholder="Anything specific to call out.">${esc(existing.note||'')}</textarea></div>
+  <div class="card" style="padding:12px 14px;margin:6px 0 14px;background:var(--hair-2)">
+    <b id="scoreTotalLine">Total: 0/${SCORE_MAX}</b> <span id="scoreRatingLine" class="small muted"></span>
+  </div>
+  <div class="mrow"><button class="btn" onclick="closeModal()">Cancel</button>
+  <button class="btn dark" onclick="saveScore('${userId}','${date}')">Save score</button></div>`);
+  scoreFormRecalc();
+}
+function scoreFormRecalc(){
+  const marks = {}; SCORE_KPIS.forEach(k=>marks[k.id]=$('sk_'+k.id).value);
+  const total = scoreTotal(marks); const rt = scoreRating(total);
+  $('scoreTotalLine').textContent = `Total: ${total}/${SCORE_MAX}`;
+  $('scoreRatingLine').innerHTML = `<span class="tag ${rt.cls}">${rt.label}</span> — ${rt.action}`;
+}
+function saveScore(userId, date){
+  const marks = {}; SCORE_KPIS.forEach(k=>{ marks[k.id] = Math.max(0, Math.min(k.max, +$('sk_'+k.id).value || 0)); });
+  const total = scoreTotal(marks);
+  const note = $('skNote').value.trim();
+  const existing = todaysScore(userId, date);
+  if(existing){ existing.marks=marks; existing.total=total; existing.note=note; existing.byId=ME.id; existing.updatedAt=Date.now(); }
+  else{ DB.scores.unshift({id:uid(), userId, byId:ME.id, date, marks, total, note, createdAt:Date.now()}); }
+  save('scores'); closeModal(); toast(`Score saved — ${total}/${SCORE_MAX}.`); go('score');
+}
+
+/* — Sales rep: view own scores only — */
+function vScoreMine(){
+  const mine = DB.scores.filter(s=>s.userId===ME.id).sort((a,b)=>b.date.localeCompare(a.date));
+  const t = todaysScore(ME.id);
+  const monthStart = today().slice(0,7);
+  const thisMonth = mine.filter(s=>s.date.startsWith(monthStart));
+  const avg = thisMonth.length ? Math.round(thisMonth.reduce((s,x)=>s+x.total,0)/thisMonth.length) : null;
+  $('main').innerHTML = head('My Compliance Score','How your manager is scoring your daily CRM discipline — 100 marks.') + `
+  <div class="kpis">
+    <div class="kpi"><div class="k">Today</div><div class="v">${t?`${t.total}/${SCORE_MAX}`:'—'}</div><div class="s">${t?scoreRating(t.total).label:'Not scored yet'}</div></div>
+    <div class="kpi"><div class="k">This month's average</div><div class="v">${avg??'—'}</div><div class="s">${thisMonth.length} day${thisMonth.length===1?'':'s'} scored</div></div>
+    <div class="kpi"><div class="k">Best score</div><div class="v">${mine.length?Math.max(...mine.map(s=>s.total)):'—'}</div><div class="s">all time</div></div>
+  </div>
+  ${t?`<div class="card" style="padding:18px 14px;margin-bottom:16px">
+    <h3>Today's breakdown — ${dmy(t.date)}</h3>
+    <table class="tbl"><thead><tr><th>KPI</th><th class="num">Marks</th></tr></thead><tbody>
+      ${SCORE_KPIS.map(k=>`<tr><td>${esc(k.label)}</td><td class="num">${t.marks[k.id]??0}/${k.max}</td></tr>`).join('')}
+      <tr><td><b>Total</b></td><td class="num"><b>${t.total}/${SCORE_MAX}</b></td></tr>
+    </tbody></table>
+    ${t.note?`<div class="small muted" style="margin-top:8px"><b>Manager's note:</b> ${esc(t.note)}</div>`:''}
+  </div>`:`<div class="card" style="padding:18px 14px;margin-bottom:16px">${empty("Not scored yet today","Your manager scores each rep once a day — check back after your shift.")}</div>`}
+  <div class="card" style="padding:18px 14px">
+  <h3>History</h3>
+  <table class="tbl"><thead><tr><th>Date</th><th class="num">Score</th><th>Rating</th><th>Action</th></tr></thead><tbody>
+    ${mine.length?mine.map(s=>{const rt=scoreRating(s.total);return `<tr><td class="mono small">${dmy(s.date)}</td>
+      <td class="num"><b>${s.total}</b>/${SCORE_MAX}</td><td><span class="tag ${rt.cls}">${rt.label}</span></td><td class="small muted">${rt.action}</td></tr>`;}).join(''):`<tr><td colspan="4">${empty('No scores yet','')}</td></tr>`}
+  </tbody></table>
+  </div>`;
+}
+
+function vHrDash(){
+  const pendingLeave = DB.leaves.filter(l=>l.status==='pending');
+  const upcoming = DB.meetings.filter(m=>m.at>=Date.now()).sort((a,b)=>a.at-b.at).slice(0,5);
+  $('main').innerHTML = head('HR dashboard','Leave, documents, meetings and payroll — all in one place.') + `
+  <div class="kpis">
+    <div class="kpi ${pendingLeave.length?'alert':''}"><div class="k">Leave requests</div><div class="v">${pendingLeave.length}</div><div class="s">waiting on you</div></div>
+    <div class="kpi"><div class="k">Documents on file</div><div class="v">${DB.documents.length}</div><div class="s">across the team</div></div>
+    <div class="kpi"><div class="k">Upcoming meetings</div><div class="v">${upcoming.length}</div><div class="s">scheduled</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Leave awaiting a decision</h3>
+      ${pendingLeave.length? `<table class="tbl"><thead><tr><th>Person</th><th>Dates</th><th></th></tr></thead><tbody>
+        ${pendingLeave.map(l=>`<tr><td><b>${esc(l.name)}</b></td><td class="small">${dmy(l.from)} – ${dmy(l.to)}</td>
+          <td style="text-align:right"><button class="btn sm ok" onclick="leaveDecide('${l.id}',1)">Approve</button> <button class="btn sm no" onclick="leaveDecide('${l.id}',0)">Reject</button></td></tr>`).join('')}
+      </tbody></table>` : empty('All clear','Nothing pending.')}
+    </div>
+    <div class="card"><h3>Upcoming meetings</h3>
+      ${upcoming.length? `<table class="tbl"><thead><tr><th>Title</th><th>When</th><th>Audience</th></tr></thead><tbody>
+        ${upcoming.map(m=>`<tr><td><b>${esc(m.title)}</b></td><td class="mono small">${dmy(new Date(m.at).toISOString().slice(0,10))} ${hhmm(m.at)}</td><td class="small">${m.audience==='all'?'Everyone':ROLE_LABEL[m.audience]}</td></tr>`).join('')}
+      </tbody></table>` : empty('Nothing scheduled','Set up your first meeting.')}
+    </div>
+  </div>`;
+}
+function vHrOverview(){ vHrDash(); }
+
+function vSessions(){
+  reapStaleSessions();
+  // Director sees everyone. Manager sees everyone except the director's own
+  // sessions. Sales manager sees only chefs + the sales team. Sales sees
+  // only their own sign-ins — there's nobody below them to look at.
+  let scoped = DB.sessions;
+  if(ME.role==='manager') scoped = scoped.filter(s=>s.role!=='owner');
+  else if(ME.role==='sales_manager') scoped = scoped.filter(s=>s.role==='sales' || s.role==='chef' || s.role==='parttime');
+  else if(ME.role==='sales') scoped = scoped.filter(s=>s.userId===ME.id);
+  const rows = [...scoped].sort((a,b)=>b.loginAt-a.loginAt).slice(0,300);
+  const scopeNote = ME.role==='owner'?'Visible to the director and managers, scoped by who reports to whom.'
+    :ME.role==='manager'?'Everyone except the director\'s own sign-ins.'
+    :ME.role==='sales_manager'?'Your sales team and the chefs, only.'
+    :ME.role==='sales'?'Just your own sign-ins.':'';
+  $('main').innerHTML = head('Login activity',`Every sign-in — who, when, and for how long. ${scopeNote}`) + `
+  <div class="card" style="padding:18px 14px">
+  ${rows.length? `<table class="tbl"><thead><tr><th>Name</th><th>Desk</th><th>Session code</th><th>Login</th><th>Logout</th><th class="num">Duration</th></tr></thead><tbody>
+    ${rows.map(s=>`<tr><td><b>${esc(s.name)}</b></td><td><span class="tag ${s.role==='owner'?'t-lost':s.role==='manager'?'t-new':s.role==='sales'?'t-won':'t-warm'}">${ROLE_LABEL[s.role]}</span></td>
+      <td class="mono small">${esc(s.code)}</td>
+      <td class="mono small">${dmy(new Date(s.loginAt).toISOString().slice(0,10))} ${hhmm(s.loginAt)}</td>
+      <td class="mono small">${s.logoutAt? hhmm(s.logoutAt) : (s.away?'<span class="tag t-warm">Away from tab</span>':'<span class="tag t-ok"><span class="live"></span>Active</span>')}</td>
+      <td class="num">${(()=>{ const h = s.logoutAt? hrs(s.loginAt,s.logoutAt) : hrs(s.loginAt);
+        const label = s.logoutAt? h.toFixed(1)+'h' : h.toFixed(1)+'h so far';
+        return h>=8 ? `${label} <span class="tag t-warm">8h+</span>` : label; })()}</td></tr>`).join('')}
+  </tbody></table>` : empty('No sessions yet','Sign-ins will show up here.')}
+  </div>`;
+}
+
+function vRep(){
+  const m = money();
+  const byCat = {};
+  DB.expenses.filter(e=>e.status==='approved').forEach(e=>byCat[e.cat]=(byCat[e.cat]||0)+ (+e.amount||0));
+  const cats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const max = cats.length ? cats[0][1] : 1;
+
+  $('main').innerHTML = head('Money report','Where it came in, where it went out. Nobody else can open this.') + `
+  <div class="kpis">
+    <div class="kpi"><div class="k">Revenue</div><div class="v">${rs(m.rev)}</div></div>
+    <div class="kpi"><div class="k">Chef payouts</div><div class="v">${rs(m.chef)}</div></div>
+    <div class="kpi"><div class="k">Staff wages</div><div class="v">${rs(m.lab)}</div></div>
+    <div class="kpi"><div class="k">Approved bills</div><div class="v">${rs(m.exp)}</div></div>
+    <div class="kpi"><div class="k">Margin</div><div class="v" style="color:${m.margin>=0?'var(--mint)':'var(--chilli)'}">${rs(m.margin)}</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Revenue vs. cost</h3><div class="sub">Where every rupee went</div>
+      <div style="height:220px;position:relative"><canvas id="chartMoney"></canvas></div>
+    </div>
+    <div class="card"><h3>Where the money went</h3><div class="sub">Approved bills by category</div>
+    ${cats.length? cats.map(([c,v])=>`
+      <div style="margin-bottom:11px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+          <span>${esc(c)}</span><span class="num">${rs(v)}</span></div>
+        <div style="height:8px;background:var(--hair-2);border-radius:6px;overflow:hidden">
+          <div style="height:100%;width:${Math.max(3,v/max*100)}%;background:var(--saffron);border-radius:6px"></div></div>
+      </div>`).join('') : empty('No approved bills','Nothing has been cleared yet.')}
+    </div>
+  </div>`;
+  if(typeof Chart!=='undefined'){
+    const el = document.getElementById('chartMoney');
+    if(CHART_MONEY) CHART_MONEY.destroy();
+    if(el) CHART_MONEY = new Chart(el, { type:'bar',
+      data:{ labels:['Revenue','Chef payouts','Staff wages','Bills','Margin'],
+        datasets:[{ data:[m.rev,m.chef,m.lab,m.exp,m.margin],
+          backgroundColor:['#F2701D','#E8A33D','#5B6B85','#D93A2B', m.margin>=0?'#1E9E6A':'#D93A2B'], borderRadius:6 }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{ y:{ ticks:{ callback:v=>'₹'+(Math.abs(v)>=1000?(v/1000)+'k':v) } } } }
+    });
+  }
+}
+let CHART_MONEY=null;
+
+/* ═══════════ 10 · CHEF: JOBS + EARNINGS ═══════════ */
+function vJobs(){
+  const jobs = DB.bookings.filter(b=>b.chefId===ME.id && b.status!=='cancelled').sort((a,b)=>a.date.localeCompare(b.date));
+  $('main').innerHTML = head('My jobs','Only the jobs assigned to you. Client pricing is not your worry.') +
+  `<div class="card">${jobs.length? `<div class="dockets">${jobs.map(dockChef).join('')}</div>`
+    : empty('No jobs assigned','The manager will assign your jobs here.')}</div>`;
+}
+function vPay(){
+  const jobs = DB.bookings.filter(b=>b.chefId===ME.id && b.status!=='cancelled');
+  const done = jobs.filter(b=>b.status==='done');
+  const shifts = DB.attendance.filter(a=>a.userId===ME.id).sort((a,b)=>b.inAt-a.inAt);
+  const reimb = DB.expenses.filter(e=>e.byId===ME.id && e.status==='approved').reduce((s,e)=>s+(+e.amount||0),0);
+  $('main').innerHTML = head('My earnings','Job payouts and approved bills coming back to you.') + `
+  <div class="kpis">
+    <div class="kpi"><div class="k">Completed jobs</div><div class="v">${done.length}</div><div class="s">of ${jobs.length} assigned</div></div>
+    <div class="kpi"><div class="k">Payout earned</div><div class="v">${rs(done.reduce((s,b)=>s+(+b.chefPay||0),0))}</div><div class="s">completed jobs only</div></div>
+    <div class="kpi"><div class="k">Bills cleared</div><div class="v">${rs(reimb)}</div><div class="s">coming back to you</div></div>
+  </div>
+  <div class="card" style="padding:18px 14px"><h3 style="padding:0 10px">My shift log</h3>
+    <div class="sub" style="padding:0 10px">Every clock-in and clock-out.</div>
+    ${shifts.length? `<table class="tbl"><thead><tr><th>Date</th><th>In</th><th>Out</th><th class="num">Hours</th></tr></thead><tbody>
+      ${shifts.map(a=>`<tr><td class="mono small">${dmy(a.date)}</td><td class="mono">${hhmm(a.inAt)}</td>
+        <td class="mono">${a.outAt?hhmm(a.outAt):'<span class="tag t-ok">running</span>'}</td>
+        <td class="num">${a.outAt?hrs(a.inAt,a.outAt).toFixed(1):'—'}</td></tr>`).join('')}
+    </tbody></table>` : empty('No shifts yet','Clock in from My Day.')}
+  </div>`;
+}
+
+boot();
+</script>
+</body>
+</html>

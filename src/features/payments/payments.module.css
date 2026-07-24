@@ -1,0 +1,320 @@
+.stack {
+  display: grid;
+  gap: 20px;
+}
+
+.section {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+}
+
+.section h2 {
+  font-family: var(--font-display), sans-serif;
+  margin: 0 0 16px;
+}
+
+.sectionHeader,
+.recordTop {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.sectionHeader h2 {
+  margin-bottom: 0;
+}
+
+.sectionHeader p,
+.recordTop div > span,
+.empty {
+  color: var(--slate);
+  margin: 3px 0 0;
+}
+
+.sectionHeader > span {
+  background: var(--indigo-tint);
+  border-radius: 999px;
+  font-family: var(--font-mono), monospace;
+  padding: 5px 9px;
+}
+
+.formGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.formGrid label,
+.reviewForm label {
+  color: var(--ink);
+  display: grid;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  gap: 6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.formGrid input,
+.formGrid select,
+.reviewForm input,
+.reviewForm select {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  min-height: 44px;
+  padding: 9px 11px;
+  text-transform: none;
+}
+
+.formGrid small {
+  color: var(--slate);
+  font-family: var(--font-body), sans-serif;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.wide,
+.actions {
+  grid-column: 1 / -1;
+}
+
+.tabs {
+  border-bottom: 1px solid var(--hair);
+  display: flex;
+  gap: 6px;
+  margin-top: 18px;
+  overflow-x: auto;
+}
+
+.tabs button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  color: var(--slate);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 600;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+.tabs button > span {
+  background: var(--hair-2);
+  border-radius: 999px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  padding: 3px 7px;
+}
+
+.tabs .activeTab {
+  border-bottom-color: var(--saffron);
+  color: var(--ink);
+}
+
+.tabs .activeTab > span {
+  background: var(--saffron-tint);
+  color: var(--saffron-dark);
+}
+
+.listToolbar {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.searchControl {
+  align-items: center;
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--slate);
+  display: flex;
+  gap: 9px;
+  max-width: 520px;
+  min-height: 44px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.searchControl:focus-within {
+  border-color: var(--saffron);
+  box-shadow: 0 0 0 3px var(--saffron-tint);
+}
+
+.searchControl input {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  min-width: 0;
+  outline: 0;
+  width: 100%;
+}
+
+.resultSummary,
+.pagination {
+  color: var(--slate);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.paginationActions {
+  display: flex;
+  gap: 8px;
+}
+
+.paginationActions button {
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 5px;
+  min-height: 38px;
+  padding: 7px 11px;
+}
+
+.paginationActions button:disabled {
+  color: var(--slate);
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.srOnly {
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.list > li {
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.recordTop strong,
+.recordTop span {
+  display: block;
+}
+
+.badge {
+  background: var(--saffron-tint);
+  border-radius: 999px;
+  color: var(--saffron-dark);
+  flex: 0 0 auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 5px 8px;
+  text-transform: uppercase;
+}
+
+.meta {
+  align-items: center;
+  color: var(--slate);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.meta a {
+  align-items: center;
+  color: var(--saffron-dark);
+  display: inline-flex;
+  font-weight: 700;
+  gap: 4px;
+}
+
+.reviewForm {
+  align-items: end;
+  border-top: 1px solid var(--hair-2);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(120px, 180px) minmax(180px, 1fr) auto;
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
+.rejection {
+  background: var(--chilli-tint);
+  border-radius: var(--radius-sm);
+  color: var(--chilli);
+  padding: 9px 11px;
+}
+
+.error {
+  background: var(--chilli-tint);
+  border: 1px solid rgb(217 58 43 / 20%);
+  border-radius: var(--radius-md);
+  color: var(--chilli);
+  padding: 14px;
+}
+
+@media (max-width: 700px) {
+  .formGrid,
+  .reviewForm {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 16px;
+  }
+
+  .listToolbar,
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchControl {
+    max-width: none;
+  }
+
+  .paginationActions button {
+    flex: 1;
+    justify-content: center;
+  }
+}

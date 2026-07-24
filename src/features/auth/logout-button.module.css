@@ -1,0 +1,182 @@
+.controls {
+  display: grid;
+  gap: 8px;
+}
+
+.button {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-sm, 8px);
+  color: #a7b0c4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 10px 14px;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+  width: 100%;
+}
+
+.allDevices {
+  border-color: rgba(217, 58, 43, 0.28);
+  color: #f1b6b0;
+}
+
+.button:hover {
+  background: rgba(217, 58, 43, 0.12);
+  border-color: var(--chilli, #d93a2b);
+  color: #fff;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--saffron, #f2701d);
+  outline-offset: 2px;
+}
+
+.dialog {
+  background: transparent;
+  border: 0;
+  color: var(--ink, #0b2545);
+  margin: auto;
+  max-width: min(92vw, 440px);
+  padding: 0;
+  width: 100%;
+}
+
+.dialog::backdrop {
+  backdrop-filter: blur(3px);
+  background: rgb(7 26 50 / 62%);
+}
+
+.dialogPanel {
+  background: var(--card, #fff);
+  border: 1px solid var(--hair, #e1e6ef);
+  border-radius: var(--radius-lg, 18px);
+  box-shadow: var(--shadow-lg, 0 20px 48px rgba(11, 37, 69, 0.18));
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  position: relative;
+}
+
+.dialogClose {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--slate, #5b6b85);
+  cursor: pointer;
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  width: 36px;
+}
+
+.dialogClose:hover {
+  background: var(--hair-2, #f0f3f8);
+  color: var(--ink, #0b2545);
+}
+
+.warningIcon {
+  align-items: center;
+  background: var(--chilli-tint, #fbeae8);
+  border-radius: 12px;
+  color: var(--chilli, #d93a2b);
+  display: inline-flex;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+
+.dialogCopy h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.25rem;
+  margin: 0 40px 7px 0;
+}
+
+.dialogCopy p {
+  color: var(--slate, #5b6b85);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.dialogActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.dialogActions form {
+  display: contents;
+}
+
+.cancelButton,
+.confirmButton {
+  border-radius: var(--radius-sm, 8px);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  min-height: 42px;
+  padding: 10px 16px;
+  width: auto;
+}
+
+.cancelButton {
+  background: #fff;
+  border: 1.5px solid var(--hair, #e1e6ef);
+  color: var(--ink, #0b2545);
+}
+
+.confirmButton {
+  background: var(--chilli, #d93a2b);
+  border-color: var(--chilli, #d93a2b);
+  color: #fff;
+}
+
+.cancelButton:hover {
+  background: var(--hair-2, #f0f3f8);
+}
+
+.confirmButton:hover {
+  background: #b82f23;
+  border-color: #b82f23;
+}
+
+.dialogClose:focus-visible,
+.cancelButton:focus-visible,
+.confirmButton:focus-visible {
+  outline: 2px solid var(--saffron, #f2701d);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .dialogActions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelButton,
+  .confirmButton {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}

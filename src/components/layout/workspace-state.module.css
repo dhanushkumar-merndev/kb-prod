@@ -1,0 +1,122 @@
+.loading {
+  display: grid;
+  gap: 22px;
+}
+
+.headerSkeleton,
+.cardGrid span,
+.tableSkeleton {
+  animation: pulse 1.2s ease-in-out infinite alternate;
+  background: linear-gradient(100deg, #e8edf4 25%, #f5f7fa 45%, #e8edf4 65%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-md);
+}
+
+.headerSkeleton {
+  background: transparent;
+  display: grid;
+  gap: 10px;
+}
+
+.headerSkeleton span {
+  background: #e8edf4;
+  border-radius: 8px;
+  display: block;
+  height: 38px;
+  width: min(330px, 70%);
+}
+
+.headerSkeleton span:last-child {
+  height: 15px;
+  width: min(520px, 90%);
+}
+
+.cardGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cardGrid span {
+  display: block;
+  height: 116px;
+}
+
+.tableSkeleton {
+  height: 340px;
+}
+
+.error {
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  margin: min(12vh, 90px) auto;
+  max-width: 520px;
+  padding: 46px 24px;
+  text-align: center;
+}
+
+.error svg {
+  color: var(--chilli);
+}
+
+.error h1 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 24px;
+  margin: 14px 0 4px;
+}
+
+.error p {
+  color: var(--slate);
+  margin: 0 0 20px;
+}
+
+.error button {
+  align-items: center;
+  background: var(--ink);
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+}
+
+@keyframes pulse {
+  from {
+    background-position: 100% 0;
+    opacity: 0.75;
+  }
+
+  to {
+    background-position: 0 0;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 540px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headerSkeleton,
+  .cardGrid span,
+  .tableSkeleton {
+    animation: none;
+  }
+}

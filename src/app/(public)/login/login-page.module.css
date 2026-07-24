@@ -1,0 +1,121 @@
+.page {
+  background: var(--canvas, #f5f7fa);
+  color: var(--ink, #0b2545);
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(420px, 1fr);
+  min-height: 100svh;
+}
+
+.brand {
+  background:
+    radial-gradient(circle at 100% 0, rgba(242, 112, 29, 0.2), transparent 42%),
+    linear-gradient(160deg, var(--ink, #0b2545), var(--ink-2, #123061));
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(36px, 5vw, 60px);
+  position: relative;
+}
+
+.logo {
+  font-family: var(--font-display, "Bricolage Grotesque", system-ui, sans-serif);
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.logoAccent {
+  color: var(--saffron, #f2701d);
+}
+
+.brandCopy {
+  margin: auto 0;
+  max-width: 540px;
+  position: relative;
+  z-index: 1;
+}
+
+.brandCopy h1 {
+  font-family: var(--font-display, "Bricolage Grotesque", system-ui, sans-serif);
+  font-size: clamp(2.6rem, 4.8vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+  margin: 0;
+}
+
+.brandCopy p {
+  color: #b5bfd0;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  margin: 24px 0 0;
+  max-width: 40ch;
+}
+
+.brandFooter {
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  color: #a7b0c4;
+  font-family: var(--font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  padding-top: 18px;
+  text-transform: uppercase;
+}
+
+.formSide {
+  align-items: center;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  padding: clamp(24px, 5vw, 64px);
+}
+
+.formBox {
+  max-width: 392px;
+  width: 100%;
+}
+
+.mobileLogo {
+  display: none;
+}
+
+.formBox h2 {
+  font-family: var(--font-display, "Bricolage Grotesque", system-ui, sans-serif);
+  font-size: clamp(1.8rem, 3vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  margin: 0 0 7px;
+}
+
+.formBox > p {
+  color: var(--slate, #5b6b85);
+  line-height: 1.55;
+  margin: 0 0 24px;
+}
+
+@media (max-width: 820px) {
+  .page {
+    display: block;
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .formSide {
+    min-height: 100svh;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  }
+
+  .formBox {
+    max-width: 420px;
+  }
+
+  .mobileLogo {
+    display: block;
+    margin-bottom: 52px;
+  }
+}
