@@ -14,6 +14,9 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Download,
+  FileText,
+  Mail,
   Pencil,
   Plus,
   Search,
@@ -21,13 +24,239 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useFormStatus } from "react-dom";
 
 import { ActionFeedback, FieldError, SubmitButton } from "@/features/core-crud/components/shared";
 import { INITIAL_CRUD_ACTION_STATE, type CrudActionState } from "@/features/core-crud/types";
+import { downloadBookingInvoicePdf } from "@/lib/invoices/client-pdf";
 
-import { createBookingAction, updateBookingAction } from "./actions";
+import {
+  createBookingAction,
+  issueBookingInvoiceAction,
+  reissueBookingInvoiceAction,
+  resendBookingInvoiceAction,
+  retryBookingEmailAction,
+  updateBookingAction,
+  updateBookingCustomerEmailAction,
+} from "./actions";
 import styles from "./bookings.module.css";
 import type { BookingCrudData, BookingRecord } from "./types";
+
+function GenerateInvoiceButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button className={styles.invoiceActionBtn} disabled={pending} type="submit">
+      <FileText size={14} />
+      {pending ? "Generating…" : "Generate"}
+    </button>
+  );
+}
+
+function LocalInvoiceDownloadButton({
+  booking,
+  compact = false,
+}: {
+  booking: BookingRecord;
+  compact?: boolean;
+}) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState("");
+
+  return (
+    <button
+      className={compact ? styles.invoiceActionBtn : styles.pageBtn}
+      disabled={isGenerating}
+      onClick={async () => {
+        setError("");
+        setIsGenerating(true);
+        try {
+          await downloadBookingInvoicePdf(booking);
+        } catch {
+          setError("PDF could not be created in this browser.");
+        } finally {
+          setIsGenerating(false);
+        }
+      }}
+      title={error || "Generate and download an offline PDF on this computer"}
+      type="button"
+    >
+      <Download size={14} />
+      {isGenerating ? "Creating…" : compact ? "PDF" : "Download local PDF"}
+    </button>
+  );
+}
+
+function BookingInvoiceQuickAction({ booking }: { booking: BookingRecord }) {
+  const [state, action] = useActionState(issueBookingInvoiceAction, INITIAL_CRUD_ACTION_STATE);
+
+  if (booking.serviceStatus === "cancelled" && !booking.invoice) {
+    return <span className={styles.invoiceUnavailable}>Not applicable</span>;
+  }
+
+  if (booking.invoice) {
+    return <LocalInvoiceDownloadButton booking={booking} compact />;
+  }
+
+  return (
+    <div className={styles.quickInvoice}>
+      <form action={action}>
+        <input name="bookingId" type="hidden" value={booking.id} />
+        <GenerateInvoiceButton />
+      </form>
+      {state.status === "error" ? (
+        <span className={styles.quickInvoiceError} role="alert" title={state.message}>
+          Retry
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function invoiceAvailability(booking: BookingRecord): string {
+  switch (booking.invoice?.status) {
+    case "issued":
+      return "local download ready · cloud copy stored";
+    case "generation_failed":
+      return "local download ready · cloud copy needs retry";
+    case "pending_generation":
+      return "local download ready";
+    default:
+      return "Invoice record is not available yet.";
+  }
+}
+
+function InvoiceControls({
+  booking,
+  viewerRole,
+}: {
+  booking: BookingRecord;
+  viewerRole: BookingCrudData["viewerRole"];
+}) {
+  const [emailState, emailAction] = useActionState(
+    updateBookingCustomerEmailAction,
+    INITIAL_CRUD_ACTION_STATE,
+  );
+  const [invoiceState, invoiceAction] = useActionState(
+    issueBookingInvoiceAction,
+    INITIAL_CRUD_ACTION_STATE,
+  );
+  const [reissueState, reissueAction] = useActionState(
+    reissueBookingInvoiceAction,
+    INITIAL_CRUD_ACTION_STATE,
+  );
+  const [resendState, resendAction] = useActionState(
+    resendBookingInvoiceAction,
+    INITIAL_CRUD_ACTION_STATE,
+  );
+  const [retryState, retryAction] = useActionState(
+    retryBookingEmailAction,
+    INITIAL_CRUD_ACTION_STATE,
+  );
+  const canReissue = ["director", "manager", "sales_manager"].includes(viewerRole);
+
+  return (
+    <section className={styles.invoicePanel}>
+      <div className={styles.invoiceHeader}>
+        <div>
+          <h3>Invoice & customer email</h3>
+          <p>
+            {booking.invoice
+              ? `${booking.invoice.number} · ${invoiceAvailability(booking)}`
+              : invoiceAvailability(booking)}
+          </p>
+        </div>
+        <div className={styles.invoiceActions}>
+          {booking.invoice ? <LocalInvoiceDownloadButton booking={booking} /> : null}
+          {booking.invoice?.downloadUrl ? (
+            <a className={styles.pageBtn} download href={booking.invoice.downloadUrl}>
+              <Download size={15} /> Stored copy
+            </a>
+          ) : null}
+        </div>
+      </div>
+
+      <form action={emailAction} className={styles.inlineForm}>
+        <input name="bookingId" type="hidden" value={booking.id} />
+        <label>
+          Customer email
+          <input
+            defaultValue={booking.customerEmail ?? ""}
+            name="customerEmail"
+            placeholder="customer@example.com"
+            required
+            type="email"
+          />
+          <FieldError field="customerEmail" state={emailState} />
+        </label>
+        <SubmitButton pendingLabel="Saving…">Save email</SubmitButton>
+      </form>
+      <ActionFeedback state={emailState} />
+
+      <div className={styles.invoiceActions}>
+        {!booking.invoice ? (
+          <form action={invoiceAction}>
+            <input name="bookingId" type="hidden" value={booking.id} />
+            <SubmitButton pendingLabel="Creating…">
+              <FileText size={15} /> Create invoice
+            </SubmitButton>
+          </form>
+        ) : (
+          <form action={resendAction}>
+            <input name="bookingId" type="hidden" value={booking.invoice.id} />
+            <SubmitButton pendingLabel="Queueing…" tone="secondary">
+              <Mail size={15} /> Resend invoice
+            </SubmitButton>
+          </form>
+        )}
+        {booking.latestEmail && ["failed", "skipped"].includes(booking.latestEmail.status) ? (
+          <form action={retryAction}>
+            <input name="outboxId" type="hidden" value={booking.latestEmail.id} />
+            <SubmitButton pendingLabel="Queueing…" tone="secondary">
+              Retry email
+            </SubmitButton>
+          </form>
+        ) : null}
+      </div>
+      <ActionFeedback state={invoiceState} />
+      <ActionFeedback state={resendState} />
+      <ActionFeedback state={retryState} />
+
+      <p className={styles.emailStatus}>
+        Email:{" "}
+        {booking.latestEmail
+          ? booking.latestEmail.status.replaceAll("_", " ")
+          : booking.customerEmail
+            ? "not queued"
+            : "skipped · customer email missing"}
+        {booking.latestEmail?.error ? ` · ${booking.latestEmail.error}` : ""}
+      </p>
+
+      {canReissue && booking.invoice?.status === "issued" ? (
+        <form
+          action={reissueAction}
+          className={styles.inlineForm}
+          onSubmit={(event) => {
+            if (!window.confirm("Void this invoice and issue a corrected replacement?")) {
+              event.preventDefault();
+            }
+          }}
+        >
+          <input name="bookingId" type="hidden" value={booking.invoice.id} />
+          <label>
+            Reissue reason
+            <input name="reason" minLength={5} required />
+            <FieldError field="reason" state={reissueState} />
+          </label>
+          <SubmitButton pendingLabel="Reissuing…" tone="secondary">
+            Void & reissue
+          </SubmitButton>
+        </form>
+      ) : null}
+      <ActionFeedback state={reissueState} />
+    </section>
+  );
+}
 
 function CreateBookingDialog({
   data,
@@ -82,6 +311,7 @@ function CreateBookingDialog({
                 {data.eligibleLeads.map((lead) => (
                   <option key={lead.id} value={lead.id}>
                     {lead.clientName}
+                    {lead.customerEmail ? ` · ${lead.customerEmail}` : " · no customer email"}
                   </option>
                 ))}
               </select>
@@ -146,9 +376,11 @@ function CreateBookingDialog({
 function EditBookingDialog({
   booking,
   onClose,
+  viewerRole,
 }: {
   booking: BookingRecord | null;
   onClose: () => void;
+  viewerRole: BookingCrudData["viewerRole"];
 }) {
   const [state, action] = useActionState(updateBookingAction, INITIAL_CRUD_ACTION_STATE);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -190,6 +422,7 @@ function EditBookingDialog({
       </div>
 
       <div className={styles.modalBody}>
+        <InvoiceControls booking={booking} viewerRole={viewerRole} />
         {locked ? (
           <p className={styles.empty}>
             This booking is locked in status &ldquo;{booking.serviceStatus.replaceAll("_", " ")}
@@ -339,6 +572,13 @@ export function BookingWorkspace({ data }: { data: BookingCrudData }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, data.search, pathname]);
 
+  useEffect(() => {
+    setSelectedBooking((current) => {
+      if (!current) return null;
+      return data.bookings.find((booking) => booking.id === current.id) ?? current;
+    });
+  }, [data.bookings]);
+
   const columns = useMemo<ColumnDef<BookingRecord>[]>(
     () => [
       {
@@ -396,15 +636,21 @@ export function BookingWorkspace({ data }: { data: BookingCrudData }) {
         ),
       },
       {
+        id: "invoice",
+        header: "Invoice",
+        enableSorting: false,
+        cell: ({ row }) => <BookingInvoiceQuickAction booking={row.original} />,
+      },
+      {
         id: "actions",
-        header: "Action",
+        header: "Details",
         cell: ({ row }) => (
           <button
             className={styles.editActionBtn}
             onClick={() => setSelectedBooking(row.original)}
             type="button"
           >
-            <Pencil size={14} /> Edit
+            <Pencil size={14} /> Manage
           </button>
         ),
       },
@@ -448,7 +694,11 @@ export function BookingWorkspace({ data }: { data: BookingCrudData }) {
         onClose={() => setIsCreateOpen(false)}
       />
 
-      <EditBookingDialog booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
+      <EditBookingDialog
+        booking={selectedBooking}
+        onClose={() => setSelectedBooking(null)}
+        viewerRole={data.viewerRole}
+      />
 
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
@@ -667,14 +917,16 @@ export function BookingWorkspace({ data }: { data: BookingCrudData }) {
                       </dd>
                     </div>
                   </dl>
-                  <button
-                    className={styles.editActionBtn}
-                    onClick={() => setSelectedBooking(booking)}
-                    style={{ width: "100%", justifyContent: "center" }}
-                    type="button"
-                  >
-                    <Pencil size={14} /> Edit booking details
-                  </button>
+                  <div className={styles.mobileActions}>
+                    <BookingInvoiceQuickAction booking={booking} />
+                    <button
+                      className={styles.editActionBtn}
+                      onClick={() => setSelectedBooking(booking)}
+                      type="button"
+                    >
+                      <Pencil size={14} /> Manage booking
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

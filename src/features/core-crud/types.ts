@@ -93,6 +93,7 @@ export type CrudLoadState<T> =
 export interface LeadRecord {
   id: string;
   clientName: string;
+  customerEmail: string | null;
   phoneE164: string;
   source: string | null;
   requirement: string | null;

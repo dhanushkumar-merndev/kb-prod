@@ -12,6 +12,7 @@ import {
   TaskCrudPanel,
 } from "@/features/core-crud";
 import { EmployeeRecordsPanel } from "@/features/employee-records";
+import { IntegrationPanel } from "@/features/integrations";
 import { MeetingCrudPanel, TemporaryWorkerCrudPanel } from "@/features/secondary-crud";
 import { SalesOperationsPanel } from "@/features/sales-operations";
 import { PaymentPanel } from "@/features/payments";
@@ -51,7 +52,7 @@ const REALTIME_TABLES: Partial<
   follow_ups: ["follow_ups"],
   calls: ["superfone_calls"],
   conversations: ["conversations", "messages", "conversation_reads"],
-  bookings: ["bookings", "booking_assignments", "booking_payments"],
+  bookings: ["bookings", "booking_assignments", "booking_payments", "invoices", "email_outbox"],
   workforce_bookings: ["bookings", "booking_assignments"],
   payments: ["booking_payments", "bookings"],
   sales_profiles: ["profiles"],
@@ -63,6 +64,7 @@ const REALTIME_TABLES: Partial<
   tasks: ["tasks"],
   meetings: ["meetings", "meeting_attendees"],
   temporary_workers: ["temporary_workers", "temporary_worker_assignments"],
+  integrations: ["integration_connections", "email_outbox", "invoices"],
 };
 
 export async function RoleModulePage({
@@ -159,6 +161,9 @@ export async function RoleModulePage({
     showLiveTable = false;
   } else if (navigationItem.resource === "bookings") {
     workingPanel = <BookingCrudPanel page={bookingPage} search={bookingSearch} />;
+    showLiveTable = false;
+  } else if (navigationItem.resource === "integrations") {
+    workingPanel = <IntegrationPanel />;
     showLiveTable = false;
   } else if (navigationItem.resource === "payments") {
     workingPanel = <PaymentPanel />;

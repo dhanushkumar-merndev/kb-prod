@@ -1,10 +1,9 @@
-import type { Metadata } from "next";
-
 import { getLoginNotice } from "@/lib/auth/account-status";
 import { loginAction } from "@/features/auth/actions";
 import { LoginForm } from "@/features/auth/login-form";
 
 import styles from "./login-page.module.css";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Log in",

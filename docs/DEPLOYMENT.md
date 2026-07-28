@@ -231,6 +231,27 @@ After the official adapter passes staging:
 
 See `docs/SUPERFONE_INTEGRATION.md` for the provider acceptance checklist.
 
+## Brevo and invoice activation
+
+Deploy the customer-email functions after setting the four `BREVO_*` Edge
+secrets:
+
+```bash
+pnpm exec supabase functions deploy brevo-test-connection
+pnpm exec supabase functions deploy generate-booking-invoice
+pnpm exec supabase functions deploy process-email-outbox --no-verify-jwt
+pnpm exec supabase functions deploy brevo-webhook --no-verify-jwt
+```
+
+Keep automatic email disabled while deploying. In Director -> Integrations,
+save the verified sender identity and invoice wording, then test the Brevo
+connection. Register the Brevo webhook with the secret token and schedule
+`process-email-outbox` every minute using the service-role bearer token.
+
+Verify SPF, DKIM and DMARC, a controlled-recipient send, the private signed PDF
+download, and webhook-confirmed delivery before enabling automation. Detailed
+steps and supported events are in `docs/EMAIL_INVOICE_AUTOMATION.md`.
+
 ## Post-deployment smoke checks
 
 Test with real RLS-scoped accounts for all seven roles:

@@ -6,6 +6,7 @@
   },
   "imports": {
     "@supabase/supabase-js": "npm:@supabase/supabase-js@2.110.8",
+    "pdf-lib": "npm:pdf-lib@1.17.1",
     "zod": "npm:zod@4.4.3"
   }
 }

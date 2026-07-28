@@ -12,11 +12,16 @@ import { ChevronLeft, ChevronRight, Plus, Search, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
+import {
+  allowedManualLeadStages,
+  leadStageNeedsReason,
+  type LeadStage,
+} from "@/lib/leads/transition-rules";
+
 import { createLeadAction, updateLeadAction, updateLeadStatusAction } from "../actions";
 import styles from "../core-crud.module.css";
 import {
   INITIAL_CRUD_ACTION_STATE,
-  LEAD_STATUSES,
   LEAD_STATUS_LABELS,
   type LeadCrudData,
   type LeadRecord,
@@ -71,6 +76,20 @@ function CreateLeadForm({ data, onCreated }: { data: LeadCrudData; onCreated: ()
           required
         />
         <FieldError field="phone" state={state} />
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="lead-customer-email">
+          Customer email
+        </label>
+        <input
+          className={styles.input}
+          id="lead-customer-email"
+          name="customerEmail"
+          type="email"
+          maxLength={320}
+          placeholder="customer@example.com"
+        />
+        <FieldError field="customerEmail" state={state} />
       </div>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="lead-source">
@@ -166,8 +185,24 @@ function CreateLeadForm({ data, onCreated }: { data: LeadCrudData; onCreated: ()
   );
 }
 
-function LeadStatusForm({ lead }: { lead: LeadRecord }) {
+function LeadStatusForm({
+  lead,
+  viewerRole,
+}: {
+  lead: LeadRecord;
+  viewerRole: LeadCrudData["viewerRole"];
+}) {
   const [state, action] = useActionState(updateLeadStatusAction, INITIAL_CRUD_ACTION_STATE);
+  const allowedStages = allowedManualLeadStages(lead.status as LeadStage, viewerRole);
+  const [selectedStage, setSelectedStage] = useState<LeadStage | "">(allowedStages[0] ?? "");
+
+  if (allowedStages.length === 0) {
+    return (
+      <p className={styles.recordText}>
+        This stage is controlled by booking, payment, and service milestones.
+      </p>
+    );
+  }
 
   return (
     <>
@@ -180,17 +215,33 @@ function LeadStatusForm({ lead }: { lead: LeadRecord }) {
           </label>
           <select
             className={styles.select}
-            defaultValue={lead.status}
             id={`lead-status-${lead.id}`}
             name="status"
+            onChange={(event) => setSelectedStage(event.target.value as LeadStage)}
+            value={selectedStage}
           >
-            {LEAD_STATUSES.map((status) => (
+            {allowedStages.map((status) => (
               <option key={status} value={status}>
                 {LEAD_STATUS_LABELS[status]}
               </option>
             ))}
           </select>
         </div>
+        {selectedStage && leadStageNeedsReason(selectedStage, lead.status as LeadStage) ? (
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor={`lead-status-reason-${lead.id}`}>
+              Reason
+            </label>
+            <input
+              className={styles.input}
+              id={`lead-status-reason-${lead.id}`}
+              name="reason"
+              maxLength={500}
+              required
+            />
+            <FieldError field="reason" state={state} />
+          </div>
+        ) : null}
         <SubmitButton pendingLabel="Updating…" tone="secondary">
           Update status
         </SubmitButton>
@@ -233,6 +284,20 @@ function UpdateLeadForm({ lead }: { lead: LeadRecord }) {
           required
         />
         <FieldError field="phone" state={state} />
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor={`lead-email-${lead.id}`}>
+          Customer email
+        </label>
+        <input
+          className={styles.input}
+          defaultValue={lead.customerEmail ?? ""}
+          id={`lead-email-${lead.id}`}
+          name="customerEmail"
+          type="email"
+          maxLength={320}
+        />
+        <FieldError field="customerEmail" state={state} />
       </div>
       <div className={styles.field}>
         <label className={styles.label} htmlFor={`lead-date-${lead.id}`}>
@@ -310,13 +375,24 @@ function UpdateLeadForm({ lead }: { lead: LeadRecord }) {
   );
 }
 
-function LeadItem({ assigneeName, lead }: { assigneeName: string; lead: LeadRecord }) {
+function LeadItem({
+  assigneeName,
+  lead,
+  viewerRole,
+}: {
+  assigneeName: string;
+  lead: LeadRecord;
+  viewerRole: LeadCrudData["viewerRole"];
+}) {
   return (
     <div className={styles.record}>
       <div className={styles.recordTop}>
         <div>
           <h3 className={styles.recordTitle}>{lead.clientName}</h3>
-          <p className={styles.recordSubtitle}>{lead.phoneE164}</p>
+          <p className={styles.recordSubtitle}>
+            {lead.phoneE164}
+            {lead.customerEmail ? ` · ${lead.customerEmail}` : ""}
+          </p>
         </div>
         <span className={styles.badge}>{LEAD_STATUS_LABELS[lead.status]}</span>
       </div>
@@ -347,7 +423,7 @@ function LeadItem({ assigneeName, lead }: { assigneeName: string; lead: LeadReco
         </div>
       </dl>
       {lead.requirement ? <p className={styles.recordText}>{lead.requirement}</p> : null}
-      <LeadStatusForm lead={lead} />
+      <LeadStatusForm lead={lead} viewerRole={viewerRole} />
       <details className={styles.details}>
         <summary>Edit lead details</summary>
         <UpdateLeadForm lead={lead} />
@@ -628,6 +704,7 @@ export function LeadWorkspace({ data }: { data: LeadCrudData }) {
                 : "Unassigned"
             }
             lead={selectedLead}
+            viewerRole={data.viewerRole}
           />
         ) : null}
       </dialog>

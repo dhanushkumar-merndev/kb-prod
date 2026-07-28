@@ -17,6 +17,11 @@ export type AppErrorCode =
   | "SUPERFONE_AUTH_FAILED"
   | "SUPERFONE_WEBHOOK_INVALID"
   | "SUPERFONE_PROVIDER_FAILED"
+  | "BREVO_NOT_CONFIGURED"
+  | "BREVO_AUTH_FAILED"
+  | "BREVO_RATE_LIMITED"
+  | "BREVO_PROVIDER_FAILED"
+  | "BREVO_WEBHOOK_INVALID"
   | "NOT_FOUND"
   | "METHOD_NOT_ALLOWED"
   | "INVALID_JSON"
@@ -35,6 +40,9 @@ interface ValidationFieldError {
 
 export interface PublicErrorDetails {
   fields?: ValidationFieldError[];
+  provider?: string;
+  reason?: string;
+  retryable?: boolean;
 }
 
 interface AppErrorOptions {
@@ -116,6 +124,26 @@ const DEFAULTS: Record<AppErrorCode, { message: string; status: number }> = {
   SUPERFONE_PROVIDER_FAILED: {
     message: "Superfone could not complete the request. Try again.",
     status: 502,
+  },
+  BREVO_NOT_CONFIGURED: {
+    message: "Customer email is not configured. Ask the Director to check Brevo.",
+    status: 503,
+  },
+  BREVO_AUTH_FAILED: {
+    message: "Brevo rejected the configured credential. Ask the Director to reconnect.",
+    status: 502,
+  },
+  BREVO_RATE_LIMITED: {
+    message: "The daily email limit was reached. The message will retry automatically.",
+    status: 429,
+  },
+  BREVO_PROVIDER_FAILED: {
+    message: "Brevo could not send the email. It will retry automatically.",
+    status: 502,
+  },
+  BREVO_WEBHOOK_INVALID: {
+    message: "The Brevo webhook could not be authenticated.",
+    status: 401,
   },
   NOT_FOUND: {
     message: "The requested record could not be found.",

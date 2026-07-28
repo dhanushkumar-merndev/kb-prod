@@ -1,6 +1,6 @@
 # Khana Banao CRM implementation progress
 
-Last updated: 2026-07-23
+Last updated: 2026-07-28
 
 ## Implementation contract
 
@@ -25,6 +25,7 @@ Last updated: 2026-07-23
 | 8     | Expenses, leave, tasks, meetings and payroll                                                             | Core CRUD complete; payroll workflow pending |
 | 9     | Superfone adapter, webhook, import/sync and capability-gated messaging                                   | Waiting for official provider configuration  |
 | 10    | Full test matrix, accessibility/responsive verification, production build and deployment docs            | In progress                                  |
+| 11    | Lead-stage automation, private PDF invoices and Brevo customer email                                     | Remote migration applied; rollout pending    |
 
 ## Phase 1 work log
 
@@ -52,15 +53,17 @@ Last updated: 2026-07-23
 
 - `pnpm lint` — passing.
 - `pnpm typecheck` — passing in strict mode.
-- `pnpm test:unit` — 9 files and 88 assertions passing.
+- `pnpm test:unit` — 17 files and 115 assertions passing.
 - `pnpm build` — passing; all seven protected role dashboard namespaces are included.
-- `pnpm format:check` — passing.
+- Changed email/invoice/lead automation files — Prettier check passing. The repository-wide
+  `pnpm format:check` still reports the existing formatting baseline.
 - Edge Function strict type/prettier checks — passing for the current files.
 
-Database migration application/tests and the Phase 1 commit are pending. No local or remote
-migration has been run.
+Remote migrations through `202607280001` are applied and aligned with local history. Remote
+schema lint and read-only table/bucket verification pass. Local pgTAP execution remains pending
+until a local Supabase/Docker runtime is available.
 
 ## Environment handoff
 
-The user will populate the real `.env`. Ask for confirmation immediately before the first
-local/staging migration application; do not apply migrations before that confirmation.
+The real environment is configured. Continue using reviewed migrations for every database
+change; do not reset or reseed staging/production.

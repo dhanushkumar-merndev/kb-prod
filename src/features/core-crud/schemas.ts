@@ -43,6 +43,10 @@ const optionalMoney = z.preprocess(
 
 const leadFields = {
   clientName: z.string().trim().min(2, "Enter the customer name.").max(160),
+  customerEmail: z.preprocess(
+    blankToUndefined,
+    z.string().trim().toLowerCase().email("Enter a valid email address.").max(254).optional(),
+  ),
   phone: z.string().trim().min(10, "Enter a valid phone number.").max(32),
   requirement: optionalText(4_000),
   eventDate: optionalDate,
@@ -67,6 +71,7 @@ export const updateLeadStatusSchema = z.object({
   id: z.string().uuid(),
   expectedVersion: z.coerce.number().int().positive(),
   status: z.enum(LEAD_STATUSES),
+  reason: optionalText(1_000),
 });
 
 export const createExpenseSchema = z.object({

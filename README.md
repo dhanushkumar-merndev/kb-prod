@@ -69,6 +69,7 @@ pnpm build
 - [Database, RLS and Storage](docs/DATABASE.md)
 - [Roles and permissions](docs/ROLES_AND_PERMISSIONS.md)
 - [Superfone integration status and activation](docs/SUPERFONE_INTEGRATION.md)
+- [Customer email, invoice, and lead-stage automation](docs/EMAIL_INVOICE_AUTOMATION.md)
 - [Deployment and operations](docs/DEPLOYMENT.md)
 - [Testing and release validation](docs/TESTING.md)
 

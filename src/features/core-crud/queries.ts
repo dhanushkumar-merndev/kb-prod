@@ -28,6 +28,7 @@ const moneySchema = z.union([z.string(), z.number()]).transform((value) => Strin
 const leadRowSchema = z.object({
   id: z.string().uuid(),
   client_name: z.string(),
+  customer_email: z.string().email().nullable(),
   phone_e164: z.string(),
   source: z.string().nullable(),
   requirement: z.string().nullable(),
@@ -131,6 +132,7 @@ function toLeadRecord(row: z.infer<typeof leadRowSchema>): LeadRecord {
   return {
     id: row.id,
     clientName: row.client_name,
+    customerEmail: row.customer_email,
     phoneE164: row.phone_e164,
     source: row.source,
     requirement: row.requirement,

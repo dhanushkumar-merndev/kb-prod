@@ -1,0 +1,138 @@
+.stack {
+  display: grid;
+  gap: 18px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 22px;
+}
+
+.header {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.header h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 20px;
+  margin: 3px 0;
+}
+
+.header p {
+  color: var(--slate);
+  margin: 0;
+}
+
+.eyebrow,
+.healthGrid dt,
+.form label {
+  color: var(--slate);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.status {
+  background: var(--mint-tint);
+  border-radius: 999px;
+  color: var(--mint);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  padding: 6px 10px;
+  text-transform: capitalize;
+}
+
+.healthGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 20px 0;
+}
+
+.healthGrid div {
+  background: var(--canvas);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.healthGrid dd {
+  color: var(--ink);
+  font-size: 14px;
+  margin: 5px 0 0;
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 20px;
+}
+
+.form label {
+  display: grid;
+  gap: 7px;
+}
+
+.form input,
+.form textarea {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  padding: 10px 12px;
+  text-transform: none;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.toggle {
+  align-items: center;
+  color: var(--ink) !important;
+  display: flex !important;
+  flex-direction: row;
+}
+
+.toggle input {
+  height: 18px;
+  width: 18px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.error {
+  background: var(--chilli-tint);
+  border-radius: var(--radius-sm);
+  color: var(--chilli);
+  padding: 10px;
+}
+
+@media (max-width: 760px) {
+  .healthGrid,
+  .form {
+    grid-template-columns: 1fr;
+  }
+
+  .wide {
+    grid-column: auto;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+}

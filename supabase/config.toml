@@ -76,3 +76,18 @@ verify_jwt = true
 
 [functions.superfone-sync]
 verify_jwt = true
+
+[functions.brevo-test-connection]
+verify_jwt = true
+
+[functions.generate-booking-invoice]
+verify_jwt = true
+
+# Supabase Cron calls this function with the service-role bearer token. A
+# Director JWT may also process only the caller's organization on demand.
+[functions.process-email-outbox]
+verify_jwt = false
+
+# Brevo authenticates with the configured webhook token rather than a user JWT.
+[functions.brevo-webhook]
+verify_jwt = false

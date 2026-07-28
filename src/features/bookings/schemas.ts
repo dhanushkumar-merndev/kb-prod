@@ -27,3 +27,20 @@ export const updateBookingFormSchema = bookingFormSchema.omit({ leadId: true }).
   bookingId: z.string().uuid(),
   expectedVersion: z.coerce.number().int().positive(),
 });
+
+export const bookingCustomerEmailSchema = z.object({
+  bookingId: z.string().uuid(),
+  customerEmail: z.string().trim().toLowerCase().email("Enter a valid customer email.").max(320),
+});
+
+export const bookingInvoiceSchema = z.object({
+  bookingId: z.string().uuid(),
+});
+
+export const reissueBookingInvoiceSchema = bookingInvoiceSchema.extend({
+  reason: z.string().trim().min(5, "Give a clear correction reason.").max(500),
+});
+
+export const retryBookingEmailSchema = z.object({
+  outboxId: z.string().uuid(),
+});

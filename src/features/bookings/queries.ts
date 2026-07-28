@@ -13,6 +13,7 @@ const bookingRowSchema = z.object({
   booking_code: z.string(),
   lead_id: z.string().uuid().nullable(),
   client_name: z.string(),
+  customer_email: z.string().email().nullable(),
   event_type: z.string(),
   event_date: z.string(),
   event_start_time: z.string().nullable(),
@@ -33,11 +34,19 @@ const bookingRowSchema = z.object({
     "cancelled",
   ]),
   version: z.number().int().positive(),
+  invoice_id: z.string().uuid().nullable(),
+  invoice_number: z.string().nullable(),
+  invoice_status: z.enum(["pending_generation", "issued", "void", "generation_failed"]).nullable(),
+  invoice_pdf_storage_path: z.string().nullable(),
+  latest_email_id: z.string().uuid().nullable(),
+  latest_email_status: z.string().nullable(),
+  latest_email_error_safe: z.string().nullable(),
 });
 
 const leadRowSchema = z.object({
   id: z.string().uuid(),
   client_name: z.string(),
+  customer_email: z.string().email().nullable(),
   event_date: z.string().nullable(),
   guest_count: z.number().int().nullable(),
   quote_amount: z.union([z.string(), z.number()]).nullable(),
@@ -49,12 +58,13 @@ const bookingPageSchema = z.object({
   total: z.union([z.number().int().nonnegative(), z.string().regex(/^\d+$/u)]),
 });
 
-function booking(row: z.infer<typeof bookingRowSchema>): BookingRecord {
+function booking(row: z.infer<typeof bookingRowSchema>, downloadUrl: string | null): BookingRecord {
   return {
     id: row.id,
     bookingCode: row.booking_code,
     leadId: row.lead_id,
     clientName: row.client_name,
+    customerEmail: row.customer_email,
     eventType: row.event_type,
     eventDate: row.event_date,
     eventStartTime: row.event_start_time,
@@ -67,6 +77,23 @@ function booking(row: z.infer<typeof bookingRowSchema>): BookingRecord {
     paymentStatus: row.payment_status,
     serviceStatus: row.service_status,
     version: row.version,
+    invoice:
+      row.invoice_id && row.invoice_number && row.invoice_status
+        ? {
+            id: row.invoice_id,
+            number: row.invoice_number,
+            status: row.invoice_status,
+            downloadUrl,
+          }
+        : null,
+    latestEmail:
+      row.latest_email_id && row.latest_email_status
+        ? {
+            id: row.latest_email_id,
+            status: row.latest_email_status,
+            error: row.latest_email_error_safe,
+          }
+        : null,
   };
 }
 
@@ -74,6 +101,7 @@ function lead(row: z.infer<typeof leadRowSchema>): BookingLeadOption {
   return {
     id: row.id,
     clientName: row.client_name,
+    customerEmail: row.customer_email,
     eventDate: row.event_date,
     guestCount: row.guest_count,
     quoteAmount: row.quote_amount === null ? null : String(row.quote_amount),
@@ -123,10 +151,25 @@ export const loadBookingCrudData = cache(async function loadBookingCrudData({
     };
   }
 
+  const bookings = await Promise.all(
+    parsedPage.data.bookings.map(async (row) => {
+      if (!row.invoice_pdf_storage_path || row.invoice_status !== "issued") {
+        return booking(row, null);
+      }
+
+      const signed = await supabase.storage
+        .from("invoices")
+        .createSignedUrl(row.invoice_pdf_storage_path, 300);
+
+      return booking(row, signed.error ? null : signed.data.signedUrl);
+    }),
+  );
+
   return {
     ok: true,
     data: {
-      bookings: parsedPage.data.bookings.map(booking),
+      viewerRole: session.profile.role,
+      bookings,
       eligibleLeads: canCreate ? parsedPage.data.eligible_leads.map(lead) : [],
       canCreate,
       total: Number(parsedPage.data.total),

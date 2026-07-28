@@ -286,6 +286,7 @@ export async function createLeadAction(
       provider: "manual",
       source: parsed.data.source ?? "manual",
       client_name: parsed.data.clientName,
+      customer_email: parsed.data.customerEmail ?? null,
       phone_e164: phoneE164,
       phone_normalized: phoneE164,
       requirement: parsed.data.requirement ?? null,
@@ -345,6 +346,7 @@ export async function updateLeadAction(
     .from("leads")
     .update({
       client_name: parsed.data.clientName,
+      customer_email: parsed.data.customerEmail ?? null,
       phone_e164: phoneE164,
       phone_normalized: phoneE164,
       requirement: parsed.data.requirement ?? null,
@@ -392,23 +394,28 @@ export async function updateLeadStatusAction(
   }
 
   const supabase = await createServerSupabaseClient();
-  const result = await supabase
-    .from("leads")
-    .update({
-      status: parsed.data.status,
-      last_activity_at: new Date().toISOString(),
-    })
-    .eq("id", parsed.data.id)
-    .eq("version", parsed.data.expectedVersion)
-    .select("id,version")
-    .maybeSingle();
+  const result = await supabase.rpc("transition_lead_stage", {
+    p_expected_version: parsed.data.expectedVersion,
+    p_lead_id: parsed.data.id,
+    p_reason: parsed.data.reason ?? null,
+    p_to_status: parsed.data.status,
+  });
 
   if (result.error) {
+    const message = typeof result.error.message === "string" ? result.error.message : "";
+    if (message.includes("CONFLICT_STALE_VERSION")) return staleFailure();
+    if (message.includes("LEAD_QUALIFICATION_INCOMPLETE")) {
+      return failure(
+        "Add the event date, guest count, requirement and quote before qualifying this lead.",
+      );
+    }
+    if (
+      message.includes("INVALID_TERMINAL_LEAD_TRANSITION") ||
+      message.includes("LEAD_REOPEN_REQUIRES_MANAGER")
+    ) {
+      return failure("This stage change needs a valid reason and Manager-level authority.");
+    }
     return databaseFailure("update-lead-status", result.error);
-  }
-
-  if (!result.data) {
-    return staleFailure();
   }
 
   revalidateDomain("leads");
