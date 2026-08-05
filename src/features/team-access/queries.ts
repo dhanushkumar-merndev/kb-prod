@@ -2,16 +2,19 @@ import "server-only";
 
 import { z } from "zod";
 
+import { loadActiveFranchiseOptions } from "@/features/franchises";
 import { requireRoleSession } from "@/lib/auth/require-role-session";
+import { ROLES } from "@/lib/constants/roles";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-import { CREATABLE_ROLES } from "./permissions";
+import { CREATABLE_ROLES, requiresFranchiseSelection } from "./permissions";
 
 const profileSchema = z.object({
   id: z.string().uuid(),
   full_name: z.string(),
   phone_e164: z.string(),
-  role: z.enum(["director", "manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"]),
+  franchise_id: z.string().uuid().nullable(),
+  role: z.enum(ROLES),
   account_status: z.enum(["active", "inactive", "blocked", "payment_pending", "left_organization"]),
   joining_date: z.string().nullable(),
   last_login_at: z.string().nullable(),
@@ -20,7 +23,13 @@ const profileSchema = z.object({
 export async function loadTeamAccessData(
   options: { page?: number | undefined; search?: string | undefined } = {},
 ) {
-  const session = await requireRoleSession(["director", "manager", "hr", "sales_manager"]);
+  const session = await requireRoleSession([
+    "director",
+    "franchise",
+    "manager",
+    "hr",
+    "sales_manager",
+  ]);
   const supabase = await createServerSupabaseClient();
   const pageSize = 10;
   const page = Math.max(1, Math.floor(options.page ?? 1));
@@ -31,9 +40,10 @@ export async function loadTeamAccessData(
     .trim();
   let profileQuery = supabase
     .from("profiles")
-    .select("id,full_name,phone_e164,role,account_status,joining_date,last_login_at", {
-      count: "exact",
-    })
+    .select(
+      "id,full_name,phone_e164,franchise_id,role,account_status,joining_date,last_login_at",
+      { count: "exact" },
+    )
     .is("deleted_at", null)
     .order("full_name");
 
@@ -53,15 +63,29 @@ export async function loadTeamAccessData(
     return { ok: false as const, message: "Team access data could not be loaded." };
   }
 
+  // Only the Director picks a franchise. Everyone else creates inside their own,
+  // which the database derives from the caller rather than the form.
+  const needsFranchiseChoice = requiresFranchiseSelection(session.profile.role);
+  const franchiseOptions = needsFranchiseChoice ? await loadActiveFranchiseOptions() : [];
+  const franchiseNames = new Map(franchiseOptions.map((option) => [option.id, option.name]));
+
   return {
     ok: true as const,
     data: {
       viewerId: session.profile.id,
       viewerRole: session.profile.role,
+      viewerFranchiseName: session.profile.franchise_name,
       creatableRoles: CREATABLE_ROLES[session.profile.role],
+      needsFranchiseChoice,
+      franchiseOptions,
       page,
       pageSize,
-      profiles: parsed.data,
+      profiles: parsed.data.map((profile) => ({
+        ...profile,
+        franchise_name: profile.franchise_id
+          ? (franchiseNames.get(profile.franchise_id) ?? null)
+          : null,
+      })),
       search,
       total: count ?? 0,
     },

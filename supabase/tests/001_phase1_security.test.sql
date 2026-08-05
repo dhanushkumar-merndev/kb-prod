@@ -47,7 +47,9 @@ from (
     ('20000000-0000-4000-8000-000000000001'::uuid, 'director-b@test.invalid'),
     ('20000000-0000-4000-8000-000000000002'::uuid, 'sales-b@test.invalid'),
     ('20000000-0000-4000-8000-000000000003'::uuid, 'sales-manager-b@test.invalid'),
-    ('20000000-0000-4000-8000-000000000004'::uuid, 'manager-b@test.invalid')
+    ('20000000-0000-4000-8000-000000000004'::uuid, 'manager-b@test.invalid'),
+    ('10000000-0000-4000-8000-0000000000f1'::uuid, 'franchise-owner-a@test.invalid'),
+    ('20000000-0000-4000-8000-0000000000f1'::uuid, 'franchise-owner-b@test.invalid')
 ) as u(id, email);
 
 insert into public.organizations (id, name, slug)
@@ -60,9 +62,15 @@ values
   ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 5000),
   ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 5000);
 
+insert into public.franchises (id, organization_id, name, code)
+values
+  ('ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'Tenant A Main', 'TAM'),
+  ('ffffffff-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'Tenant B Main', 'TBM');
+
 insert into public.profiles (
   id,
   organization_id,
+  franchise_id,
   full_name,
   phone_e164,
   role,
@@ -74,6 +82,7 @@ values
   (
     '10000000-0000-4000-8000-000000000001',
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      null,
     'Director A',
     '+919000000001',
     'director',
@@ -84,6 +93,7 @@ values
   (
     '20000000-0000-4000-8000-000000000001',
     'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      null,
     'Director B',
     '+919100000001',
     'director',
@@ -95,6 +105,43 @@ values
 insert into public.profiles (
   id,
   organization_id,
+  franchise_id,
+  full_name,
+  phone_e164,
+  role,
+  reports_to_profile_id,
+  account_status,
+  joining_date
+)
+values
+  (
+    '10000000-0000-4000-8000-0000000000f1',
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'Franchise Owner A',
+    '+919000000091',
+    'franchise',
+    '10000000-0000-4000-8000-000000000001',
+    'active',
+    current_date
+  ),
+  (
+    '20000000-0000-4000-8000-0000000000f1',
+    'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    'ffffffff-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    'Franchise Owner B',
+    '+919100000091',
+    'franchise',
+    '20000000-0000-4000-8000-000000000001',
+    'active',
+    current_date
+  );
+
+
+insert into public.profiles (
+  id,
+  organization_id,
+  franchise_id,
   full_name,
   phone_e164,
   role,
@@ -106,20 +153,22 @@ values
   (
     '10000000-0000-4000-8000-000000000002',
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     'Manager A',
     '+919000000002',
     'manager',
-    '10000000-0000-4000-8000-000000000001',
+    '10000000-0000-4000-8000-0000000000f1',
     'active',
     current_date
   ),
   (
     '20000000-0000-4000-8000-000000000004',
     'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      'ffffffff-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     'Manager B',
     '+919100000004',
     'manager',
-    '20000000-0000-4000-8000-000000000001',
+    '20000000-0000-4000-8000-0000000000f1',
     'active',
     current_date
   );
@@ -127,6 +176,7 @@ values
 insert into public.profiles (
   id,
   organization_id,
+  franchise_id,
   full_name,
   phone_e164,
   role,
@@ -138,6 +188,7 @@ values
   (
     '10000000-0000-4000-8000-000000000003',
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     'HR A',
     '+919000000003',
     'hr',
@@ -148,6 +199,7 @@ values
   (
     '10000000-0000-4000-8000-000000000004',
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     'Sales Manager A',
     '+919000000004',
     'sales_manager',
@@ -158,6 +210,7 @@ values
   (
     '20000000-0000-4000-8000-000000000003',
     'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      'ffffffff-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     'Sales Manager B',
     '+919100000003',
     'sales_manager',
@@ -169,6 +222,7 @@ values
 insert into public.profiles (
   id,
   organization_id,
+  franchise_id,
   full_name,
   phone_e164,
   role,
@@ -180,6 +234,7 @@ values
   (
     '10000000-0000-4000-8000-000000000005',
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     'Sales A',
     '+919000000005',
     'sales',
@@ -190,6 +245,7 @@ values
   (
     '10000000-0000-4000-8000-000000000006',
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     'Chef A',
     '+919000000006',
     'chef',
@@ -200,6 +256,7 @@ values
   (
     '10000000-0000-4000-8000-000000000007',
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     'Inactive Sales A',
     '+919000000007',
     'sales',
@@ -210,6 +267,7 @@ values
   (
     '10000000-0000-4000-8000-000000000008',
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     'Replacement HR A',
     '+919000000008',
     'hr',
@@ -220,6 +278,7 @@ values
   (
     '20000000-0000-4000-8000-000000000002',
     'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      'ffffffff-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     'Sales B',
     '+919100000002',
     'sales',
@@ -231,6 +290,7 @@ values
 insert into public.profiles (
   id,
   organization_id,
+  franchise_id,
   full_name,
   phone_e164,
   role,
@@ -245,6 +305,7 @@ insert into public.profiles (
 values (
   '10000000-0000-4000-8000-000000000010',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
   'Part-time Chef A',
   '+919000000010',
   'part_time_chef',
@@ -645,12 +706,13 @@ select ok(
 select throws_ok(
   $test$
     insert into public.profiles (
-      id, organization_id, full_name, phone_e164, role,
+      id, organization_id, franchise_id, full_name, phone_e164, role,
       reports_to_profile_id, account_status
     )
     values (
       '10000000-0000-4000-8000-000000000009',
       'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       'Second HR',
       '+919000000009',
       'hr',
@@ -1102,6 +1164,7 @@ select throws_ok(
     insert into public.profiles (
       id,
       organization_id,
+  franchise_id,
       full_name,
       phone_e164,
       role,
@@ -1111,6 +1174,7 @@ select throws_ok(
     values (
       '10000000-0000-4000-8000-000000000009',
       'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'ffffffff-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       'Invalid HR Hierarchy',
       '+919000000009',
       'hr',

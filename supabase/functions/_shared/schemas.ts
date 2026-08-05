@@ -62,6 +62,9 @@ export const createTeamMemberSchema = z
   .object({
     aadhaarStoragePath: optionalStoragePath,
     accountStatus: initialAccountStatusSchema.default("active"),
+    // Honoured only for a Director actor; the database pins every other actor
+    // to their own franchise regardless of what is submitted here.
+    franchiseId: z.string().uuid().optional(),
     fullName: trimmedText(2, 120),
     joiningDate: isoDate.optional(),
     partTimePaymentAmount: z.number().finite().nonnegative().optional(),

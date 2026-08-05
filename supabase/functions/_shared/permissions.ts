@@ -2,21 +2,24 @@ import { AppError } from "./errors.ts";
 import type { ProfileRecord, ProfileRole } from "./types.ts";
 
 const CREATE_ROLE_PERMISSIONS: Partial<Record<ProfileRole, readonly ProfileRole[]>> = {
-  director: ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
+  director: ["franchise", "manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
+  franchise: ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
   manager: ["hr", "sales_manager", "sales", "chef", "part_time_chef"],
   hr: ["chef", "part_time_chef"],
   sales_manager: ["sales"],
 };
 
 const MANAGE_ROLE_PERMISSIONS: Partial<Record<ProfileRole, readonly ProfileRole[]>> = {
-  director: ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
+  director: ["franchise", "manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
+  franchise: ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
   manager: ["hr", "sales_manager", "sales", "chef", "part_time_chef"],
   hr: ["chef", "part_time_chef"],
   sales_manager: ["sales"],
 };
 
 const REPLACE_ROLE_PERMISSIONS: Partial<Record<ProfileRole, readonly ProfileRole[]>> = {
-  director: ["manager", "hr", "sales_manager"],
+  director: ["franchise", "manager", "hr", "sales_manager"],
+  franchise: ["manager", "hr", "sales_manager"],
   manager: ["hr", "sales_manager"],
 };
 
@@ -55,6 +58,21 @@ export function assertSeparateProfiles(actor: ProfileRecord, target: ProfileReco
 export function assertSameOrganization(actor: ProfileRecord, target: ProfileRecord): void {
   if (actor.organization_id !== target.organization_id) {
     // Deliberately indistinguishable from a missing row across tenants.
+    throw new AppError("NOT_FOUND");
+  }
+}
+
+/**
+ * A franchise-scoped actor may only touch profiles inside its own franchise.
+ * The database repeats this check, so a bug here cannot widen access.
+ */
+export function assertSameFranchise(actor: ProfileRecord, target: ProfileRecord): void {
+  if (actor.franchise_id === null) {
+    return;
+  }
+
+  if (actor.franchise_id !== target.franchise_id) {
+    // Deliberately indistinguishable from a missing row across franchises.
     throw new AppError("NOT_FOUND");
   }
 }

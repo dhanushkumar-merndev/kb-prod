@@ -14,13 +14,18 @@ import styles from "./team-access.module.css";
 interface TeamAccessData {
   viewerId: string;
   viewerRole: Role;
+  viewerFranchiseName: string | null;
   creatableRoles: readonly Role[];
+  needsFranchiseChoice: boolean;
+  franchiseOptions: Array<{ id: string; name: string; code: string }>;
   page: number;
   pageSize: number;
   profiles: Array<{
     id: string;
     full_name: string;
     phone_e164: string;
+    franchise_id: string | null;
+    franchise_name: string | null;
     role: Role;
     account_status: "active" | "inactive" | "blocked" | "payment_pending" | "left_organization";
     joining_date: string | null;
@@ -111,6 +116,9 @@ export function TeamAccessWorkspace({ data }: { data: TeamAccessData }) {
       {data.creatableRoles.length > 0 ? (
         <section className={styles.section}>
           <h2>Create team member</h2>
+          {data.needsFranchiseChoice && data.franchiseOptions.length === 0 ? (
+            <p>Create a franchise first — every account below the Director belongs to one.</p>
+          ) : null}
           <form action={createAction} className={styles.formGrid}>
             <label>
               Full name
@@ -130,6 +138,19 @@ export function TeamAccessWorkspace({ data }: { data: TeamAccessData }) {
                 ))}
               </select>
             </label>
+            {data.needsFranchiseChoice ? (
+              <label>
+                Franchise
+                <select name="franchiseId" required>
+                  <option value="">Select a franchise…</option>
+                  {data.franchiseOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} ({option.code})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
             <label>
               Temporary password
               <input minLength={8} name="password" required type="password" />
@@ -164,7 +185,12 @@ export function TeamAccessWorkspace({ data }: { data: TeamAccessData }) {
         <div className={styles.header}>
           <div>
             <h2>Team access</h2>
-            <p>Account changes are enforced immediately by Auth, RLS and session checks.</p>
+            <p>
+              {data.viewerFranchiseName
+                ? `${data.viewerFranchiseName} staff only. `
+                : "Every franchise. "}
+              Account changes are enforced immediately by Auth, RLS and session checks.
+            </p>
           </div>
           <span>{data.total}</span>
         </div>
@@ -201,6 +227,7 @@ export function TeamAccessWorkspace({ data }: { data: TeamAccessData }) {
                     <strong>{profile.full_name}</strong>
                     <span>
                       {ROLE_LABELS[profile.role]} · {profile.phone_e164}
+                      {profile.franchise_name ? ` · ${profile.franchise_name}` : ""}
                     </span>
                   </div>
                   <span className={styles.badge}>

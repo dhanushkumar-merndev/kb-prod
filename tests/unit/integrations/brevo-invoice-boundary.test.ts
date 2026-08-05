@@ -4,6 +4,12 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 
+// Git checks these files out with CRLF on Windows, so multi-line assertions
+// must compare against normalized text rather than the raw bytes on disk.
+function readSource(relativePath: string): string {
+  return readFileSync(resolve(root, relativePath), "utf8").replaceAll("\r\n", "\n");
+}
+
 describe("Brevo and invoice boundaries", () => {
   it("ships all required Edge Functions", () => {
     for (const name of [
@@ -25,9 +31,8 @@ describe("Brevo and invoice boundaries", () => {
   });
 
   it("uses private Storage and immutable replacement invoices", () => {
-    const migration = readFileSync(
-      resolve(root, "supabase/migrations/202607280001_email_invoice_lead_automation.sql"),
-      "utf8",
+    const migration = readSource(
+      "supabase/migrations/202607280001_email_invoice_lead_automation.sql",
     );
     expect(migration).toContain("'invoices',\n  'invoices',\n  false");
     expect(migration).toContain("function public.void_and_reissue_invoice");

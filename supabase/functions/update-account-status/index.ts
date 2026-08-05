@@ -3,6 +3,7 @@ import { AppError, fromDatabaseError } from "../_shared/errors.ts";
 import { parseJson, withEdgeRequest } from "../_shared/http.ts";
 import {
   assertCanManageRole,
+  assertSameFranchise,
   assertSameOrganization,
   assertSeparateProfiles,
 } from "../_shared/permissions.ts";
@@ -20,6 +21,7 @@ Deno.serve((request) =>
     }
 
     assertSameOrganization(actor, target);
+    assertSameFranchise(actor, target);
     assertSeparateProfiles(actor, target);
     assertCanManageRole(actor.role, target.role);
 

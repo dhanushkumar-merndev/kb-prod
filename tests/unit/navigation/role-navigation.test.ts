@@ -26,6 +26,7 @@ const EXPECTED_NAVIGATION = {
     { label: "Attendance", href: "/director/attendance" },
     { label: "Expenses", href: "/director/expenses" },
     { label: "Team & Access", href: "/director/team" },
+    { label: "Franchises", href: "/director/franchises" },
     { label: "Assign Work", href: "/director/tasks" },
     { label: "HR Overview", href: "/director/hr" },
     { label: "Leave", href: "/director/leave" },
@@ -35,6 +36,25 @@ const EXPECTED_NAVIGATION = {
     { label: "Login Activity", href: "/director/sessions" },
     { label: "Integrations", href: "/director/integrations" },
     { label: "Import & Sync", href: "/director/import-sync" },
+  ],
+  franchise: [
+    { label: "Dashboard", href: "/franchise/dashboard" },
+    { label: "Leads & Calls", href: "/franchise/leads" },
+    { label: "Conversations", href: "/franchise/conversations" },
+    { label: "Bookings", href: "/franchise/bookings" },
+    { label: "Payments", href: "/franchise/payments" },
+    { label: "Sales Team", href: "/franchise/sales-team" },
+    { label: "Chefs & Staff", href: "/franchise/workforce" },
+    { label: "Attendance", href: "/franchise/attendance" },
+    { label: "Expenses", href: "/franchise/expenses" },
+    { label: "Team & Access", href: "/franchise/team" },
+    { label: "Assign Work", href: "/franchise/tasks" },
+    { label: "HR Overview", href: "/franchise/hr" },
+    { label: "Leave", href: "/franchise/leave" },
+    { label: "Meetings", href: "/franchise/meetings" },
+    { label: "Payroll", href: "/franchise/payroll" },
+    { label: "Business Reports", href: "/franchise/reports" },
+    { label: "Login Activity", href: "/franchise/sessions" },
   ],
   manager: [
     { label: "Operations Dashboard", href: "/manager/dashboard" },
@@ -117,6 +137,7 @@ const EXPECTED_NAVIGATION = {
 
 const ROLE_NAMESPACES = {
   director: "director",
+  franchise: "franchise",
   manager: "manager",
   sales_manager: "sales-manager",
   sales: "sales",
@@ -131,6 +152,7 @@ describe("role navigation", () => {
   it("defines the requested display label for every CRM role", () => {
     expect(ROLE_DISPLAY_NAMES).toEqual({
       director: "Director",
+      franchise: "Franchise Owner",
       manager: "Manager",
       sales_manager: "Sales Manager",
       sales: "Sales Executive",

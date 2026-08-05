@@ -28,6 +28,27 @@ The browser never receives the service-role key or provider credentials. The
 legacy HTML is retained only at `reference/legacy-crm.html` for visual
 comparison and is not an application dependency.
 
+## Franchise tenancy
+
+An organization is split into franchises. The Director is organization-wide;
+every other profile belongs to exactly one franchise, and every operational row
+carries that franchise's `franchise_id`.
+
+Because a `SECURITY DEFINER` RPC bypasses RLS entirely, table policies alone
+cannot contain a franchise. Isolation is therefore layered:
+
+| Layer                                            | Covers                              |
+| ------------------------------------------------ | ----------------------------------- |
+| `RESTRICTIVE` RLS policy per franchise-scoped table | direct PostgREST reads and writes |
+| `public.apply_franchise_scope()` row trigger        | writes made through definer RPCs  |
+| franchise predicates inside definer read models     | aggregate and paginated reads     |
+
+The trigger also stamps `franchise_id` on insert, deriving it from the row's
+natural parent (a booking's lead, a payment's booking) and falling back to the
+acting profile's franchise. A row that resolves to no franchise stays
+organization-level and only the Director can see it, so a derivation gap fails
+closed. `docs/ROLES_AND_PERMISSIONS.md` holds the role contract.
+
 ## Runtime boundaries
 
 | Boundary                | Responsibility                                                                                                               | Trust level                          |
@@ -78,11 +99,12 @@ for the caller.
 
 ## Role route structure
 
-All seven roles use the same shell and dynamic module renderer:
+All eight roles use the same shell and dynamic module renderer:
 
 | Database role    | URL namespace     | Home                        |
 | ---------------- | ----------------- | --------------------------- |
 | `director`       | `/director`       | `/director/dashboard`       |
+| `franchise`      | `/franchise`      | `/franchise/dashboard`      |
 | `manager`        | `/manager`        | `/manager/dashboard`        |
 | `hr`             | `/hr`             | `/hr/dashboard`             |
 | `sales_manager`  | `/sales-manager`  | `/sales-manager/dashboard`  |
@@ -173,7 +195,8 @@ idempotency keys, active assignments and open shifts.
 
 ## Edge Functions
 
-Privileged account functions:
+Privileged account functions, all of which confine a franchise-scoped actor to
+its own franchise before using the service-role client:
 
 - `bootstrap-organization`
 - `create-team-member`

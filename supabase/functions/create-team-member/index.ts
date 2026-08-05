@@ -11,8 +11,9 @@ const AUTH_CANDIDATE_RECOVERY_AGE_MS = 60_000;
 
 const REPORTING_ROLE: Record<Exclude<ProfileRole, "director">, ProfileRole> = {
   chef: "hr",
+  franchise: "director",
   hr: "manager",
-  manager: "director",
+  manager: "franchise",
   part_time_chef: "hr",
   sales: "sales_manager",
   sales_manager: "manager",
@@ -21,6 +22,7 @@ const REPORTING_ROLE: Record<Exclude<ProfileRole, "director">, ProfileRole> = {
 async function resolveReportingProfile(
   actor: ProfileRecord,
   targetRole: Exclude<ProfileRole, "director">,
+  franchiseId: string,
 ): Promise<string> {
   const requiredRole = REPORTING_ROLE[targetRole];
   if (actor.role === requiredRole) {
@@ -28,15 +30,19 @@ async function resolveReportingProfile(
   }
 
   const admin = getAdminClient();
-  const { data, error } = await admin
+  let query = admin
     .from("profiles")
     .select("id")
     .eq("organization_id", actor.organization_id)
     .eq("role", requiredRole)
     .eq("account_status", "active")
-    .is("deleted_at", null)
-    .limit(1)
-    .maybeSingle();
+    .is("deleted_at", null);
+
+  // Only a Franchise Owner reports to the organization-level Director. Every
+  // other parent must be inside the same franchise as the new account.
+  query = requiredRole === "director" ? query.is("franchise_id", null) : query.eq("franchise_id", franchiseId);
+
+  const { data, error } = await query.limit(1).maybeSingle();
 
   if (error) {
     throw fromDatabaseError(error);
@@ -237,7 +243,31 @@ Deno.serve((request) =>
       throw new AppError("DUPLICATE_PHONE");
     }
 
-    const reportsToProfileId = await resolveReportingProfile(actor, input.role);
+    // The Director chooses the franchise; everybody else creates inside theirs.
+    // create_team_member_profile re-derives this and rejects a mismatch.
+    const franchiseId = actor.franchise_id ?? input.franchiseId;
+    if (!franchiseId) {
+      throw new AppError("FRANCHISE_REQUIRED");
+    }
+
+    const { data: franchise, error: franchiseError } = await admin
+      .from("franchises")
+      .select("id")
+      .eq("id", franchiseId)
+      .eq("organization_id", actor.organization_id)
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (franchiseError) {
+      throw fromDatabaseError(franchiseError);
+    }
+
+    if (!franchise) {
+      throw new AppError("FRANCHISE_NOT_FOUND");
+    }
+
+    const reportsToProfileId = await resolveReportingProfile(actor, input.role, franchiseId);
 
     let accountStatus: AccountStatus = input.accountStatus;
     if (input.role === "part_time_chef") {
@@ -303,6 +333,7 @@ Deno.serve((request) =>
       p_account_status: accountStatus,
       p_actor_profile_id: actor.id,
       p_auth_user_id: user.id,
+      p_franchise_id: franchiseId,
       p_full_name: input.fullName,
       p_part_time_payment_amount: input.partTimePaymentAmount ?? null,
       p_part_time_payment_proof_path: input.partTimePaymentProofPath ?? null,
@@ -332,10 +363,9 @@ Deno.serve((request) =>
       }
 
       await cleanupUnlinkedAuthUser(user.id, requestId);
-      const fallback =
-        input.role === "manager" || input.role === "hr" || input.role === "sales_manager"
-          ? "ROLE_HOLDER_CONFLICT"
-          : "DUPLICATE_PHONE";
+      const fallback = ["franchise", "manager", "hr", "sales_manager"].includes(input.role)
+        ? "ROLE_HOLDER_CONFLICT"
+        : "DUPLICATE_PHONE";
       throw fromDatabaseError(profileError, fallback);
     }
 

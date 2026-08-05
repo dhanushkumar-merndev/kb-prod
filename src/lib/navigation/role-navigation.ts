@@ -39,7 +39,8 @@ export type ModuleResource =
   | "login_sessions"
   | "integrations"
   | "sync_runs"
-  | "temporary_workers";
+  | "temporary_workers"
+  | "franchises";
 
 export interface RoleNavigationItem {
   label: string;
@@ -68,6 +69,7 @@ function item(
 
 export const ROLE_NAMESPACES: Record<Role, string> = {
   director: "director",
+  franchise: "franchise",
   manager: "manager",
   hr: "hr",
   sales_manager: "sales-manager",
@@ -78,6 +80,7 @@ export const ROLE_NAMESPACES: Record<Role, string> = {
 
 export const ROLE_DISPLAY_NAMES: Record<Role, string> = {
   director: "Director",
+  franchise: "Franchise Owner",
   manager: "Manager",
   hr: "HR",
   sales_manager: "Sales Manager",
@@ -87,6 +90,7 @@ export const ROLE_DISPLAY_NAMES: Record<Role, string> = {
 };
 
 const director = "director";
+const franchise = "franchise";
 const manager = "manager";
 const hr = "hr";
 const salesManager = "sales-manager";
@@ -169,6 +173,14 @@ export const ROLE_NAVIGATION: Record<Role, readonly RoleNavigationItem[]> = {
       "team",
       "all_profiles",
     ),
+    item(
+      director,
+      "franchises",
+      "Franchises",
+      "Franchise units and their owners.",
+      "team",
+      "franchises",
+    ),
     item(director, "tasks", "Assign Work", "Operational tasks and ownership.", "tasks", "tasks"),
     item(
       director,
@@ -212,6 +224,109 @@ export const ROLE_NAVIGATION: Record<Role, readonly RoleNavigationItem[]> = {
       "Provider synchronization runs.",
       "integrations",
       "sync_runs",
+    ),
+  ],
+  franchise: [
+    item(
+      franchise,
+      "dashboard",
+      "Dashboard",
+      "Your franchise operations and performance.",
+      "dashboard",
+      "dashboard",
+    ),
+    item(
+      franchise,
+      "leads",
+      "Leads & Calls",
+      "Leads and call activity in your franchise.",
+      "leads",
+      "leads",
+    ),
+    item(
+      franchise,
+      "conversations",
+      "Conversations",
+      "Customer message activity.",
+      "conversations",
+      "conversations",
+    ),
+    item(franchise, "bookings", "Bookings", "Every booking in your franchise.", "bookings", "bookings"),
+    item(
+      franchise,
+      "payments",
+      "Payments",
+      "Submitted and verified payments.",
+      "payments",
+      "payments",
+    ),
+    item(
+      franchise,
+      "sales-team",
+      "Sales Team",
+      "Your sales leadership and executives.",
+      "team",
+      "sales_profiles",
+    ),
+    item(
+      franchise,
+      "workforce",
+      "Chefs & Staff",
+      "Your kitchen and workforce directory.",
+      "team",
+      "workforce_profiles",
+    ),
+    item(
+      franchise,
+      "attendance",
+      "Attendance",
+      "Live and completed shifts.",
+      "attendance",
+      "attendance",
+    ),
+    item(
+      franchise,
+      "expenses",
+      "Expenses",
+      "Claims across your franchise.",
+      "expenses",
+      "expenses",
+    ),
+    item(
+      franchise,
+      "team",
+      "Team & Access",
+      "Franchise staff access and account status.",
+      "team",
+      "all_profiles",
+    ),
+    item(franchise, "tasks", "Assign Work", "Operational tasks and ownership.", "tasks", "tasks"),
+    item(
+      franchise,
+      "hr",
+      "HR Overview",
+      "Workforce bookings and records.",
+      "team",
+      "workforce_bookings",
+    ),
+    item(franchise, "leave", "Leave", "Franchise leave requests.", "leave", "leave"),
+    item(franchise, "meetings", "Meetings", "Scheduled team meetings.", "meetings", "meetings"),
+    item(franchise, "payroll", "Payroll", "Payroll periods and earnings.", "payroll", "payroll"),
+    item(
+      franchise,
+      "reports",
+      "Business Reports",
+      "Live booking and revenue totals.",
+      "reports",
+      "reports",
+    ),
+    item(
+      franchise,
+      "sessions",
+      "Login Activity",
+      "Franchise staff application sessions.",
+      "activity",
+      "login_sessions",
     ),
   ],
   manager: [

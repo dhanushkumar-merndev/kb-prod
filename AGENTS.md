@@ -438,15 +438,22 @@ Create `bootstrap-organization`, protected by a one-time deployment secret. It a
 # 7. Final hierarchy and upper-role access
 
 ```text
-Director
-└── Manager
-    ├── HR
-    │   ├── Chef
-    │   ├── Part-time Chef
-    │   └── Temporary workers — no login
-    └── Sales Manager
-        └── Sales Members
+Director                          — organization-wide, belongs to no franchise
+└── Franchise                     — one owner per franchise unit
+    └── Manager
+        ├── HR
+        │   ├── Chef
+        │   ├── Part-time Chef
+        │   └── Temporary workers — no login
+        └── Sales Manager
+            └── Sales Members
 ```
+
+An organization contains many franchises. Every profile except the Director
+belongs to exactly one franchise, and every tenant row carries `franchise_id`.
+A franchise-scoped user must never read or write another franchise's rows; only
+the Director sees the whole organization. Only the Director may create a
+franchise or route a lead from one franchise to another.
 
 General permission rule:
 
@@ -458,7 +465,7 @@ General permission rule:
 - individual workers can access only their own/assigned records;
 - all rules must be enforced by RLS and server authorization, not only hidden buttons.
 
-Allow one active Manager, one active HR and one active Sales Manager per organization. Enforce this with partial unique indexes.
+Allow one active Franchise owner, one active Manager, one active HR and one active Sales Manager **per franchise**, and one active Director per organization. Enforce this with partial unique indexes.
 
 ---
 
@@ -854,6 +861,7 @@ Role enum:
 
 ```text
 director
+franchise
 manager
 hr
 sales_manager
@@ -1719,13 +1727,25 @@ Create helper functions such as:
 ```sql
 current_profile_id()
 current_organization_id()
+current_franchise_id()
 current_role()
 is_active_profile()
 is_director()
+is_franchise_owner()
+franchise_scope_allows(uuid)
 is_manager_or_director()
 is_hr_scope_admin()
 is_sales_scope_admin()
 ```
+
+Franchise isolation must be enforced three times over, because a
+`SECURITY DEFINER` RPC is not subject to RLS:
+
+1. a `RESTRICTIVE` RLS policy on every franchise-scoped table;
+2. a row trigger on every franchise-scoped table, which also catches definer RPC
+   writes;
+3. explicit franchise predicates inside definer read models and `can_read_*`
+   predicates.
 
 All helpers must use the authenticated user and database profile. Never trust role or organization values sent by the browser.
 

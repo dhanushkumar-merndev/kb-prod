@@ -40,54 +40,69 @@ double_confirm_changes = true
 enable_confirmations = false
 
 [functions.bootstrap-organization]
+import_map = "./functions/deno.json"
 # Bootstrap has no user JWT yet. The Edge Function validates BOOTSTRAP_TOKEN in
 # constant time and the database RPC also enforces a globally one-time lock.
 verify_jwt = false
 
 [functions.create-team-member]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.update-account-status]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.replace-role-holder]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 # Superfone authenticates webhook requests with its provider signature. JWT
 # verification must be disabled at the gateway so the function can validate the
 # raw signed payload before performing any write.
 [functions.superfone-webhook]
 verify_jwt = false
+import_map = "./functions/deno.json"
 
 [functions.superfone-test-connection]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.superfone-import-existing-leads]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.superfone-replay-event]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.superfone-send-message]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.superfone-send-media]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.superfone-sync]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.brevo-test-connection]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 [functions.generate-booking-invoice]
 verify_jwt = true
+import_map = "./functions/deno.json"
 
 # Supabase Cron calls this function with the service-role bearer token. A
 # Director JWT may also process only the caller's organization on demand.
 [functions.process-email-outbox]
 verify_jwt = false
+import_map = "./functions/deno.json"
 
 # Brevo authenticates with the configured webhook token rather than a user JWT.
 [functions.brevo-webhook]
 verify_jwt = false
+import_map = "./functions/deno.json"

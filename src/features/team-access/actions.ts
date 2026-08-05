@@ -7,13 +7,24 @@ import type { CrudActionState } from "@/features/core-crud/types";
 import { requireActiveSession } from "@/lib/auth/require-session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-import { CREATABLE_ROLES } from "./permissions";
+import { CREATABLE_ROLES, requiresFranchiseSelection } from "./permissions";
 
 const createSchema = z.object({
   fullName: z.string().trim().min(2).max(120),
   phone: z.string().trim().min(10).max(32),
   password: z.string().min(8).max(128),
-  role: z.enum(["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"]),
+  role: z.enum(["franchise", "manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"]),
+  // Only honoured for the Director. Every other actor is pinned to their own
+  // franchise by the database, whatever the form submits.
+  franchiseId: z
+    .string()
+    .trim()
+    .transform((value) => (value === "" ? undefined : value))
+    .optional()
+    .refine(
+      (value) => value === undefined || z.string().uuid().safeParse(value).success,
+      "Select a franchise.",
+    ),
   joiningDate: z
     .string()
     .trim()
@@ -77,6 +88,10 @@ function revalidateTeam(): void {
     "/director/team",
     "/director/sales-team",
     "/director/workforce",
+    "/director/franchises",
+    "/franchise/team",
+    "/franchise/sales-team",
+    "/franchise/workforce",
     "/manager/team",
     "/manager/workforce",
     "/hr/chefs",
@@ -105,6 +120,10 @@ export async function createTeamMemberAction(
     return actionState("error", "You do not have permission to create this role.");
   }
 
+  if (requiresFranchiseSelection(session.profile.role) && !parsed.data.franchiseId) {
+    return actionState("error", "Choose the franchise this account belongs to.");
+  }
+
   const isWorkforce = ["chef", "part_time_chef"].includes(parsed.data.role);
   if (isWorkforce && (!parsed.data.paymentType || parsed.data.paymentAmount === undefined)) {
     return actionState("error", "Payment type and amount are required for Chef accounts.");
@@ -118,6 +137,7 @@ export async function createTeamMemberAction(
       password: parsed.data.password,
       role: parsed.data.role,
       accountStatus: "active",
+      ...(parsed.data.franchiseId ? { franchiseId: parsed.data.franchiseId } : {}),
       ...(parsed.data.joiningDate ? { joiningDate: parsed.data.joiningDate } : {}),
       ...(parsed.data.paymentType ? { paymentType: parsed.data.paymentType } : {}),
       ...(parsed.data.paymentAmount !== undefined

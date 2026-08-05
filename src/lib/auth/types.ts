@@ -13,6 +13,10 @@ export type AccountStatus = SharedAccountStatus;
 export const authContextSchema = z.object({
   id: z.string().uuid(),
   organization_id: z.string().uuid(),
+  // Null only for the Director, who is organization-wide rather than in a
+  // single franchise.
+  franchise_id: z.string().uuid().nullable(),
+  franchise_name: z.string().nullable(),
   full_name: z.string().min(1),
   phone_e164: z.string().regex(/^\+[1-9]\d{7,14}$/),
   role: z.enum(ROLES),

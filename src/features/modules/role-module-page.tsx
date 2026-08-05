@@ -12,6 +12,7 @@ import {
   TaskCrudPanel,
 } from "@/features/core-crud";
 import { EmployeeRecordsPanel } from "@/features/employee-records";
+import { FranchisesPanel } from "@/features/franchises";
 import { IntegrationPanel } from "@/features/integrations";
 import { MeetingCrudPanel, TemporaryWorkerCrudPanel } from "@/features/secondary-crud";
 import { SalesOperationsPanel } from "@/features/sales-operations";
@@ -64,6 +65,7 @@ const REALTIME_TABLES: Partial<
   tasks: ["tasks"],
   meetings: ["meetings", "meeting_attendees"],
   temporary_workers: ["temporary_workers", "temporary_worker_assignments"],
+  franchises: ["franchises", "profiles"],
   integrations: ["integration_connections", "email_outbox", "invoices"],
 };
 
@@ -95,7 +97,9 @@ export async function RoleModulePage({
         <>
           <LeadCrudPanel page={leadPage} search={leadSearch} />
           <SalesOperationsPanel
-            mode={role === "director" || role === "manager" ? "overview" : "activity"}
+            mode={role === "director" || role === "franchise" || role === "manager"
+                ? "overview"
+                : "activity"}
           />
         </>
       );
@@ -120,7 +124,7 @@ export async function RoleModulePage({
     showLiveTable = false;
   } else if (
     navigationItem.resource === "expenses" &&
-    ["director", "manager", "hr"].includes(role)
+    ["director", "franchise", "manager", "hr"].includes(role)
   ) {
     workingPanel = <ExpenseReviewPanel />;
     showLiveTable = false;
@@ -138,7 +142,7 @@ export async function RoleModulePage({
       </>
     );
     showLiveTable = false;
-  } else if (navigationItem.resource === "leave" && ["director", "manager", "hr"].includes(role)) {
+  } else if (navigationItem.resource === "leave" && ["director", "franchise", "manager", "hr"].includes(role)) {
     workingPanel = <LeaveReviewPanel />;
     showLiveTable = false;
   } else if (
@@ -162,6 +166,9 @@ export async function RoleModulePage({
   } else if (navigationItem.resource === "bookings") {
     workingPanel = <BookingCrudPanel page={bookingPage} search={bookingSearch} />;
     showLiveTable = false;
+  } else if (navigationItem.resource === "franchises") {
+    workingPanel = <FranchisesPanel />;
+    showLiveTable = false;
   } else if (navigationItem.resource === "integrations") {
     workingPanel = <IntegrationPanel />;
     showLiveTable = false;
@@ -176,13 +183,13 @@ export async function RoleModulePage({
     showLiveTable = false;
   } else if (
     navigationItem.resource === "attendance" &&
-    ["director", "manager", "hr"].includes(role)
+    ["director", "franchise", "manager", "hr"].includes(role)
   ) {
     workingPanel = <AttendanceApprovalPanel />;
     showLiveTable = false;
   } else if (
     navigationItem.resource === "workforce_profiles" &&
-    (["director", "manager"].includes(role) || (role === "hr" && slug === "employee-records"))
+    (["director", "franchise", "manager"].includes(role) || (role === "hr" && slug === "employee-records"))
   ) {
     workingPanel = <EmployeeRecordsPanel />;
     showLiveTable = false;

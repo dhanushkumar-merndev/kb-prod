@@ -79,6 +79,21 @@ constraints, role-holder replacement/session invalidation, deduplication,
 private records and key workforce/payment operations. Treat the SQL file's
 current assertions as the source of exact database coverage.
 
+`supabase/tests/003_franchise_isolation.test.sql` is a pgTAP transaction with 26
+planned assertions covering the franchise tier: one organization with two
+franchises, and a full Franchise Owner → Manager → Sales Manager → Sales chain in
+each.
+
+It asserts that every franchise-scoped table carries both the restrictive
+isolation policy and the write-guard trigger, that role-holder uniqueness is per
+franchise, that a Franchise Owner cannot read, update or plant rows in another
+franchise, that the definer read models and dashboard aggregates are franchise
+scoped, that only the Director may create a franchise or route a lead, and that
+the Director retains organization-wide reach.
+
+Its fixtures build a live application session (`login_sessions` bound to
+`auth.sessions`), because access requires one.
+
 Run against a clean local database:
 
 ```bash

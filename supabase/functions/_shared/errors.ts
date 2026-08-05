@@ -8,6 +8,11 @@ export type AppErrorCode =
   | "VALIDATION_FAILED"
   | "CONFLICT_STALE_VERSION"
   | "DUPLICATE_PHONE"
+  | "FRANCHISE_REQUIRED"
+  | "FRANCHISE_NOT_FOUND"
+  | "FRANCHISE_SCOPE_VIOLATION"
+  | "FRANCHISE_HAS_ACTIVE_STAFF"
+  | "DUPLICATE_FRANCHISE"
   | "ROLE_HOLDER_CONFLICT"
   | "ROLE_HOLDER_REQUIRED"
   | "PAYMENT_PROOF_REQUIRED"
@@ -87,6 +92,26 @@ const DEFAULTS: Record<AppErrorCode, { message: string; status: number }> = {
   },
   DUPLICATE_PHONE: {
     message: "That phone number already has an account.",
+    status: 409,
+  },
+  FRANCHISE_REQUIRED: {
+    message: "Choose the franchise this account belongs to.",
+    status: 400,
+  },
+  FRANCHISE_NOT_FOUND: {
+    message: "That franchise does not exist or is no longer active.",
+    status: 404,
+  },
+  FRANCHISE_SCOPE_VIOLATION: {
+    message: "That record belongs to another franchise.",
+    status: 403,
+  },
+  FRANCHISE_HAS_ACTIVE_STAFF: {
+    message: "Deactivate the franchise staff accounts before closing the franchise.",
+    status: 409,
+  },
+  DUPLICATE_FRANCHISE: {
+    message: "A franchise with that name or code already exists.",
     status: 409,
   },
   ROLE_HOLDER_CONFLICT: {
@@ -228,6 +253,11 @@ const DATABASE_CODES: readonly AppErrorCode[] = [
   "VALIDATION_FAILED",
   "CONFLICT_STALE_VERSION",
   "DUPLICATE_PHONE",
+  "FRANCHISE_REQUIRED",
+  "FRANCHISE_NOT_FOUND",
+  "FRANCHISE_SCOPE_VIOLATION",
+  "FRANCHISE_HAS_ACTIVE_STAFF",
+  "DUPLICATE_FRANCHISE",
   "ROLE_HOLDER_CONFLICT",
   "ROLE_HOLDER_REQUIRED",
   "PAYMENT_PROOF_REQUIRED",

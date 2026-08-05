@@ -4,6 +4,8 @@ import {
   canAccessDomain,
   canCreateRole,
   canManageAccountStatus,
+  isFranchiseScopedRole,
+  isOrganizationAdmin,
   isSalesScopeAdmin,
   isWorkforceScopeAdmin,
 } from "@/lib/permissions/role-hierarchy";
@@ -40,5 +42,53 @@ describe("role hierarchy permissions", () => {
     expect(isSalesScopeAdmin("hr")).toBe(false);
     expect(isWorkforceScopeAdmin("hr")).toBe(true);
     expect(isWorkforceScopeAdmin("sales_manager")).toBe(false);
+  });
+
+  it("lets only the Director create a Franchise Owner", () => {
+    expect(canCreateRole("director", "franchise")).toBe(true);
+    expect(canCreateRole("franchise", "franchise")).toBe(false);
+    expect(canCreateRole("manager", "franchise")).toBe(false);
+    expect(canCreateRole("hr", "franchise")).toBe(false);
+    expect(canCreateRole("sales_manager", "franchise")).toBe(false);
+  });
+
+  it("gives a Franchise Owner the full team below it", () => {
+    for (const role of ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"] as const) {
+      expect(canCreateRole("franchise", role)).toBe(true);
+      expect(canManageAccountStatus("franchise", role)).toBe(true);
+    }
+  });
+
+  it("stops a Manager from administering the Franchise Owner above it", () => {
+    expect(canManageAccountStatus("manager", "franchise")).toBe(false);
+    expect(canManageAccountStatus("franchise", "director")).toBe(false);
+  });
+
+  it("keeps organization ownership with the Director alone", () => {
+    expect(isOrganizationAdmin("director")).toBe(true);
+    expect(isOrganizationAdmin("franchise")).toBe(false);
+    expect(canAccessDomain("franchise", "integration")).toBe(false);
+    expect(canAccessDomain("franchise", "organization")).toBe(false);
+  });
+
+  it("treats a Franchise Owner as an operational admin inside its franchise", () => {
+    expect(isSalesScopeAdmin("franchise")).toBe(true);
+    expect(isWorkforceScopeAdmin("franchise")).toBe(true);
+    expect(canAccessDomain("franchise", "payroll")).toBe(true);
+  });
+
+  it("pins every role except the Director to one franchise", () => {
+    expect(isFranchiseScopedRole("director")).toBe(false);
+    for (const role of [
+      "franchise",
+      "manager",
+      "hr",
+      "sales_manager",
+      "sales",
+      "chef",
+      "part_time_chef",
+    ] as const) {
+      expect(isFranchiseScopedRole(role)).toBe(true);
+    }
   });
 });

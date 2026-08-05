@@ -131,6 +131,21 @@ does not enable capabilities without the official adapter.
 
 ## Edge Function deployment
 
+The functions import npm packages by bare specifier (`@supabase/supabase-js`,
+`zod`, `pdf-lib`). The remote bundler cannot resolve those without an import
+map, so every `[functions.*]` block in `supabase/config.toml` declares
+`import_map = "./functions/deno.json"`. A new function must add the same line or
+its deploy fails with `Relative import path ... not prefixed with / or ./ or ../`.
+
+`verify_jwt` is also read from `config.toml`, so the whole set deploys in one
+command and each function keeps its configured gateway behaviour:
+
+```bash
+pnpm exec supabase functions deploy --project-ref <project-ref>
+```
+
+The per-function commands below remain valid when deploying a single function.
+
 Functions requiring a staff JWT:
 
 ```bash

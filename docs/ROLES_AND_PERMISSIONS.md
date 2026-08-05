@@ -7,19 +7,45 @@ remains authoritative.
 ## Hierarchy
 
 ```text
-Director
-└── Manager
-    ├── HR
-    │   ├── Chef
-    │   ├── Part-time Chef
-    │   └── Temporary workers (no login)
-    └── Sales Manager
-        └── Sales Executive (`sales`)
+Director                                   (organization-wide, no franchise)
+└── Franchise Owner (`franchise`)          (one per franchise)
+    └── Manager
+        ├── HR
+        │   ├── Chef
+        │   ├── Part-time Chef
+        │   └── Temporary workers (no login)
+        └── Sales Manager
+            └── Sales Executive (`sales`)
 ```
 
-Exactly one active Director, Manager, HR and Sales Manager is allowed per
-organization. Replacement is a transactional, audited workflow; deactivation
-never deletes historical records.
+Exactly one active Director is allowed per organization. Exactly one active
+Franchise Owner, Manager, HR and Sales Manager is allowed **per franchise**, so
+every franchise runs a complete team of its own. Replacement is a transactional,
+audited workflow; deactivation never deletes historical records.
+
+## Franchise tenancy
+
+An organization contains many franchises. Every profile except the Director
+belongs to exactly one franchise, and every operational row carries the
+`franchise_id` of the franchise that owns it.
+
+- only the Director creates franchises or routes a lead between them;
+- a franchise-scoped user reads and writes only its own franchise's rows;
+- the Director sees the whole organization;
+- a row with no franchise is organization-level and visible only to the
+  Director, so any derivation gap fails closed rather than leaking.
+
+Isolation is enforced in three independent layers, because each covers a gap the
+others cannot:
+
+1. a `RESTRICTIVE` RLS policy on every franchise-scoped table, which can only
+   ever remove access and is ANDed with the existing permissive policies;
+2. a row trigger on every franchise-scoped table, which also catches writes made
+   through `SECURITY DEFINER` RPCs that bypass RLS entirely;
+3. explicit franchise predicates inside the `SECURITY DEFINER` read models and
+   `can_read_*` predicates, which RLS never sees.
+
+`supabase/tests/003_franchise_isolation.test.sql` asserts all three.
 
 ## Enforcement layers
 
@@ -52,20 +78,24 @@ application sessions, revokes Auth sessions and writes an audit event.
 
 ## Domain permission matrix
 
-| Domain                 | Director               | Manager                 | HR                       | Sales Manager             | Sales                     | Chef / PT Chef        |
-| ---------------------- | ---------------------- | ----------------------- | ------------------------ | ------------------------- | ------------------------- | --------------------- |
-| Organization settings  | Manage                 | No ownership/secrets    | No                       | No                        | No                        | No                    |
-| Superfone setup/import | Director only          | No                      | No                       | No                        | No                        | No                    |
-| Leads                  | All                    | Operational all         | No                       | Sales team                | Assigned/owned            | No                    |
-| Conversations/calls    | All                    | Operational all         | No                       | Sales team                | Assigned                  | No                    |
-| Bookings               | All                    | All                     | Confirmed/workforce view | Team                      | Own sold                  | Assigned jobs         |
-| Customer payments      | Verify/override        | Verify/override         | No                       | Verify/reject             | Submit for own bookings   | No                    |
-| Workforce accounts     | All lower roles        | Operational lower roles | Chef/PT Chef             | Availability only         | Availability only         | Own profile           |
-| Attendance             | Override               | Override                | Manage/review            | Own only where applicable | Own only where applicable | Own start/end/history |
-| Expense review         | Override/final         | Final within workflow   | Workforce verification   | Own submission            | Own submission            | Own submission        |
-| Leave review           | Override               | Override                | Workforce branch         | Sales branch              | Own                       | Own                   |
-| Payroll                | Full approval/pay/lock | Review                  | Generate/adjust/prepare  | No                        | No                        | Own earnings          |
-| Sessions/audit         | Organization-wide      | Lower-role/scoped       | Workforce-scoped         | Sales-scoped              | Own actions               | Own actions           |
+All rows below are additionally confined to the actor's own franchise; only the
+Director is organization-wide.
+
+| Domain                 | Director               | Franchise Owner          | Manager                 | HR                       | Sales Manager             | Sales                     | Chef / PT Chef        |
+| ---------------------- | ---------------------- | ------------------------ | ----------------------- | ------------------------ | ------------------------- | ------------------------- | --------------------- |
+| Franchises             | Create/close/route     | No                       | No                      | No                       | No                        | No                        | No                    |
+| Organization settings  | Manage                 | No                       | No ownership/secrets    | No                       | No                        | No                        | No                    |
+| Superfone setup/import | Director only          | No                       | No                      | No                       | No                        | No                        | No                    |
+| Leads                  | All                    | Own franchise            | Operational all         | No                       | Sales team                | Assigned/owned            | No                    |
+| Conversations/calls    | All                    | Own franchise            | Operational all         | No                       | Sales team                | Assigned                  | No                    |
+| Bookings               | All                    | Own franchise            | All                     | Confirmed/workforce view | Team                      | Own sold                  | Assigned jobs         |
+| Customer payments      | Verify/override        | Verify/override          | Verify/override         | No                       | Verify/reject             | Submit for own bookings   | No                    |
+| Workforce accounts     | All lower roles        | All roles in franchise   | Operational lower roles | Chef/PT Chef             | Availability only         | Availability only         | Own profile           |
+| Attendance             | Override               | Override                 | Override                | Manage/review            | Own only where applicable | Own only where applicable | Own start/end/history |
+| Expense review         | Override/final         | Override/final           | Final within workflow   | Workforce verification   | Own submission            | Own submission            | Own submission        |
+| Leave review           | Override               | Override                 | Override                | Workforce branch         | Sales branch              | Own                       | Own                   |
+| Payroll                | Full approval/pay/lock | Review                   | Review                  | Generate/adjust/prepare  | No                        | No                        | Own earnings          |
+| Sessions/audit         | Organization-wide      | Franchise-wide           | Lower-role/scoped       | Workforce-scoped         | Sales-scoped              | Own actions               | Own actions           |
 
 RLS redacts rows and restricted columns; the UI does not fetch sensitive data
 and hide it with CSS.
@@ -74,10 +104,15 @@ and hide it with CSS.
 
 ### Create scope
 
-| Actor                       | May create                                              |
-| --------------------------- | ------------------------------------------------------- |
-| Director                    | Manager, HR, Sales Manager, Sales, Chef, Part-time Chef |
-| Manager                     | HR, Sales Manager                                       |
+Except for the Director, an actor may only create accounts inside its own
+franchise. The Director chooses the franchise; for everyone else the database
+derives it from the caller and ignores whatever the form submits.
+
+| Actor                       | May create                                                        |
+| --------------------------- | ----------------------------------------------------------------- |
+| Director                    | Franchise Owner, Manager, HR, Sales Manager, Sales, Chef, PT Chef |
+| Franchise Owner             | Manager, HR, Sales Manager, Sales, Chef, Part-time Chef           |
+| Manager                     | HR, Sales Manager, Sales, Chef, Part-time Chef                    |
 | HR                          | Chef, Part-time Chef                                    |
 | Sales Manager               | Sales                                                   |
 | Sales, Chef, Part-time Chef | Nobody                                                  |
@@ -86,7 +121,8 @@ and hide it with CSS.
 
 | Actor                   | May change status for                      |
 | ----------------------- | ------------------------------------------ |
-| Director                | Every subordinate role                     |
+| Director                | Every subordinate role, in any franchise   |
+| Franchise Owner         | Every role inside its own franchise        |
 | Manager                 | HR, Sales Manager and their lower branches |
 | HR                      | Chef and Part-time Chef                    |
 | Sales Manager           | Sales                                      |
@@ -98,7 +134,8 @@ requires proof and no private proof path is recorded.
 
 ### Role replacement
 
-- Director appoints/replaces Manager.
+- Director appoints/replaces the Franchise Owner of any franchise.
+- Franchise Owner appoints/replaces its Manager, HR and Sales Manager.
 - Manager appoints/replaces HR and Sales Manager.
 - The candidate must already hold the target role and be inactive.
 - The caller supplies the expected current holder, preventing stale replacement.
@@ -109,9 +146,23 @@ requires proof and no private proof path is recorded.
 ### Director — `/director`
 
 Navigation covers Dashboard, Leads & Calls, Conversations, Bookings, Payments,
+Sales Team, Chefs & Staff, Attendance, Expenses, Team & Access, Franchises,
+Assign Work, HR Overview, Leave, Meetings, Payroll, Business Reports, Login
+Activity, Integrations, and Import & Sync.
+
+Franchises is Director-only. It creates a franchise, renames or closes one, and
+flags any franchise that still has no owner. A franchise cannot be closed while
+it still has active staff.
+
+### Franchise Owner — `/franchise`
+
+Navigation covers Dashboard, Leads & Calls, Conversations, Bookings, Payments,
 Sales Team, Chefs & Staff, Attendance, Expenses, Team & Access, Assign Work, HR
-Overview, Leave, Meetings, Payroll, Business Reports, Login Activity,
-Integrations, and Import & Sync.
+Overview, Leave, Meetings, Payroll, Business Reports, and Login Activity.
+
+A Franchise Owner is a Director for its own franchise and nothing outside it. It
+cannot see another franchise, create a franchise, change organization settings,
+or open provider/integration configuration — those remain Director-only.
 
 Director is the only role permitted to configure/test Superfone or run provider
 sync/import/replay functions.

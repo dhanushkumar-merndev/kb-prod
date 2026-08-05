@@ -147,6 +147,7 @@ export async function getProfileById(
       [
         "id",
         "organization_id",
+        "franchise_id",
         "full_name",
         "phone_e164",
         "role",

@@ -1,5 +1,6 @@
 export const PROFILE_ROLES = [
   "director",
+  "franchise",
   "manager",
   "hr",
   "sales_manager",
@@ -27,6 +28,8 @@ export type PaymentType = (typeof PAYMENT_TYPES)[number];
 export interface ProfileRecord {
   id: string;
   organization_id: string;
+  /** Null only for the Director, who is organization-wide. */
+  franchise_id: string | null;
   full_name: string;
   phone_e164: string;
   role: ProfileRole;

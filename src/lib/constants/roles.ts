@@ -1,5 +1,6 @@
 export const ROLES = [
   "director",
+  "franchise",
   "manager",
   "hr",
   "sales_manager",
@@ -22,6 +23,7 @@ export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = {
   director: "Director",
+  franchise: "Franchise Owner",
   manager: "Manager",
   hr: "HR",
   sales_manager: "Sales Manager",
@@ -40,6 +42,7 @@ export const ACCOUNT_STATUS_LABELS: Record<AccountStatus, string> = {
 
 export const ROLE_HOME_ROUTES: Record<Role, string> = {
   director: "/director/dashboard",
+  franchise: "/franchise/dashboard",
   manager: "/manager/dashboard",
   hr: "/hr/dashboard",
   sales_manager: "/sales-manager/dashboard",

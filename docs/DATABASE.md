@@ -160,14 +160,58 @@ All policy helpers derive identity from `auth.uid()`:
 
 - `current_profile_id()`
 - `current_organization_id()`
+- `current_franchise_id()`
 - `current_role()`
 - `current_auth_session_is_valid()`
 - `is_active_profile()`
 - `is_director()`
+- `is_franchise_owner()`
+- `franchise_scope_allows(uuid)`
 - `is_manager_or_director()`
 - `is_hr_scope_admin()`
 - `is_sales_scope_admin()`
 - record-specific `can_read_*` helpers
+
+### Franchise isolation
+
+Migrations `202608050001`–`202608050004` add the franchise tier. `franchises`
+holds one row per franchise unit; `profiles.franchise_id` records membership and
+is null only for the Director. Every franchise-scoped table gained a
+`franchise_id` column, a composite `(franchise_id, organization_id)` foreign key
+and an index.
+
+Three layers keep a franchise contained, because a `SECURITY DEFINER` RPC is not
+subject to RLS:
+
+- a `RESTRICTIVE` policy `<table>_franchise_isolation` on each franchise-scoped
+  table. Being restrictive, it is ANDed with the existing permissive policies and
+  can only ever remove access;
+- an `aa_franchise_scope` row trigger running `public.apply_franchise_scope()`,
+  which stamps `franchise_id` from the row's natural parent or the acting profile
+  and raises `FRANCHISE_SCOPE_VIOLATION` on any cross-franchise write, including
+  from definer RPCs;
+- explicit franchise predicates injected into the definer read models
+  (`get_leads_page`, `get_bookings_page`, `get_conversation_inbox`,
+  `get_dashboard_metric_counts`, the `can_read_*` predicates and others).
+
+A row whose franchise cannot be derived stays organization-level and is visible
+only to the Director, so a gap fails closed instead of leaking.
+
+Role-holder uniqueness moved from the organization to the franchise:
+
+```text
+one_active_director_per_org                (unchanged)
+one_active_franchise_owner_per_franchise   (new)
+one_active_manager_per_franchise           (replaces one_active_manager_per_org)
+one_active_hr_per_franchise                (replaces one_active_hr_per_org)
+one_active_sales_manager_per_franchise     (replaces one_active_sales_manager_per_org)
+```
+
+Lead de-duplication is now per franchise (`lead_phone_unique` covers
+`organization_id, franchise_id, phone_normalized`), so two franchises may each
+hold the same customer. `assign_lead_to_franchise()` is the Director-only route
+for moving a lead and its whole timeline between franchises; it clears the
+previous franchise's sales owner so ownership never crosses the boundary.
 
 The common policy predicate requires an active profile in the current
 organization. An inactive, blocked, payment-pending, left or deleted profile
@@ -176,6 +220,8 @@ does not receive business rows.
 RLS scope is branch-aware:
 
 - Director: organization-wide access, subject to workflow functions for writes;
+- Franchise Owner: the same operational reach as a Manager but across its whole
+  franchise, and never outside it;
 - Manager: lower-role operational data, excluding Director/provider-secret
   scope;
 - HR: workforce branch;

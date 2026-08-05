@@ -94,6 +94,19 @@ const ROLE_COPY: Record<Role, RoleDashboardCopy> = {
       "working_now",
     ],
   },
+  franchise: {
+    title: "Franchise dashboard",
+    subtitle: "Live activity and approvals across your franchise.",
+    chartTitle: "Operational workload",
+    chartDescription: "Current work and approval queues in your franchise.",
+    chartMetricIds: [
+      "leads",
+      "upcoming_bookings",
+      "pending_payments",
+      "pending_attendance",
+      "working_now",
+    ],
+  },
   manager: {
     title: "Operations dashboard",
     subtitle: "Today’s events, staffing, approvals, and overdue work.",
@@ -293,7 +306,10 @@ async function loadAggregatedMetricsForRole(
     aggregatedMetric(counts, id, label, description, tone);
 
   switch (profile.role) {
+    // The aggregate RPCs are already franchise-filtered, so a Franchise Owner
+    // sees the Director layout narrowed to its own franchise.
     case "director":
+    case "franchise":
       return [
         metric("leads", "Leads received", "All active lead records", "navy"),
         metric(
@@ -976,6 +992,12 @@ const ACTION_ROUTES: Record<Role, Partial<Record<string, string>>> = {
     working_now: "/director/attendance",
     upcoming_bookings: "/director/bookings",
   },
+  franchise: {
+    pending_payments: "/franchise/payments",
+    pending_attendance: "/franchise/attendance",
+    working_now: "/franchise/attendance",
+    upcoming_bookings: "/franchise/bookings",
+  },
   manager: {
     pending_payments: "/manager/payments",
     pending_attendance: "/manager/attendance",
@@ -1126,6 +1148,7 @@ function metricsForRole(
 
     switch (profile.role) {
       case "director":
+      case "franchise":
         return directorMetrics(supabase, profile, today);
       case "manager":
         return managerMetrics(supabase, profile, today, now);

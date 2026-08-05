@@ -451,6 +451,25 @@ export async function loadModuleData(
         "temporary workers",
       );
     }
+    case "franchises": {
+      const result = await supabase
+        .from("franchises")
+        .select("id, name, code, city, contact_phone_e164, is_active, created_at")
+        .is("deleted_at", null)
+        .order("name", { ascending: true })
+        .limit(100);
+      return tableResult(
+        result,
+        [
+          { key: "name", label: "Franchise" },
+          { key: "code", label: "Code" },
+          { key: "city", label: "City" },
+          { key: "contact_phone_e164", label: "Contact" },
+          { key: "is_active", label: "Active" },
+        ],
+        "franchises",
+      );
+    }
     default: {
       const exhaustive: never = resource;
       throw new Error(`Unsupported module resource: ${String(exhaustive)}`);

@@ -3,8 +3,11 @@ import type { Role } from "@/lib/constants/roles";
 export type OperationalDomain =
   "organization" | "integration" | "sales" | "workforce" | "payroll" | "audit" | "own";
 
+// A Franchise Owner mirrors the Director inside its own franchise. Which
+// franchise that is comes from the database, never from these tables.
 const ACCOUNT_CREATION_SCOPE: Record<Role, readonly Role[]> = {
-  director: ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
+  director: ["franchise", "manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
+  franchise: ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
   manager: ["hr", "sales_manager", "sales", "chef", "part_time_chef"],
   hr: ["chef", "part_time_chef"],
   sales_manager: ["sales"],
@@ -14,7 +17,8 @@ const ACCOUNT_CREATION_SCOPE: Record<Role, readonly Role[]> = {
 };
 
 const ACCOUNT_STATUS_SCOPE: Record<Role, readonly Role[]> = {
-  director: ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
+  director: ["franchise", "manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
+  franchise: ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"],
   manager: ["hr", "sales_manager", "sales", "chef", "part_time_chef"],
   hr: ["chef", "part_time_chef"],
   sales_manager: ["sales"],
@@ -25,6 +29,7 @@ const ACCOUNT_STATUS_SCOPE: Record<Role, readonly Role[]> = {
 
 const DOMAIN_ACCESS: Record<Role, readonly OperationalDomain[]> = {
   director: ["organization", "integration", "sales", "workforce", "payroll", "audit", "own"],
+  franchise: ["sales", "workforce", "payroll", "audit", "own"],
   manager: ["sales", "workforce", "payroll", "audit", "own"],
   hr: ["workforce", "payroll", "audit", "own"],
   sales_manager: ["sales", "audit", "own"],
@@ -58,13 +63,23 @@ export function isChefRole(role: Role): boolean {
 }
 
 export function isOperationalAdmin(role: Role): boolean {
-  return role === "director" || role === "manager";
+  return role === "director" || role === "franchise" || role === "manager";
 }
 
 export function isSalesScopeAdmin(role: Role): boolean {
-  return role === "director" || role === "manager" || role === "sales_manager";
+  return isOperationalAdmin(role) || role === "sales_manager";
 }
 
 export function isWorkforceScopeAdmin(role: Role): boolean {
-  return role === "director" || role === "manager" || role === "hr";
+  return isOperationalAdmin(role) || role === "hr";
+}
+
+/** Only the Director owns the organization: franchises, integrations, secrets. */
+export function isOrganizationAdmin(role: Role): boolean {
+  return role === "director";
+}
+
+/** Roles pinned to exactly one franchise. The Director is organization-wide. */
+export function isFranchiseScopedRole(role: Role): boolean {
+  return role !== "director";
 }

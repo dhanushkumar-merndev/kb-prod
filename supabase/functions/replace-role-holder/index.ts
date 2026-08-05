@@ -4,6 +4,7 @@ import { parseJson, withEdgeRequest } from "../_shared/http.ts";
 import {
   assertCanManageRole,
   assertCanReplaceRole,
+  assertSameFranchise,
   assertSameOrganization,
   assertSeparateProfiles,
 } from "../_shared/permissions.ts";
@@ -21,6 +22,7 @@ Deno.serve((request) =>
     }
 
     assertSameOrganization(actor, target);
+    assertSameFranchise(actor, target);
     assertSeparateProfiles(actor, target);
     assertCanManageRole(actor.role, target.role);
     assertCanReplaceRole(actor.role, input.role);
@@ -58,6 +60,7 @@ Deno.serve((request) =>
       }
 
       assertSameOrganization(actor, expectedHolder);
+      assertSameFranchise(actor, expectedHolder);
       if (expectedHolder.role !== input.role) {
         throw new AppError("CONFLICT_STALE_VERSION");
       }
