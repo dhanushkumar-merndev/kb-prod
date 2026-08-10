@@ -72,7 +72,7 @@ export async function uploadEmployeeDocumentAction(
   _previousState: CrudActionState,
   formData: FormData,
 ): Promise<CrudActionState> {
-  const session = await requireRoleSession(["director", "manager", "hr"]);
+  const session = await requireRoleSession(["director", "franchise", "manager", "hr"]);
   const parsed = documentSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (!parsed.success) {
@@ -166,7 +166,7 @@ export async function updateWorkforceCompensationAction(
   _previousState: CrudActionState,
   formData: FormData,
 ): Promise<CrudActionState> {
-  await requireRoleSession(["director", "manager", "hr"]);
+  await requireRoleSession(["director", "franchise", "manager", "hr"]);
   const parsed = compensationSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (!parsed.success) {

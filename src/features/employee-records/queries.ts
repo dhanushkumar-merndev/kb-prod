@@ -44,7 +44,7 @@ function failure(operation: string, error: unknown): EmployeeRecordsLoadResult {
 }
 
 export async function loadEmployeeRecords(): Promise<EmployeeRecordsLoadResult> {
-  await requireRoleSession(["director", "manager", "hr"]);
+  await requireRoleSession(["director", "franchise", "manager", "hr"]);
   const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from("profiles")

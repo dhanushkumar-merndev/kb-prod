@@ -352,7 +352,7 @@ function LeadSidePanel({
   data: ConversationWorkspaceData;
 }) {
   const lead = data.leads.find((item) => item.id === conversation.leadId);
-  const canAssign = ["director", "manager", "sales_manager"].includes(data.viewerRole);
+  const canAssign = ["director", "franchise", "manager", "sales_manager"].includes(data.viewerRole);
   const bookingPath = `/${ROLE_NAMESPACES[data.viewerRole]}/bookings`;
 
   return (
@@ -617,7 +617,7 @@ export function ConversationWorkspace({ data }: { data: ConversationWorkspaceDat
     );
   }
 
-  const canFilterAssignee = ["director", "manager", "sales_manager"].includes(data.viewerRole);
+  const canFilterAssignee = ["director", "franchise", "manager", "sales_manager"].includes(data.viewerRole);
 
   return (
     <div className={`${styles.shell} ${mobileOpen ? styles.mobileOpen : ""}`}>

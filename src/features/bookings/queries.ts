@@ -120,7 +120,7 @@ export const loadBookingCrudData = cache(async function loadBookingCrudData({
   pageSize?: number;
   search?: string;
 } = {}): Promise<BookingLoadResult> {
-  const session = await requireRoleSession(["director", "manager", "sales_manager", "sales"]);
+  const session = await requireRoleSession(["director", "franchise", "manager", "sales_manager", "sales"]);
   const supabase = await createServerSupabaseClient();
   const canCreate = ["sales", "sales_manager"].includes(session.profile.role);
 

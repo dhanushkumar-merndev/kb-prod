@@ -32,7 +32,7 @@ const bookingRowSchema = z.object({
 export type PaymentLoadResult = { ok: true; data: PaymentData } | { ok: false; message: string };
 
 export async function loadPaymentData(): Promise<PaymentLoadResult> {
-  const session = await requireRoleSession(["director", "manager", "sales_manager", "sales"]);
+  const session = await requireRoleSession(["director", "franchise", "manager", "sales_manager", "sales"]);
   const supabase = await createServerSupabaseClient();
   const [paymentsResult, bookingsResult] = await Promise.all([
     supabase
@@ -118,7 +118,7 @@ export async function loadPaymentData(): Promise<PaymentLoadResult> {
       payments: mappedPayments,
       bookings: mappedBookings,
       canSubmit: ["sales", "sales_manager"].includes(session.profile.role),
-      canReview: ["director", "manager", "sales_manager"].includes(session.profile.role),
+      canReview: ["director", "franchise", "manager", "sales_manager"].includes(session.profile.role),
     },
   };
 }

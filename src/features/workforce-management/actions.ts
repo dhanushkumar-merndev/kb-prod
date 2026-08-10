@@ -135,7 +135,7 @@ export async function assignChefAction(
 ): Promise<CrudActionState> {
   const session = await requireActiveSession();
 
-  if (!["director", "manager", "hr"].includes(session.profile.role)) {
+  if (!["director", "franchise", "manager", "hr"].includes(session.profile.role)) {
     return state("error", "You do not have permission to assign a Chef.");
   }
 
@@ -168,7 +168,7 @@ export async function reviewAttendanceAction(
 ): Promise<CrudActionState> {
   const session = await requireActiveSession();
 
-  if (!["director", "manager", "hr"].includes(session.profile.role)) {
+  if (!["director", "franchise", "manager", "hr"].includes(session.profile.role)) {
     return state("error", "You do not have permission to review attendance.");
   }
 
@@ -212,7 +212,7 @@ export async function bulkApproveAttendanceAction(
 ): Promise<CrudActionState> {
   const session = await requireActiveSession();
 
-  if (!["director", "manager", "hr"].includes(session.profile.role)) {
+  if (!["director", "franchise", "manager", "hr"].includes(session.profile.role)) {
     return state("error", "You do not have permission to review attendance.");
   }
 
@@ -241,7 +241,7 @@ export async function recordMissedAttendanceAction(
 ): Promise<CrudActionState> {
   const session = await requireActiveSession();
 
-  if (!["director", "manager", "hr"].includes(session.profile.role)) {
+  if (!["director", "franchise", "manager", "hr"].includes(session.profile.role)) {
     return state("error", "You do not have permission to record attendance.");
   }
 

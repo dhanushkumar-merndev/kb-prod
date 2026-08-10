@@ -206,13 +206,20 @@ function toSafeProfile(row: z.infer<typeof safeProfileRowSchema>): SafeProfileOp
   };
 }
 
-const SALES_DOMAIN_ROLES: readonly Role[] = ["director", "manager", "sales_manager", "sales"];
+const SALES_DOMAIN_ROLES: readonly Role[] = [
+  "director",
+  "franchise",
+  "manager",
+  "sales_manager",
+  "sales",
+];
 const TASK_CREATOR_ROLES: readonly Role[] = ["director", "manager", "hr", "sales_manager"];
 
 function taskAssigneeRoles(role: Role): Role[] {
   switch (role) {
     case "director":
       return [...ROLES];
+    case "franchise":
     case "manager":
       return ["manager", "hr", "sales_manager", "sales", "chef", "part_time_chef"];
     case "hr":

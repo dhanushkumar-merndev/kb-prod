@@ -16,10 +16,11 @@ import {
   sendMessageSchema,
 } from "./schemas";
 
-const SALES_ROLES: readonly Role[] = ["director", "manager", "sales_manager", "sales"];
-const ASSIGNMENT_ROLES: readonly Role[] = ["director", "manager", "sales_manager"];
+const SALES_ROLES: readonly Role[] = ["director", "franchise", "manager", "sales_manager", "sales"];
+const ASSIGNMENT_ROLES: readonly Role[] = ["director", "franchise", "manager", "sales_manager"];
 const CONVERSATION_PATHS = [
   "/director/conversations",
+  "/franchise/conversations",
   "/manager/conversations",
   "/sales-manager/conversations",
   "/sales/conversations",

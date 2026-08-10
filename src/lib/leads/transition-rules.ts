@@ -15,7 +15,7 @@ const TERMINAL_STAGES: readonly LeadStage[] = ["lost", "unreachable"];
 
 export function allowedManualLeadStages(current: LeadStage, role: Role): LeadStage[] {
   if (TERMINAL_STAGES.includes(current)) {
-    return ["director", "manager", "sales_manager"].includes(role)
+    return ["director", "franchise", "manager", "sales_manager"].includes(role)
       ? ["contacted", "follow_up"]
       : [];
   }

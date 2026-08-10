@@ -88,7 +88,7 @@ function failure(operation: string, error: unknown): ReviewLoadResult<never> {
 export async function loadExpenseReviews(): Promise<ReviewLoadResult<ExpenseReviewRecord>> {
   const session = await requireActiveSession();
 
-  if (!["director", "manager", "hr"].includes(session.profile.role)) {
+  if (!["director", "franchise", "manager", "hr"].includes(session.profile.role)) {
     return failure("expense-permission", { code: "42501" });
   }
 
@@ -193,7 +193,7 @@ export async function loadExpenseReviews(): Promise<ReviewLoadResult<ExpenseRevi
 export async function loadLeaveReviews(): Promise<ReviewLoadResult<LeaveReviewRecord>> {
   const session = await requireActiveSession();
 
-  if (!["director", "manager", "hr", "sales_manager"].includes(session.profile.role)) {
+  if (!["director", "franchise", "manager", "hr", "sales_manager"].includes(session.profile.role)) {
     return failure("leave-permission", { code: "42501" });
   }
 

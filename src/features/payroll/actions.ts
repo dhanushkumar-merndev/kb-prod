@@ -238,7 +238,7 @@ export async function reviewPayrollAction(
 ): Promise<CrudActionState> {
   return periodTransition(
     formData,
-    ["director", "manager"],
+    ["director", "franchise", "manager"],
     "review_payroll_period",
     "Payroll reviewed and sent for Director approval.",
   );

@@ -92,7 +92,10 @@ begin
     join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public'
       and p.prosecdef
-      and p.prorettype <> 'trigger'::regtype
+      -- Event triggers are database hooks too. They cannot be moved into the
+      -- private schema or recreated as SQL RPC wrappers, just like row
+      -- trigger functions.
+      and p.prorettype not in ('trigger'::regtype, 'event_trigger'::regtype)
       and has_function_privilege('authenticated', p.oid, 'EXECUTE')
     order by p.proname, pg_get_function_identity_arguments(p.oid)
   loop

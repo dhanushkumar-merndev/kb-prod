@@ -17,11 +17,12 @@ import {
   updateFollowUpSchema,
 } from "./schemas";
 
-const SALES_ROLES: readonly Role[] = ["director", "manager", "sales_manager", "sales"];
-const ASSIGNMENT_ROLES: readonly Role[] = ["director", "manager", "sales_manager"];
+const SALES_ROLES: readonly Role[] = ["director", "franchise", "manager", "sales_manager", "sales"];
+const ASSIGNMENT_ROLES: readonly Role[] = ["director", "franchise", "manager", "sales_manager"];
 
 const SALES_PATHS = [
   "/director/leads",
+  "/franchise/leads",
   "/manager/leads",
   "/sales-manager/leads",
   "/sales-manager/assignment",

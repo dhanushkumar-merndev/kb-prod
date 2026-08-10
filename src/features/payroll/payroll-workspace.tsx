@@ -128,7 +128,7 @@ function PeriodTransition({
     );
   }
 
-  if (period.status === "prepared" && ["director", "manager"].includes(viewerRole)) {
+  if (period.status === "prepared" && ["director", "franchise", "manager"].includes(viewerRole)) {
     return (
       <>
         <form action={reviewAction} className={styles.inlineAction}>

@@ -16,7 +16,7 @@ import {
   type SalesProfileOption,
 } from "./types";
 
-const SALES_ROLES: readonly Role[] = ["director", "manager", "sales_manager", "sales"];
+const SALES_ROLES: readonly Role[] = ["director", "franchise", "manager", "sales_manager", "sales"];
 
 const leadSchema = z.object({
   id: z.string().uuid(),

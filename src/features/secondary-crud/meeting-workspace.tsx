@@ -437,7 +437,7 @@ function MeetingItem({
 }
 
 export function MeetingWorkspace({ data }: { data: MeetingCrudData }) {
-  const isUpperAdmin = data.viewerRole === "director" || data.viewerRole === "manager";
+  const isUpperAdmin = ["director", "franchise", "manager"].includes(data.viewerRole);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const filteredMeetings = useMemo(() => {

@@ -20,8 +20,8 @@ import {
 } from "./types";
 import type { CrudLoadState } from "@/features/core-crud/types";
 
-const MEETING_CREATOR_ROLES: readonly Role[] = ["director", "manager", "hr", "sales_manager"];
-const TEMPORARY_WORKER_ADMIN_ROLES: readonly Role[] = ["director", "manager", "hr"];
+const MEETING_CREATOR_ROLES: readonly Role[] = ["director", "franchise", "manager", "hr", "sales_manager"];
+const TEMPORARY_WORKER_ADMIN_ROLES: readonly Role[] = ["director", "franchise", "manager", "hr"];
 
 const meetingRowSchema = z.object({
   id: z.string().uuid(),

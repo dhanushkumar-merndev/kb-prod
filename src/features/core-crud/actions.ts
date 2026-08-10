@@ -27,7 +27,13 @@ import {
 } from "./schemas";
 import type { CrudActionState, ExpenseStatus } from "./types";
 
-const SALES_DOMAIN_ROLES: readonly Role[] = ["director", "manager", "sales_manager", "sales"];
+const SALES_DOMAIN_ROLES: readonly Role[] = [
+  "director",
+  "franchise",
+  "manager",
+  "sales_manager",
+  "sales",
+];
 const TASK_CREATOR_ROLES: readonly Role[] = ["director", "manager", "hr", "sales_manager"];
 const EXPENSE_BILL_MIME_EXTENSIONS: Readonly<Record<string, string>> = {
   "image/jpeg": "jpg",
@@ -40,10 +46,12 @@ const MAX_EXPENSE_BILL_BYTES = 8 * 1024 * 1024;
 const DOMAIN_PATHS = {
   leads: [
     "/director/leads",
+    "/franchise/leads",
     "/manager/leads",
     "/sales-manager/leads",
     "/sales/leads",
     "/director/dashboard",
+    "/franchise/dashboard",
     "/manager/dashboard",
     "/sales-manager/dashboard",
     "/sales/dashboard",

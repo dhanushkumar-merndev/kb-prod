@@ -151,7 +151,7 @@ export async function updateBookingAction(
 ): Promise<CrudActionState> {
   const session = await requireActiveSession();
 
-  if (!["director", "manager", "sales_manager", "sales"].includes(session.profile.role)) {
+  if (!["director", "franchise", "manager", "sales_manager", "sales"].includes(session.profile.role)) {
     return failure("You do not have permission to update a booking.");
   }
 
@@ -241,7 +241,7 @@ export async function reissueBookingInvoiceAction(
   formData: FormData,
 ): Promise<CrudActionState> {
   const session = await requireActiveSession();
-  if (!["director", "manager", "sales_manager"].includes(session.profile.role)) {
+  if (!["director", "franchise", "manager", "sales_manager"].includes(session.profile.role)) {
     return failure("You do not have permission to reissue an invoice.");
   }
   const parsed = reissueBookingInvoiceSchema.safeParse(input(formData));

@@ -50,7 +50,7 @@ const attendanceBookingSchema = z.object({
 });
 
 export async function loadAssignmentData() {
-  await requireRoleSession(["director", "manager", "hr"]);
+  await requireRoleSession(["director", "franchise", "manager", "hr"]);
   const supabase = await createServerSupabaseClient();
   const today = new Date();
   const end = new Date(today);
@@ -86,7 +86,7 @@ export async function loadAssignmentData() {
 }
 
 export async function loadAttendanceReviewData() {
-  await requireRoleSession(["director", "manager", "hr"]);
+  await requireRoleSession(["director", "franchise", "manager", "hr"]);
   const supabase = await createServerSupabaseClient();
   const [shiftResult, profileResult, temporaryResult, bookingResult] = await Promise.all([
     supabase

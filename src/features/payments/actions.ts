@@ -214,7 +214,7 @@ export async function reviewPaymentAction(
 ): Promise<CrudActionState> {
   const session = await requireActiveSession();
 
-  if (!["director", "manager", "sales_manager"].includes(session.profile.role)) {
+  if (!["director", "franchise", "manager", "sales_manager"].includes(session.profile.role)) {
     return failure("You do not have permission to review payments.");
   }
 

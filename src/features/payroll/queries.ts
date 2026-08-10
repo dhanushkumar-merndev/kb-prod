@@ -135,7 +135,7 @@ export type PayrollLoadResult =
   { ok: true; data: PayrollWorkspaceData } | { ok: false; message: string };
 
 export async function loadPayrollWorkspace(): Promise<PayrollLoadResult> {
-  const session = await requireRoleSession(["director", "manager", "hr", "chef", "part_time_chef"]);
+  const session = await requireRoleSession(["director", "franchise", "manager", "hr", "chef", "part_time_chef"]);
   const supabase = await createServerSupabaseClient();
   const isWorker = ["chef", "part_time_chef"].includes(session.profile.role);
   const [periodResult, entryResult, summaryResult] = await Promise.all([

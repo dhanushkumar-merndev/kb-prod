@@ -14,7 +14,7 @@ import type {
   SuperfonePublicCapabilities,
 } from "./types";
 
-const SALES_ROLES: readonly Role[] = ["director", "manager", "sales_manager", "sales"];
+const SALES_ROLES: readonly Role[] = ["director", "franchise", "manager", "sales_manager", "sales"];
 
 const leadSchema = z.object({
   id: z.string().uuid(),
@@ -49,7 +49,11 @@ function failure(operation: string, error: unknown): ConversationLoadState {
   const requestId = crypto.randomUUID();
   const code =
     typeof error === "object" && error !== null && "code" in error ? String(error.code) : "UNKNOWN";
-  console.error("[conversations]", { operation, requestId, code });
+  const message =
+    typeof error === "object" && error !== null && "message" in error
+      ? String(error.message)
+      : "UNKNOWN";
+  console.error(`[conversations] operation=${operation} requestId=${requestId} code=${code} message=${message}`);
   return {
     ok: false,
     message: "We could not load conversations. Refresh the page and try again.",
@@ -80,8 +84,12 @@ export async function loadConversationWorkspaceData(): Promise<ConversationLoadS
     supabase.rpc("get_superfone_public_capabilities"),
   ]);
 
-  const failed = [inboxResult, referenceResult, capabilityResult].find((result) => result.error);
-  if (failed?.error) return failure("load", failed.error);
+  const failed = [
+    { operation: "load-inbox", result: inboxResult },
+    { operation: "load-reference-data", result: referenceResult },
+    { operation: "load-capabilities", result: capabilityResult },
+  ].find(({ result }) => result.error);
+  if (failed?.result.error) return failure(failed.operation, failed.result.error);
 
   try {
     const inbox = parseConversationInbox(inboxResult.data);

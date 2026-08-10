@@ -178,7 +178,7 @@ export async function RoleModulePage({
   } else if (navigationItem.resource === "payroll") {
     workingPanel = <PayrollPanel />;
     showLiveTable = false;
-  } else if (navigationItem.resource === "workforce_bookings" && role === "hr") {
+  } else if (navigationItem.resource === "workforce_bookings" && ["franchise", "hr"].includes(role)) {
     workingPanel = <BookingAssignmentPanel />;
     showLiveTable = false;
   } else if (
@@ -189,12 +189,15 @@ export async function RoleModulePage({
     showLiveTable = false;
   } else if (
     navigationItem.resource === "workforce_profiles" &&
-    (["director", "franchise", "manager"].includes(role) || (role === "hr" && slug === "employee-records"))
+    (["director", "franchise", "manager"].includes(role) ||
+      (role === "hr" && slug === "employee-records"))
   ) {
     workingPanel = <EmployeeRecordsPanel />;
     showLiveTable = false;
   } else if (
     navigationItem.resource === "all_profiles" ||
+    (role === "franchise" &&
+      ["sales_profiles", "workforce_profiles"].includes(navigationItem.resource)) ||
     (role === "hr" && navigationItem.resource === "workforce_profiles" && slug === "chefs") ||
     (role === "sales_manager" && navigationItem.resource === "sales_profiles")
   ) {

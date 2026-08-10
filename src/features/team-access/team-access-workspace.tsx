@@ -69,12 +69,14 @@ export function TeamAccessWorkspace({ data }: { data: TeamAccessData }) {
   const router = useRouter();
   const currentSearchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(data.search);
+  const [selectedRole, setSelectedRole] = useState<Role>(data.creatableRoles[0] ?? "sales");
   const [isNavigating, startNavigation] = useTransition();
   const [createState, createAction] = useActionState(
     createTeamMemberAction,
     INITIAL_CRUD_ACTION_STATE,
   );
   const pageCount = Math.max(1, Math.ceil(data.total / data.pageSize));
+  const isChefRole = selectedRole === "chef" || selectedRole === "part_time_chef";
 
   const navigate = (updates: { page?: number; search?: string }) => {
     const params = new URLSearchParams(currentSearchParams.toString());
@@ -130,7 +132,12 @@ export function TeamAccessWorkspace({ data }: { data: TeamAccessData }) {
             </label>
             <label>
               Role
-              <select name="role" required>
+              <select
+                name="role"
+                onChange={(event) => setSelectedRole(event.target.value as Role)}
+                required
+                value={selectedRole}
+              >
                 {data.creatableRoles.map((role) => (
                   <option key={role} value={role}>
                     {ROLE_LABELS[role]}
@@ -159,20 +166,26 @@ export function TeamAccessWorkspace({ data }: { data: TeamAccessData }) {
               Joining date
               <input defaultValue={currentIndiaDate()} name="joiningDate" type="date" />
             </label>
-            <label>
-              Payment type (Chef roles)
-              <select defaultValue="" name="paymentType">
-                <option value="">Not applicable</option>
-                <option value="monthly">Monthly</option>
-                <option value="daily">Daily</option>
-                <option value="hourly">Hourly</option>
-                <option value="per_booking">Per booking</option>
-              </select>
-            </label>
-            <label>
-              Payment amount (Chef roles)
-              <input min="0" name="paymentAmount" step="0.01" type="number" />
-            </label>
+            {isChefRole ? (
+              <>
+                <label>
+                  Payment type
+                  <select defaultValue="" name="paymentType" required>
+                    <option value="" disabled>
+                      Select payment type…
+                    </option>
+                    <option value="monthly">Monthly</option>
+                    <option value="daily">Daily</option>
+                    <option value="hourly">Hourly</option>
+                    <option value="per_booking">Per booking</option>
+                  </select>
+                </label>
+                <label>
+                  Payment amount
+                  <input min="0" name="paymentAmount" required step="0.01" type="number" />
+                </label>
+              </>
+            ) : null}
             <div className={styles.actions}>
               <SubmitButton pendingLabel="Creating…">Create account</SubmitButton>
             </div>

@@ -23,8 +23,8 @@ import {
   updateTemporaryWorkerStatusSchema,
 } from "./schemas";
 
-const MEETING_CREATOR_ROLES: readonly Role[] = ["director", "manager", "hr", "sales_manager"];
-const TEMPORARY_WORKER_ADMIN_ROLES: readonly Role[] = ["director", "manager", "hr"];
+const MEETING_CREATOR_ROLES: readonly Role[] = ["director", "franchise", "manager", "hr", "sales_manager"];
+const TEMPORARY_WORKER_ADMIN_ROLES: readonly Role[] = ["director", "franchise", "manager", "hr"];
 
 const MEETING_PATHS = [
   "/director/meetings",
@@ -146,14 +146,14 @@ function localDateTimeToIso(value: string): string {
 }
 
 function canManageMeeting(role: Role, viewerId: string, creatorId: string): boolean {
-  return role === "director" || role === "manager" || viewerId === creatorId;
+  return role === "director" || role === "franchise" || role === "manager" || viewerId === creatorId;
 }
 
 function isAllowedMeetingAttendee(
   session: AuthenticatedSession,
   profile: { id: string; role: unknown },
 ): boolean {
-  if (session.profile.role === "director" || session.profile.role === "manager") {
+  if (["director", "franchise", "manager"].includes(session.profile.role)) {
     return true;
   }
 
