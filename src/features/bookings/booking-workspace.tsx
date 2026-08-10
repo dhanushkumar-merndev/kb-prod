@@ -153,7 +153,7 @@ function InvoiceControls({
     retryBookingEmailAction,
     INITIAL_CRUD_ACTION_STATE,
   );
-  const canReissue = ["director", "manager", "sales_manager"].includes(viewerRole);
+  const canReissue = ["director", "franchise", "manager", "sales_manager"].includes(viewerRole);
 
   return (
     <section className={styles.invoicePanel}>

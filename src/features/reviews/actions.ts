@@ -91,9 +91,11 @@ function safeFailure(error: unknown): CrudActionState {
 function revalidateReviews(): void {
   [
     "/director/expenses",
+    "/franchise/expenses",
     "/manager/expenses",
     "/hr/expenses",
     "/director/leave",
+    "/franchise/leave",
     "/manager/leave",
     "/hr/leave",
     "/sales-manager/leave",

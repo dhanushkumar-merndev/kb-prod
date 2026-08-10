@@ -213,7 +213,7 @@ const SALES_DOMAIN_ROLES: readonly Role[] = [
   "sales_manager",
   "sales",
 ];
-const TASK_CREATOR_ROLES: readonly Role[] = ["director", "manager", "hr", "sales_manager"];
+const TASK_CREATOR_ROLES: readonly Role[] = ["director", "franchise", "manager", "hr", "sales_manager"];
 
 function taskAssigneeRoles(role: Role): Role[] {
   switch (role) {

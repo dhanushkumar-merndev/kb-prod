@@ -34,7 +34,7 @@ const SALES_DOMAIN_ROLES: readonly Role[] = [
   "sales_manager",
   "sales",
 ];
-const TASK_CREATOR_ROLES: readonly Role[] = ["director", "manager", "hr", "sales_manager"];
+const TASK_CREATOR_ROLES: readonly Role[] = ["director", "franchise", "manager", "hr", "sales_manager"];
 const EXPENSE_BILL_MIME_EXTENSIONS: Readonly<Record<string, string>> = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -58,6 +58,7 @@ const DOMAIN_PATHS = {
   ],
   expenses: [
     "/director/expenses",
+    "/franchise/expenses",
     "/manager/expenses",
     "/sales-manager/expenses",
     "/sales/expenses",
@@ -68,6 +69,7 @@ const DOMAIN_PATHS = {
   ],
   leave: [
     "/director/leave",
+    "/franchise/leave",
     "/manager/leave",
     "/hr/leave",
     "/sales-manager/leave",
@@ -78,6 +80,7 @@ const DOMAIN_PATHS = {
   ],
   tasks: [
     "/director/tasks",
+    "/franchise/tasks",
     "/manager/tasks",
     "/sales-manager/tasks",
     "/sales/tasks",

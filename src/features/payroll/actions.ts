@@ -111,6 +111,8 @@ function revalidatePayroll(): void {
   [
     "/director/dashboard",
     "/director/payroll",
+    "/franchise/dashboard",
+    "/franchise/payroll",
     "/manager/dashboard",
     "/manager/payroll",
     "/hr/dashboard",

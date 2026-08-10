@@ -47,6 +47,9 @@ function revalidatePayments(): void {
   [
     "/director/dashboard",
     "/director/payments",
+    "/franchise/dashboard",
+    "/franchise/payments",
+    "/franchise/bookings",
     "/manager/dashboard",
     "/manager/payments",
     "/sales-manager/dashboard",

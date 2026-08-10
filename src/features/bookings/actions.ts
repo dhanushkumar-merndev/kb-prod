@@ -72,6 +72,9 @@ function revalidateBookings(): void {
   [
     "/director/dashboard",
     "/director/bookings",
+    "/franchise/dashboard",
+    "/franchise/bookings",
+    "/franchise/payments",
     "/manager/dashboard",
     "/manager/bookings",
     "/sales-manager/dashboard",

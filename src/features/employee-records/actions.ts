@@ -63,6 +63,8 @@ function revalidateEmployeeRecords(): void {
   [
     "/hr/employee-records",
     "/hr/chefs",
+    "/franchise/employee-records",
+    "/franchise/workforce",
     "/manager/workforce",
     "/director/workforce",
   ].forEach((path) => revalidatePath(path));
