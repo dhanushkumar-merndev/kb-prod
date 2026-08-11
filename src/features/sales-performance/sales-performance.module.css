@@ -1,0 +1,79 @@
+.workspace { display: grid; gap: 18px; }
+.hero { align-items: center; background: linear-gradient(135deg, var(--ink), var(--ink-2)); border-radius: var(--radius-lg); color: white; display: grid; gap: 16px; grid-template-columns: auto 1fr auto; padding: 22px 24px; box-shadow: var(--shadow-md); }
+.heroIcon { align-items: center; background: var(--saffron); border-radius: 14px; display: flex; height: 54px; justify-content: center; width: 54px; }
+.hero h2, .card h3, .notes h3 { font-family: var(--font-display), sans-serif; margin: 0; }
+.hero h2 { font-size: clamp(23px, 3vw, 34px); }
+.hero p { color: #dce7f5; margin: 3px 0 0; }
+.eyebrow { font-family: var(--font-mono), monospace; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.heroDate { align-items: center; background: rgb(255 255 255 / 10%); border: 1px solid rgb(255 255 255 / 18%); border-radius: 10px; display: flex; gap: 8px; padding: 10px 12px; }
+.summaryGrid { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.summaryGrid div, .card, .notes > div { background: var(--card); border: 1px solid var(--hair); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+.summaryGrid div { display: grid; gap: 4px; padding: 16px 18px; }
+.summaryGrid span { color: var(--slate); font-size: 12px; }
+.summaryGrid strong { font-family: var(--font-display), sans-serif; font-size: 22px; }
+.card { padding: 20px; }
+.cardHeader { align-items: center; color: var(--ink); display: flex; justify-content: space-between; margin-bottom: 15px; }
+.cardHeader svg { color: var(--saffron); }
+.rankingList { display: grid; gap: 10px; }
+.rankingCard { align-items: center; border: 1px solid var(--hair); border-radius: 12px; display: grid; gap: 14px; grid-template-columns: 46px minmax(150px, 1fr) minmax(120px, 2fr) auto; padding: 13px 14px; }
+.rank { align-items: center; background: var(--indigo-tint); border-radius: 50%; display: flex; font-family: var(--font-mono), monospace; font-weight: 700; height: 38px; justify-content: center; width: 38px; }
+.person { display: grid; }
+.person span { color: var(--slate); font-size: 12px; }
+.scoreBar { background: var(--hair-2); border-radius: 999px; height: 9px; overflow: hidden; }
+.scoreBar span { background: linear-gradient(90deg, var(--saffron), var(--mint)); border-radius: inherit; display: block; height: 100%; }
+.rating { align-items: baseline; display: grid; grid-template-columns: auto auto; min-width: 104px; text-align: right; }
+.rating > strong { font-family: var(--font-display), sans-serif; font-size: 24px; }
+.rating > span { color: var(--slate); }
+.rating small, .rating .stars { grid-column: 1 / -1; }
+.stars { letter-spacing: 1px; white-space: nowrap; }
+.starActive { color: currentcolor; }
+.starIdle { color: #c5ccd6; }
+.excellent, .veryGood { color: #08772d; }
+.good { color: #c67906; }
+.needsImprovement { color: #d9500b; }
+.poor { color: var(--chilli); }
+.breakdown { border-top: 1px solid var(--hair-2); grid-column: 2 / -1; padding-top: 10px; }
+.breakdown summary { cursor: pointer; font-weight: 600; }
+.breakdown dl { display: grid; gap: 6px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.breakdown dl div { align-items: center; display: flex; justify-content: space-between; }
+.breakdown dt { color: var(--slate); }
+.breakdown dd { font-family: var(--font-mono), monospace; font-weight: 600; margin: 0; }
+.guidance { align-items: center; color: var(--ink); display: flex; gap: 7px; }
+.managerRemark { background: var(--hair-2); border-radius: 8px; padding: 10px; }
+.reviewForm { background: var(--canvas); border-radius: 10px; display: grid; gap: 10px; grid-template-columns: minmax(130px, 180px) minmax(220px, 1fr) auto; padding: 12px; }
+.reviewForm label { color: var(--slate); display: grid; font-family: var(--font-mono), monospace; font-size: 10px; gap: 4px; letter-spacing: .04em; text-transform: uppercase; }
+.reviewForm input, .reviewForm textarea { background: white; border: 1px solid var(--hair); border-radius: 8px; color: var(--ink); font-family: var(--font-body), sans-serif; font-size: 14px; padding: 9px; text-transform: none; }
+.criteriaTableWrap { overflow-x: auto; }
+.criteriaTable { border-collapse: collapse; min-width: 720px; width: 100%; }
+.criteriaTable th, .criteriaTable td { border-bottom: 1px solid var(--hair); padding: 11px 12px; text-align: left; }
+.criteriaTable thead th, .criteriaTable tfoot td { background: var(--ink); color: white; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+.criteriaTable tbody th { color: var(--ink-2); }
+.criteriaTable td:last-child, .criteriaTable th:last-child { font-family: var(--font-mono), monospace; font-weight: 700; text-align: right; }
+.ratingScale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.ratingScale > div { align-items: center; background: white; border: 1px solid var(--hair); display: flex; flex-direction: column; gap: 3px; min-height: 130px; padding: 16px 10px; text-align: center; }
+.ratingScale > div:first-child { border-radius: 12px 0 0 12px; }
+.ratingScale > div:last-child { border-radius: 0 12px 12px 0; }
+.ratingScale small { color: var(--slate); }
+.notes { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.notes > div { padding: 18px; }
+.notes p { color: var(--slate); margin: 8px 0 0; }
+.empty { color: var(--slate); padding: 36px; text-align: center; }
+.empty p { margin: 4px 0 0; }
+@media (max-width: 800px) {
+  .hero { grid-template-columns: auto 1fr; }
+  .heroDate { grid-column: 1 / -1; }
+  .rankingCard { grid-template-columns: 42px 1fr auto; }
+  .scoreBar { grid-column: 2 / -1; grid-row: 2; }
+  .breakdown { grid-column: 1 / -1; }
+  .reviewForm { grid-template-columns: 1fr; }
+  .ratingScale { grid-template-columns: 1fr; }
+  .ratingScale > div:first-child, .ratingScale > div:last-child { border-radius: 0; }
+}
+@media (max-width: 560px) {
+  .summaryGrid, .notes { grid-template-columns: 1fr; }
+  .hero { padding: 18px; }
+  .rankingCard { align-items: start; grid-template-columns: 40px 1fr; }
+  .rating { grid-column: 2; text-align: left; }
+  .scoreBar { grid-column: 1 / -1; grid-row: auto; }
+  .breakdown dl { grid-template-columns: 1fr; }
+}

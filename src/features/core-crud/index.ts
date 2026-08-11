@@ -1,10 +1,12 @@
 export {
+  addLeadTagAction,
   cancelLeaveRequestAction,
   createExpenseAction,
   createLeadAction,
   createLeaveRequestAction,
   createTaskAction,
   reviewExpenseAction,
+  removeLeadTagAction,
   updateExpenseAction,
   updateLeadAction,
   updateLeadStatusAction,

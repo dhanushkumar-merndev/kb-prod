@@ -12,12 +12,14 @@ import { APP_ERROR_MESSAGES } from "@/lib/errors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 import {
+  addLeadTagSchema,
   cancelLeaveRequestSchema,
   createExpenseSchema,
   createLeadSchema,
   createLeaveRequestSchema,
   createTaskSchema,
   reviewExpenseSchema,
+  removeLeadTagSchema,
   updateExpenseSchema,
   updateLeadSchema,
   updateLeadStatusSchema,
@@ -290,26 +292,28 @@ export async function createLeadAction(
     assignedSalesProfileId = parsed.data.assignedSalesProfileId;
   }
 
-  const result = await supabase
-    .from("leads")
-    .insert({
-      organization_id: session.profile.organization_id,
-      provider: "manual",
-      source: parsed.data.source ?? "manual",
-      client_name: parsed.data.clientName,
-      customer_email: parsed.data.customerEmail ?? null,
-      phone_e164: phoneE164,
-      phone_normalized: phoneE164,
-      requirement: parsed.data.requirement ?? null,
-      event_date: parsed.data.eventDate ?? null,
-      guest_count: parsed.data.guestCount ?? null,
-      quote_amount: parsed.data.quoteAmount ?? null,
-      notes: parsed.data.notes ?? null,
-      assigned_sales_profile_id: assignedSalesProfileId,
-      created_by_profile_id: session.userId,
-    })
-    .select("id")
-    .single();
+  const tags = Array.from(
+    new Set(
+      (parsed.data.tags ?? "")
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+    ),
+  ).slice(0, 10);
+
+  const result = await supabase.rpc("create_manual_lead", {
+    p_assigned_sales_profile_id: assignedSalesProfileId,
+    p_client_name: parsed.data.clientName,
+    p_customer_email: parsed.data.customerEmail ?? null,
+    p_event_date: parsed.data.eventDate ?? null,
+    p_guest_count: parsed.data.guestCount ?? null,
+    p_notes: parsed.data.notes ?? null,
+    p_phone_e164: phoneE164,
+    p_quote_amount: parsed.data.quoteAmount ?? null,
+    p_requirement: parsed.data.requirement ?? null,
+    p_source: parsed.data.source ?? "manual",
+    p_tags: tags,
+  });
 
   if (result.error) {
     return databaseFailure(
@@ -321,6 +325,62 @@ export async function createLeadAction(
 
   revalidateDomain("leads");
   return success("Lead created.");
+}
+
+export async function addLeadTagAction(
+  _previousState: CrudActionState,
+  formData: FormData,
+): Promise<CrudActionState> {
+  const session = await requireActiveSession();
+
+  if (!SALES_DOMAIN_ROLES.includes(session.profile.role)) {
+    return failure(APP_ERROR_MESSAGES.PERMISSION_DENIED);
+  }
+
+  const parsed = addLeadTagSchema.safeParse(inputFromFormData(formData));
+  if (!parsed.success) return validationFailure(parsed.error);
+
+  const supabase = await createServerSupabaseClient();
+  const result = await supabase.from("lead_tags").insert({
+    organization_id: session.profile.organization_id,
+    franchise_id: session.profile.franchise_id,
+    lead_id: parsed.data.leadId,
+    tag: parsed.data.tag,
+    added_by_profile_id: session.userId,
+  });
+
+  if (result.error) {
+    return databaseFailure("add-lead-tag", result.error, "This tag is already on the lead.");
+  }
+
+  revalidateDomain("leads");
+  return success("Lead tag added.");
+}
+
+export async function removeLeadTagAction(
+  _previousState: CrudActionState,
+  formData: FormData,
+): Promise<CrudActionState> {
+  const session = await requireActiveSession();
+
+  if (!SALES_DOMAIN_ROLES.includes(session.profile.role)) {
+    return failure(APP_ERROR_MESSAGES.PERMISSION_DENIED);
+  }
+
+  const parsed = removeLeadTagSchema.safeParse(inputFromFormData(formData));
+  if (!parsed.success) return validationFailure(parsed.error);
+
+  const supabase = await createServerSupabaseClient();
+  const result = await supabase
+    .from("lead_tags")
+    .delete()
+    .eq("id", parsed.data.tagId)
+    .eq("lead_id", parsed.data.leadId);
+
+  if (result.error) return databaseFailure("remove-lead-tag", result.error);
+
+  revalidateDomain("leads");
+  return success("Lead tag removed.");
 }
 
 export async function updateLeadAction(

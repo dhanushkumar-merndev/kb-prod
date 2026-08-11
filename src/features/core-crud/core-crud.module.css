@@ -559,6 +559,52 @@
   margin-top: 14px;
 }
 
+.helpText,
+.noTags {
+  color: var(--slate);
+  font-size: 12px;
+}
+
+.tagSection {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.tagList {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tagList form {
+  margin: 0;
+}
+
+.tag {
+  align-items: center;
+  background: var(--saffron-tint);
+  border: 1px solid color-mix(in srgb, var(--saffron) 28%, white);
+  border-radius: 999px;
+  color: var(--saffron-dark);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 5px;
+  padding: 5px 9px;
+  text-transform: uppercase;
+}
+
+.tagForm {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(130px, 240px) auto;
+}
+
 .details {
   border-top: 1px solid var(--hair-2);
   margin-top: 14px;

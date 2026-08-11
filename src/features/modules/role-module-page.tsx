@@ -16,6 +16,7 @@ import { FranchisesPanel } from "@/features/franchises";
 import { IntegrationPanel } from "@/features/integrations";
 import { MeetingCrudPanel, TemporaryWorkerCrudPanel } from "@/features/secondary-crud";
 import { SalesOperationsPanel } from "@/features/sales-operations";
+import { SalesPerformancePanel } from "@/features/sales-performance";
 import { PaymentPanel } from "@/features/payments";
 import { PayrollPanel } from "@/features/payroll";
 import { ExpenseReviewPanel, LeaveReviewPanel } from "@/features/reviews";
@@ -67,6 +68,14 @@ const REALTIME_TABLES: Partial<
   temporary_workers: ["temporary_workers", "temporary_worker_assignments"],
   franchises: ["franchises", "profiles"],
   integrations: ["integration_connections", "email_outbox", "invoices"],
+  reports: [
+    "leads",
+    "lead_tags",
+    "follow_ups",
+    "superfone_calls",
+    "messages",
+    "sales_daily_reviews",
+  ],
 };
 
 export async function RoleModulePage({
@@ -178,6 +187,14 @@ export async function RoleModulePage({
   } else if (navigationItem.resource === "payroll") {
     workingPanel = <PayrollPanel />;
     showLiveTable = false;
+  } else if (navigationItem.resource === "reports" && slug === "performance") {
+    workingPanel = <SalesPerformancePanel />;
+    showLiveTable = false;
+  } else if (
+    navigationItem.resource === "reports" &&
+    ["director", "franchise"].includes(role)
+  ) {
+    workingPanel = <SalesPerformancePanel />;
   } else if (navigationItem.resource === "workforce_bookings" && ["franchise", "hr"].includes(role)) {
     workingPanel = <BookingAssignmentPanel />;
     showLiveTable = false;

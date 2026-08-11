@@ -18,7 +18,13 @@ import {
   type LeadStage,
 } from "@/lib/leads/transition-rules";
 
-import { createLeadAction, updateLeadAction, updateLeadStatusAction } from "../actions";
+import {
+  addLeadTagAction,
+  createLeadAction,
+  removeLeadTagAction,
+  updateLeadAction,
+  updateLeadStatusAction,
+} from "../actions";
 import styles from "../core-crud.module.css";
 import {
   INITIAL_CRUD_ACTION_STATE,
@@ -157,6 +163,20 @@ function CreateLeadForm({ data, onCreated }: { data: LeadCrudData; onCreated: ()
         <FieldError field="quoteAmount" state={state} />
       </div>
       <div className={styles.fieldWide}>
+        <label className={styles.label} htmlFor="lead-tags">
+          Tags
+        </label>
+        <input
+          className={styles.input}
+          id="lead-tags"
+          name="tags"
+          maxLength={500}
+          placeholder="Hot, Referral, Follow-up"
+        />
+        <small className={styles.helpText}>Separate multiple tags with commas.</small>
+        <FieldError field="tags" state={state} />
+      </div>
+      <div className={styles.fieldWide}>
         <label className={styles.label} htmlFor="lead-requirement">
           Requirement
         </label>
@@ -182,6 +202,54 @@ function CreateLeadForm({ data, onCreated }: { data: LeadCrudData; onCreated: ()
         <ActionFeedback state={state} />
       </div>
     </form>
+  );
+}
+
+function RemoveLeadTagButton({ leadId, tag }: { leadId: string; tag: LeadRecord["tags"][number] }) {
+  const [, action] = useActionState(removeLeadTagAction, INITIAL_CRUD_ACTION_STATE);
+  return (
+    <form action={action}>
+      <input name="leadId" type="hidden" value={leadId} />
+      <input name="tagId" type="hidden" value={tag.id} />
+      <button className={styles.tag} title={`Remove ${tag.tag}`} type="submit">
+        {tag.tag}
+        <X aria-hidden="true" size={13} />
+      </button>
+    </form>
+  );
+}
+
+function LeadTags({ lead }: { lead: LeadRecord }) {
+  const [addState, addAction] = useActionState(addLeadTagAction, INITIAL_CRUD_ACTION_STATE);
+
+  return (
+    <div className={styles.tagSection}>
+      <div className={styles.tagList} aria-label="Lead tags">
+        {lead.tags.length === 0 ? <span className={styles.noTags}>No tags applied</span> : null}
+        {lead.tags.map((tag) => (
+          <RemoveLeadTagButton key={tag.id} leadId={lead.id} tag={tag} />
+        ))}
+      </div>
+      <form action={addAction} className={styles.tagForm}>
+        <input name="leadId" type="hidden" value={lead.id} />
+        <label className={styles.srOnly} htmlFor={`lead-tag-${lead.id}`}>
+          Add tag
+        </label>
+        <input
+          className={styles.input}
+          id={`lead-tag-${lead.id}`}
+          maxLength={40}
+          name="tag"
+          placeholder="Add tag"
+          required
+        />
+        <SubmitButton pendingLabel="Adding…" tone="secondary">
+          Add tag
+        </SubmitButton>
+      </form>
+      <FieldError field="tag" state={addState} />
+      <ActionFeedback state={addState} />
+    </div>
   );
 }
 
@@ -423,6 +491,7 @@ function LeadItem({
         </div>
       </dl>
       {lead.requirement ? <p className={styles.recordText}>{lead.requirement}</p> : null}
+      <LeadTags lead={lead} />
       <LeadStatusForm lead={lead} viewerRole={viewerRole} />
       <details className={styles.details}>
         <summary>Edit lead details</summary>

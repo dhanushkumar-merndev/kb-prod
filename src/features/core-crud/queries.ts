@@ -143,6 +143,7 @@ function toLeadRecord(row: z.infer<typeof leadRowSchema>): LeadRecord {
     assignedSalesProfileId: row.assigned_sales_profile_id,
     nextFollowUpAt: row.next_follow_up_at,
     notes: row.notes,
+    tags: [],
     version: row.version,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -279,6 +280,32 @@ export async function loadLeadCrudData(
   try {
     const leadPage = leadPageSchema.parse(leadResult.data);
     const leads = leadPage.rows.map(toLeadRecord);
+    const leadIds = leads.map((lead) => lead.id);
+    const tagResult =
+      leadIds.length === 0
+        ? { data: [], error: null }
+        : await supabase
+            .from("lead_tags")
+            .select("id,lead_id,tag")
+            .in("lead_id", leadIds)
+            .order("tag", { ascending: true });
+
+    if (tagResult.error) {
+      return loadFailure("load-lead-tags", tagResult.error);
+    }
+
+    const tagSchema = z.object({
+      id: z.string().uuid(),
+      lead_id: z.string().uuid(),
+      tag: z.string(),
+    });
+    const tagsByLead = new Map<string, LeadRecord["tags"]>();
+    for (const tag of parseRows(tagSchema, tagResult.data)) {
+      const current = tagsByLead.get(tag.lead_id) ?? [];
+      current.push({ id: tag.id, tag: tag.tag });
+      tagsByLead.set(tag.lead_id, current);
+    }
+    for (const lead of leads) lead.tags = tagsByLead.get(lead.id) ?? [];
     const salesAssignees = parseRows(safeProfileRowSchema, assigneeResult.data).map(toSafeProfile);
 
     return {

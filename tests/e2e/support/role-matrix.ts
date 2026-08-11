@@ -8,6 +8,14 @@ export const ROLE_MATRIX = [
     unauthorizedPath: "/manager/dashboard",
   },
   {
+    key: "FRANCHISE",
+    label: "Franchise Owner",
+    homePath: "/franchise/dashboard",
+    dashboardHeading: "Franchise dashboard",
+    primaryNavigationLabel: "Dashboard",
+    unauthorizedPath: "/director/dashboard",
+  },
+  {
     key: "MANAGER",
     label: "Manager",
     homePath: "/manager/dashboard",

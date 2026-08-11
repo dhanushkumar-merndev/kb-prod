@@ -104,6 +104,7 @@ export interface LeadRecord {
   assignedSalesProfileId: string | null;
   nextFollowUpAt: string | null;
   notes: string | null;
+  tags: Array<{ id: string; tag: string }>;
   version: number;
   createdAt: string;
   updatedAt: string;

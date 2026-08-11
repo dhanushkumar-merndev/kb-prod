@@ -59,6 +59,17 @@ export const createLeadSchema = z.object({
   ...leadFields,
   source: optionalText(120),
   assignedSalesProfileId: optionalUuid,
+  tags: optionalText(500),
+});
+
+export const addLeadTagSchema = z.object({
+  leadId: z.string().uuid(),
+  tag: z.string().trim().min(1, "Enter a tag.").max(40, "Tags must be 40 characters or less."),
+});
+
+export const removeLeadTagSchema = z.object({
+  leadId: z.string().uuid(),
+  tagId: z.string().uuid(),
 });
 
 export const updateLeadSchema = z.object({
