@@ -56,9 +56,9 @@ export function SalesPerformanceWorkspace({ data }: { data: SalesComplianceData 
       <section className={styles.hero}>
         <div className={styles.heroIcon}><Target aria-hidden="true" size={30} /></div>
         <div>
-          <span className={styles.eyebrow}>Daily sales compliance</span>
-          <h2>100-mark CRM score</h2>
-          <p>Complete CRM updates, quality follow-ups, and faster customer responses.</p>
+          <span className={styles.eyebrow}>Daily sales performance</span>
+          <h2>Sales score</h2>
+          <p>Track sales activity, follow-up quality, and customer response performance.</p>
         </div>
         <div className={styles.heroDate}>
           <ClipboardCheck aria-hidden="true" size={20} />
