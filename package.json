@@ -23,6 +23,7 @@
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
     "supabase:test": "supabase test db",
+    "deploy:production:bom1": "bash scripts/deploy-vercel-bom1.sh",
     "seed:leads": "node --env-file=.env scripts/seed-leads.mjs --confirm-lead-seed",
     "seed:demo": "node --env-file=.env scripts/seed-demo.mjs --confirm-demo-seed"
   },

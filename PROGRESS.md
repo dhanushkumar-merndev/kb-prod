@@ -1,6 +1,6 @@
 # Khana Banao CRM implementation progress
 
-Last updated: 2026-07-28
+Last updated: 2026-09-04
 
 ## Implementation contract
 
@@ -59,9 +59,10 @@ Last updated: 2026-07-28
   `pnpm format:check` still reports the existing formatting baseline.
 - Edge Function strict type/prettier checks — passing for the current files.
 
-Remote migrations through `202607280001` are applied and aligned with local history. Remote
-schema lint and read-only table/bucket verification pass. Local pgTAP execution remains pending
-until a local Supabase/Docker runtime is available.
+Remote migrations through `202608110003` are applied and aligned with local history. A follow-up
+production dry run reports that the remote database is up to date. Remote schema lint and
+read-only table/bucket verification pass. Local pgTAP execution remains pending until a local
+Supabase/Docker runtime is available.
 
 ## Environment handoff
 

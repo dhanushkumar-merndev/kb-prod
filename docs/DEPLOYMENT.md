@@ -229,6 +229,20 @@ pnpm start
 Deploy the built application using the platform's Next.js 16 support. Do not
 place service-role, bootstrap or provider secrets in the web deployment.
 
+The repository pins Vercel Functions to Mumbai (`bom1`) in `vercel.json`, which
+keeps the Next.js compute in the same AWS region (`ap-south-1`) as the production
+Supabase project. For an explicit cache-bypassing production deployment, first
+link the intended Vercel project and then run:
+
+```bash
+npx --yes vercel@59.11.2 link
+pnpm deploy:production:bom1 -- --confirm-production
+```
+
+The confirmation argument and link check prevent the script from silently
+creating or deploying a different Vercel project. The command uses Vercel's
+`--force` option, so it creates a fresh build without the previous build cache.
+
 ## Superfone activation
 
 Do not mark this deployment step complete while the pending adapter is active.

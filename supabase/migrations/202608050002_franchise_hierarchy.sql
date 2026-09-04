@@ -530,10 +530,22 @@ update public.meetings c set franchise_id = p.franchise_id
 update public.meeting_attendees c set franchise_id = p.franchise_id
   from public.meetings p where p.id = c.meeting_id and c.franchise_id is null;
 
+-- Paid/reversed payroll rows and payroll components are immutable to application
+-- workflows. Temporarily suspend only those guards for this structural tenant
+-- backfill; PostgreSQL restores them automatically if this migration rolls back.
+alter table public.payroll_entries
+  disable trigger payroll_entries_enforce_transition;
 update public.payroll_entries c set franchise_id = p.franchise_id
   from public.profiles p where p.id = c.profile_id and c.franchise_id is null;
+alter table public.payroll_entries
+  enable trigger payroll_entries_enforce_transition;
+
+alter table public.payroll_components
+  disable trigger payroll_components_enforce_immutability;
 update public.payroll_components c set franchise_id = p.franchise_id
   from public.payroll_entries p where p.id = c.payroll_entry_id and c.franchise_id is null;
+alter table public.payroll_components
+  enable trigger payroll_components_enforce_immutability;
 
 update public.notifications c set franchise_id = p.franchise_id
   from public.profiles p where p.id = c.recipient_profile_id and c.franchise_id is null;
@@ -543,8 +555,16 @@ update public.login_sessions c set franchise_id = p.franchise_id
   from public.profiles p where p.id = c.profile_id and c.franchise_id is null;
 update public.role_assignment_history c set franchise_id = p.franchise_id
   from public.profiles p where p.id = c.profile_id and c.franchise_id is null;
+
+-- Audit history remains immutable to the application. This one-time structural
+-- backfill is performed by the migration owner and the guard is restored before
+-- the transaction commits.
+alter table public.audit_logs
+  disable trigger audit_logs_reject_update_delete;
 update public.audit_logs c set franchise_id = p.franchise_id
   from public.profiles p where p.id = c.actor_profile_id and c.franchise_id is null;
+alter table public.audit_logs
+  enable trigger audit_logs_reject_update_delete;
 
 -- ---------------------------------------------------------------------------
 -- 6. Franchise-aware reporting hierarchy
