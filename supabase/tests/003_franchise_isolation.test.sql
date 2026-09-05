@@ -161,7 +161,7 @@ select is(
    where schemaname = 'public'
      and permissive = 'RESTRICTIVE'
      and policyname like '%franchise_isolation'),
-  38,
+  39,
   'every franchise-scoped table carries a restrictive isolation policy'
 );
 
@@ -173,7 +173,7 @@ select is(
    where n.nspname = 'public'
      and not t.tgisinternal
      and t.tgname in ('aa_franchise_scope', 'ab_enforce_franchise_scope')),
-  38,
+  39,
   'every franchise-scoped table carries the write guard trigger'
 );
 

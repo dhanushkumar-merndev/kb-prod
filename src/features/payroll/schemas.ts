@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a valid date.");
+const dateSchema = z.iso.date("Enter a valid date.");
 
 const moneySchema = z.coerce
   .number()
@@ -10,8 +10,17 @@ const moneySchema = z.coerce
 
 export const generatePayrollSchema = z
   .object({
+    franchiseId: z.union([z.string().uuid(), z.literal("")]).optional(),
+    payrollMonth: z
+      .string()
+      .regex(/^\d{4}-\d{2}$/)
+      .optional(),
     periodStart: dateSchema,
     periodEnd: dateSchema,
+  })
+  .refine((value) => !value.payrollMonth || value.periodStart.startsWith(value.payrollMonth), {
+    message: "Dates must match the payroll month.",
+    path: ["payrollMonth"],
   })
   .refine((value) => value.periodEnd >= value.periodStart, {
     message: "End date must be on or after the start date.",
@@ -46,4 +55,24 @@ export const reversePayrollEntrySchema = z.object({
   payrollEntryId: z.string().uuid(),
   reason: z.string().trim().min(3, "Add a reversal reason.").max(1000),
   confirmation: z.literal("yes"),
+});
+
+export const salaryStructureSchema = z.object({
+  profileId: z.string().uuid(),
+  effectiveFrom: dateSchema.refine(
+    (date) => date.endsWith("-01"),
+    "Choose the first day of a month.",
+  ),
+  paidLeave: z.preprocess((value) => value === true || value === "true", z.boolean()),
+  expectedVersion: z.coerce.number().int().min(0),
+  hra: moneySchema,
+  allowances: moneySchema,
+  incentives: moneySchema,
+  pf: moneySchema,
+  esic: moneySchema,
+  professional_tax: moneySchema,
+  tds: moneySchema,
+  other_deductions: moneySchema,
+  employer_pf: moneySchema,
+  employer_esic: moneySchema,
 });

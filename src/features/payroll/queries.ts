@@ -3,10 +3,11 @@ import "server-only";
 import { z } from "zod";
 
 import { requireRoleSession } from "@/lib/auth/require-role-session";
-import { ROLES } from "@/lib/constants/roles";
+import { ROLE_LABELS, ROLES } from "@/lib/constants/roles";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 import {
+  SALARY_FIELDS,
   PAYROLL_ENTRY_STATUSES,
   PAYROLL_PERIOD_STATUSES,
   type EarningsSummary,
@@ -20,6 +21,7 @@ const moneySchema = z.union([z.string(), z.number()]).transform(String);
 
 const periodRowSchema = z.object({
   id: z.string().uuid(),
+  franchise_id: z.string().uuid().nullable(),
   period_start: z.string(),
   period_end: z.string(),
   status: z.enum(PAYROLL_PERIOD_STATUSES),
@@ -41,6 +43,8 @@ const entryRowSchema = z.object({
   payroll_period_id: z.string().uuid(),
   profile_id: z.string().uuid().nullable(),
   temporary_worker_id: z.string().uuid().nullable(),
+  attendance_days: z.number().int().nullable(),
+  payable_days: z.number().int().nullable(),
   base_amount: moneySchema,
   attendance_amount: moneySchema,
   booking_earnings: moneySchema,
@@ -92,6 +96,7 @@ const earningsRowSchema = z.object({
 function period(row: z.infer<typeof periodRowSchema>): PayrollPeriodRecord {
   return {
     id: row.id,
+    franchiseId: row.franchise_id,
     periodStart: row.period_start,
     periodEnd: row.period_end,
     status: row.status,
@@ -135,29 +140,89 @@ export type PayrollLoadResult =
   { ok: true; data: PayrollWorkspaceData } | { ok: false; message: string };
 
 export async function loadPayrollWorkspace(): Promise<PayrollLoadResult> {
-  const session = await requireRoleSession(["director", "franchise", "manager", "hr", "chef", "part_time_chef"]);
+  const session = await requireRoleSession([
+    "director",
+    "franchise",
+    "manager",
+    "hr",
+    "chef",
+    "part_time_chef",
+  ]);
   const supabase = await createServerSupabaseClient();
   const isWorker = ["chef", "part_time_chef"].includes(session.profile.role);
-  const [periodResult, entryResult, summaryResult] = await Promise.all([
-    supabase
-      .from("payroll_periods")
-      .select(
-        "id,period_start,period_end,status,prepared_by_profile_id,reviewed_by_profile_id,approved_by_profile_id,prepared_at,reviewed_at,approved_at,paid_at,payment_reference,locked_at,created_at,updated_at",
-      )
-      .order("period_end", { ascending: false })
-      .limit(36),
-    supabase
-      .from("payroll_entries")
-      .select(
-        "id,payroll_period_id,profile_id,temporary_worker_id,base_amount,attendance_amount,booking_earnings,overtime_amount,expense_reimbursement,allowances,deductions,advances,net_payable,status,payment_reference,paid_at,reversed_at,reversal_reason,created_at,updated_at",
-      )
-      .order("created_at", { ascending: false })
-      .limit(500),
-    isWorker
-      ? supabase.rpc("get_my_payroll_earnings")
-      : Promise.resolve({ data: null, error: null }),
-  ]);
+  const [periodResult, summaryResult, salaryResult, workforceResult, franchiseResult] =
+    await Promise.all([
+      supabase
+        .from("payroll_periods")
+        .select(
+          "id,franchise_id,period_start,period_end,status,prepared_by_profile_id,reviewed_by_profile_id,approved_by_profile_id,prepared_at,reviewed_at,approved_at,paid_at,payment_reference,locked_at,created_at,updated_at",
+        )
+        .order("period_end", { ascending: false })
+        .limit(36),
+      isWorker
+        ? supabase.rpc("get_my_payroll_earnings")
+        : Promise.resolve({ data: null, error: null }),
+      !isWorker
+        ? supabase
+            .from("payroll_salary_structures")
+            .select("*")
+            .order("version", { ascending: false })
+        : Promise.resolve({ data: [], error: null }),
+      ["director", "hr"].includes(session.profile.role)
+        ? supabase
+            .from("profiles")
+            .select("id,full_name,payment_type,payment_amount")
+            .in("role", ["chef", "part_time_chef"])
+            .is("deleted_at", null)
+            .order("full_name")
+        : Promise.resolve({ data: [], error: null }),
+      session.profile.role === "director"
+        ? supabase.from("franchises").select("id,name").order("name")
+        : Promise.resolve({ data: [], error: null }),
+    ]);
 
+  // Fetch complete periods in batches so summary totals and exports never truncate at 500 entries.
+  const periodIds = (periodResult.data ?? []).map((row) => row.id as string);
+  const entryRows: unknown[] = [];
+  let entryError = false;
+  if (periodIds.length) {
+    for (let offset = 0; ; offset += 500) {
+      const result = await supabase
+        .from("payroll_entries")
+        .select("*")
+        .in("payroll_period_id", periodIds)
+        .order("id")
+        .range(offset, offset + 499);
+      if (result.error) {
+        entryError = true;
+        break;
+      }
+      entryRows.push(...(result.data ?? []));
+      if ((result.data?.length ?? 0) < 500) break;
+    }
+  }
+  const entryResult = { data: entryRows, error: entryError };
+  const salarySchema = z.object({
+    profile_id: z.string().uuid(),
+    effective_from: z.string(),
+    paid_leave: z.boolean(),
+    version: z.number(),
+    ...Object.fromEntries(Object.keys(SALARY_FIELDS).map((field) => [field, moneySchema])),
+  });
+  const salaries = z.array(salarySchema).safeParse(salaryResult.data ?? []);
+  const workforce = z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        full_name: z.string(),
+        payment_type: z.string().nullable(),
+        payment_amount: moneySchema.nullable(),
+      }),
+    )
+    .safeParse(workforceResult.data ?? []);
+  const franchises = z
+    .array(z.object({ id: z.string().uuid(), name: z.string() }))
+    .safeParse(franchiseResult.data ?? []);
   const parsedPeriods = z.array(periodRowSchema).safeParse(periodResult.data ?? []);
   const parsedEntries = z.array(entryRowSchema).safeParse(entryResult.data ?? []);
   const parsedSummary = isWorker
@@ -165,6 +230,12 @@ export async function loadPayrollWorkspace(): Promise<PayrollLoadResult> {
     : null;
 
   if (
+    franchiseResult.error ||
+    !franchises.success ||
+    salaryResult.error ||
+    workforceResult.error ||
+    !salaries.success ||
+    !workforce.success ||
     periodResult.error ||
     entryResult.error ||
     summaryResult.error ||
@@ -201,14 +272,23 @@ export async function loadPayrollWorkspace(): Promise<PayrollLoadResult> {
           .select("id,full_name,worker_type")
           .in("id", temporaryWorkerIds)
       : Promise.resolve({ data: [], error: null }),
-    entryIds.length > 0
-      ? supabase
-          .from("payroll_components")
-          .select("id,payroll_entry_id,component_type,source_type,amount,description,created_at")
-          .in("payroll_entry_id", entryIds)
-          .order("created_at", { ascending: true })
-          .limit(3000)
-      : Promise.resolve({ data: [], error: null }),
+    (async () => {
+      const rows: unknown[] = [];
+      for (let chunk = 0; chunk < entryIds.length; chunk += 100) {
+        for (let offset = 0; ; offset += 500) {
+          const result = await supabase
+            .from("payroll_components")
+            .select("id,payroll_entry_id,component_type,source_type,amount,description,created_at")
+            .in("payroll_entry_id", entryIds.slice(chunk, chunk + 100))
+            .order("id")
+            .range(offset, offset + 499);
+          if (result.error) return { data: [], error: result.error };
+          rows.push(...(result.data ?? []));
+          if ((result.data?.length ?? 0) < 500) break;
+        }
+      }
+      return { data: rows, error: null };
+    })(),
   ]);
   const parsedProfiles = z.array(profileRowSchema).safeParse(profilesResult.data ?? []);
   const parsedWorkers = z.array(temporaryWorkerRowSchema).safeParse(workersResult.data ?? []);
@@ -233,7 +313,7 @@ export async function loadPayrollWorkspace(): Promise<PayrollLoadResult> {
       row.id,
       {
         name: row.full_name,
-        label: row.role === "part_time_chef" ? "Part-time Chef" : "Chef",
+        label: ROLE_LABELS[row.role],
       },
     ]),
   );
@@ -258,6 +338,8 @@ export async function loadPayrollWorkspace(): Promise<PayrollLoadResult> {
       temporaryWorkerId: row.temporary_worker_id,
       subjectName: subject?.name ?? "Workforce member",
       subjectLabel: subject?.label ?? "Worker",
+      attendanceDays: row.attendance_days,
+      payableDays: row.payable_days,
       baseAmount: row.base_amount,
       attendanceAmount: row.attendance_amount,
       bookingEarnings: row.booking_earnings,
@@ -280,6 +362,14 @@ export async function loadPayrollWorkspace(): Promise<PayrollLoadResult> {
   return {
     ok: true,
     data: {
+      franchises: franchises.data,
+      salaryStructures: salaries.data as import("./types").SalaryStructure[],
+      workforce: workforce.data.map((p) => ({
+        id: p.id,
+        name: p.full_name,
+        paymentType: p.payment_type,
+        paymentAmount: p.payment_amount,
+      })),
       viewerRole: session.profile.role,
       periods: parsedPeriods.data.map(period),
       entries,

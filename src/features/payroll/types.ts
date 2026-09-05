@@ -22,16 +22,16 @@ export type PayrollEntryStatus = (typeof PAYROLL_ENTRY_STATUSES)[number];
 
 export const PAYROLL_PERIOD_STATUS_LABELS: Record<PayrollPeriodStatus, string> = {
   draft: "Draft",
-  prepared: "Prepared",
-  reviewed: "Reviewed",
+  prepared: "Review",
+  reviewed: "Review",
   approved: "Approved",
   paid: "Paid",
-  locked: "Locked",
+  locked: "Paid",
 };
 
 export const PAYROLL_ENTRY_STATUS_LABELS: Record<PayrollEntryStatus, string> = {
   draft: "Draft",
-  reviewed: "Reviewed",
+  reviewed: "Review",
   approved: "Approved",
   paid: "Paid",
   reversed: "Reversed",
@@ -39,6 +39,7 @@ export const PAYROLL_ENTRY_STATUS_LABELS: Record<PayrollEntryStatus, string> = {
 
 export interface PayrollPeriodRecord {
   id: string;
+  franchiseId: string | null;
   periodStart: string;
   periodEnd: string;
   status: PayrollPeriodStatus;
@@ -60,6 +61,8 @@ export interface PayrollEntryRecord {
   payrollPeriodId: string;
   profileId: string | null;
   temporaryWorkerId: string | null;
+  attendanceDays: number | null;
+  payableDays: number | null;
   subjectName: string;
   subjectLabel: string;
   baseAmount: string;
@@ -100,8 +103,36 @@ export interface EarningsSummary {
 
 export interface PayrollWorkspaceData {
   viewerRole: Role;
+  franchises: { id: string; name: string }[];
   periods: PayrollPeriodRecord[];
   entries: PayrollEntryRecord[];
   components: PayrollComponentRecord[];
   earningsSummary: EarningsSummary | null;
+  salaryStructures: SalaryStructure[];
+  workforce: {
+    id: string;
+    name: string;
+    paymentType: string | null;
+    paymentAmount: string | null;
+  }[];
 }
+
+export const SALARY_FIELDS = {
+  hra: "HRA",
+  allowances: "Allowances",
+  incentives: "Incentives",
+  pf: "PF",
+  esic: "ESIC",
+  professional_tax: "Professional Tax",
+  tds: "TDS",
+  other_deductions: "Other Deductions",
+  employer_pf: "Employer PF",
+  employer_esic: "Employer ESIC",
+} as const;
+
+export type SalaryStructure = Record<keyof typeof SALARY_FIELDS, string> & {
+  profile_id: string;
+  effective_from: string;
+  paid_leave: boolean;
+  version: number;
+};

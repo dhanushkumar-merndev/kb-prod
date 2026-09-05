@@ -1,7 +1,20 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useMemo, useState, useRef, useEffect, startTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+  type ColumnDef,
+} from "@tanstack/react-table";
+import { detailRows, payrollBreakdown, payrollSummary, payrollCsv } from "./presentation";
+import { downloadFile, payslipHtml } from "./exports";
+import { generatePayrollSchema } from "./schemas";
+import { SalarySetup } from "./salary-setup";
 
 import {
   ActionFeedback,
@@ -53,40 +66,100 @@ function currentMonthRange(): { start: string; end: string } {
   };
 }
 
-function amountTotal(entries: PayrollEntryRecord[]): string {
-  return entries.reduce((total, entry) => total + Number(entry.netPayable), 0).toFixed(2);
-}
-
-function GeneratePayrollForm() {
-  const [state, action] = useActionState(generatePayrollAction, INITIAL_CRUD_ACTION_STATE);
+function GeneratePayrollForm({ franchises }: { franchises: PayrollWorkspaceData["franchises"] }) {
+  const [state, action, pending] = useActionState(generatePayrollAction, INITIAL_CRUD_ACTION_STATE);
   const range = currentMonthRange();
-
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(generatePayrollSchema),
+    defaultValues: {
+      franchiseId: franchises.length === 1 ? franchises[0]!.id : "",
+      payrollMonth: range.start.slice(0, 7),
+      periodStart: range.start,
+      periodEnd: range.end,
+    },
+  });
   return (
     <section className={styles.card}>
       <div className={styles.cardHeader}>
         <div>
-          <span className={styles.eyebrow}>New pay cycle</span>
-          <h2>Generate payroll draft</h2>
+          <h2>Generate Payroll</h2>
           <p>
-            Uses approved attendance, completed assigned jobs, approved expenses and stored pay
-            structures.
+            Calculated from approved attendance, saved salary structure, leave, incentives,
+            deductions and approved expenses.
           </p>
         </div>
       </div>
-      <form action={action} className={styles.generateForm}>
+      <form
+        className={styles.generateForm}
+        onSubmit={handleSubmit((values) => {
+          if (pending) return;
+          const form = new FormData();
+          Object.entries(values).forEach(([key, value]) => {
+            if (value) form.set(key, value);
+          });
+          startTransition(() => action(form));
+        })}
+      >
+        {franchises.length > 1 ? (
+          <label>
+            Franchise
+            <select {...register("franchiseId")} required>
+              <option value="">Select franchise</option>
+              {franchises.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name}
+                </option>
+              ))}
+            </select>
+            <FieldError field="franchiseId" state={state} />
+          </label>
+        ) : (
+          <input type="hidden" {...register("franchiseId")} />
+        )}
         <label>
-          Period start
-          <input defaultValue={range.start} name="periodStart" required type="date" />
+          Payroll Month
+          <input
+            type="month"
+            {...register("payrollMonth", {
+              onChange: (event) => {
+                const month = event.target.value as string;
+                if (!/^\d{4}-\d{2}$/.test(month)) return;
+                const [year, number] = month.split("-").map(Number);
+                const lastDay = new Date(Date.UTC(year!, number!, 0)).getUTCDate();
+                setValue("periodStart", `${month}-01`);
+                setValue("periodEnd", `${month}-${lastDay}`);
+              },
+            })}
+            required
+          />
+          {errors.payrollMonth ? <span role="alert">{errors.payrollMonth.message}</span> : null}
+          <FieldError field="payrollMonth" state={state} />
+        </label>
+        <label>
+          Start Date
+          <input type="date" {...register("periodStart")} required />
+          {errors.periodStart ? <span role="alert">{errors.periodStart.message}</span> : null}
           <FieldError field="periodStart" state={state} />
         </label>
         <label>
-          Period end
-          <input defaultValue={range.end} name="periodEnd" required type="date" />
+          End Date
+          <input type="date" {...register("periodEnd")} required />
+          {errors.periodEnd ? <span role="alert">{errors.periodEnd.message}</span> : null}
           <FieldError field="periodEnd" state={state} />
         </label>
-        <div className={styles.formAction}>
-          <SubmitButton pendingLabel="Calculating…">Generate draft</SubmitButton>
-        </div>
+        <button
+          className={styles.actionButton}
+          type="submit"
+          disabled={pending}
+          aria-busy={pending}
+        >
+          {pending ? "Calculating…" : "Generate Payroll Draft"}
+        </button>
       </form>
       <ActionFeedback state={state} />
     </section>
@@ -121,7 +194,7 @@ function PeriodTransition({
       <>
         <form action={prepareAction} className={styles.inlineAction}>
           {hiddenId}
-          <SubmitButton pendingLabel="Submitting…">Submit for review</SubmitButton>
+          <SubmitButton pendingLabel="Submitting…">Review Payroll</SubmitButton>
         </form>
         <ActionFeedback state={prepareState} />
       </>
@@ -133,7 +206,7 @@ function PeriodTransition({
       <>
         <form action={reviewAction} className={styles.inlineAction}>
           {hiddenId}
-          <SubmitButton pendingLabel="Reviewing…">Complete review</SubmitButton>
+          <SubmitButton pendingLabel="Reviewing…">Complete Review</SubmitButton>
         </form>
         <ActionFeedback state={reviewState} />
       </>
@@ -145,7 +218,7 @@ function PeriodTransition({
       <>
         <form action={approveAction} className={styles.inlineAction}>
           {hiddenId}
-          <SubmitButton pendingLabel="Approving…">Approve payroll</SubmitButton>
+          <SubmitButton pendingLabel="Approving…">Approve Payroll</SubmitButton>
         </form>
         <ActionFeedback state={approveState} />
       </>
@@ -352,39 +425,17 @@ function EntryCard({
           </span>
         </div>
       </div>
+      <p className={styles.paymentMeta}>
+        Attendance / Payable Days: {entry.attendanceDays ?? "Unavailable"} /{" "}
+        {entry.payableDays ?? "Unavailable"}
+      </p>
       <dl className={styles.amountGrid}>
-        <div>
-          <dt>Base</dt>
-          <dd>{formatMoney(entry.baseAmount)}</dd>
-        </div>
-        <div>
-          <dt>Attendance</dt>
-          <dd>{formatMoney(entry.attendanceAmount)}</dd>
-        </div>
-        <div>
-          <dt>Bookings</dt>
-          <dd>{formatMoney(entry.bookingEarnings)}</dd>
-        </div>
-        <div>
-          <dt>Overtime</dt>
-          <dd>{formatMoney(entry.overtimeAmount)}</dd>
-        </div>
-        <div>
-          <dt>Reimbursements</dt>
-          <dd>{formatMoney(entry.expenseReimbursement)}</dd>
-        </div>
-        <div>
-          <dt>Allowances</dt>
-          <dd>{formatMoney(entry.allowances)}</dd>
-        </div>
-        <div>
-          <dt>Deductions</dt>
-          <dd>{formatMoney(entry.deductions)}</dd>
-        </div>
-        <div>
-          <dt>Advances</dt>
-          <dd>{formatMoney(entry.advances)}</dd>
-        </div>
+        {detailRows(entry, components).map(([label, amount]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{formatMoney((amount / 100).toFixed(2))}</dd>
+          </div>
+        ))}
       </dl>
       {entry.paymentReference ? (
         <p className={styles.paymentMeta}>
@@ -404,88 +455,395 @@ function EntryCard({
   );
 }
 
+function EmployeeTable({
+  entries,
+  components,
+  onView,
+}: {
+  entries: PayrollEntryRecord[];
+  components: PayrollComponentRecord[];
+  onView: (entry: PayrollEntryRecord) => void;
+}) {
+  const columns: ColumnDef<PayrollEntryRecord>[] = [
+    { accessorKey: "subjectName", header: "Employee Name" },
+    { accessorKey: "subjectLabel", header: "Designation" },
+    {
+      accessorKey: "payableDays",
+      header: "Payable Days",
+      cell: ({ row }) => row.original.payableDays ?? "—",
+    },
+    ...(
+      [
+        ["Gross Salary", "gross"],
+        ["Deductions", "deductions"],
+        ["Net Salary", "net"],
+      ] as const
+    ).map(([header, key]) => ({
+      id: key,
+      header,
+      cell: ({ row }: { row: { original: PayrollEntryRecord } }) =>
+        formatMoney(
+          (
+            payrollBreakdown(
+              row.original,
+              components.filter((c) => c.payrollEntryId === row.original.id),
+            )[key] / 100
+          ).toFixed(2),
+        ),
+    })),
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <span className={styles.statusBadge} data-status={row.original.status}>
+          {PAYROLL_ENTRY_STATUS_LABELS[row.original.status]}
+        </span>
+      ),
+    },
+    {
+      id: "view",
+      header: "View Details",
+      cell: ({ row }) => (
+        <button
+          type="button"
+          className={styles.textButton}
+          onClick={() => onView(row.original)}
+          id={`payroll-entry-${row.original.id}`}
+          aria-label={`View details for ${row.original.subjectName}`}
+        >
+          View Details
+        </button>
+      ),
+    },
+  ];
+  // TanStack owns pagination state; rows still contain the full selected payroll for totals and export.
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    data: entries,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 10 } },
+  });
+  return (
+    <>
+      <div className={styles.tableScroll}>
+        <table className={styles.table}>
+          <thead>
+            {table.getHeaderGroups().map((group) => (
+              <tr key={group.id}>
+                {group.headers.map((header) => (
+                  <th key={header.id} scope="col">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!entries.length ? (
+        <p className={styles.empty}>No eligible employee records in this period.</p>
+      ) : null}
+      <Pagination
+        page={table.getState().pagination.pageIndex + 1}
+        pageCount={Math.max(1, table.getPageCount())}
+        setPage={(page) => table.setPageIndex(page - 1)}
+      />
+    </>
+  );
+}
+
+function EmployeeDetails({
+  entry,
+  period,
+  data,
+  onClose,
+}: {
+  entry: PayrollEntryRecord;
+  period: PayrollPeriodRecord;
+  data: PayrollWorkspaceData;
+  onClose: () => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const element = dialog.current;
+    element?.showModal();
+    return () => {
+      element?.close();
+      requestAnimationFrame(() => document.getElementById(`payroll-entry-${entry.id}`)?.focus());
+    };
+  }, [entry.id]);
+  return (
+    <dialog
+      ref={dialog}
+      className={styles.dialog}
+      onClose={onClose}
+      aria-labelledby="payroll-details-title"
+    >
+      <div className={styles.cardHeader}>
+        <h2 id="payroll-details-title">Employee Details</h2>
+        <button
+          type="button"
+          className={styles.textButton}
+          onClick={() => dialog.current?.close()}
+          aria-label="Close employee details"
+        >
+          Close
+        </button>
+      </div>
+      <EntryCard
+        entry={entry}
+        components={data.components.filter((c) => c.payrollEntryId === entry.id)}
+        canAdjust={period.status === "draft" && ["director", "hr"].includes(data.viewerRole)}
+        canReverse={data.viewerRole === "director" && entry.status === "paid"}
+      />
+    </dialog>
+  );
+}
+
 function AdminPayroll({ data }: { data: PayrollWorkspaceData }) {
   const canGenerate = ["director", "hr"].includes(data.viewerRole);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const period = data.periods.find((p) => p.id === selectedId) ?? data.periods[0];
+  const [entryId, setEntryId] = useState<string | null>(null);
+  const entry = data.entries.find((e) => e.id === entryId && e.payrollPeriodId === period?.id);
+  const entries = data.entries.filter((e) => e.payrollPeriodId === period?.id);
+  const totals = payrollSummary(entries, data.components);
+  const [feedback, setFeedback] = useState(INITIAL_CRUD_ACTION_STATE);
+  const [downloading, setDownloading] = useState(false);
+  const downloadLock = useRef(false);
   const [page, setPage] = useState(1);
   const pageCount = Math.max(1, Math.ceil(data.periods.length / PAYROLL_RECORDS_PER_PAGE));
   const safePage = Math.min(page, pageCount);
-  const visiblePeriods = data.periods.slice(
-    (safePage - 1) * PAYROLL_RECORDS_PER_PAGE,
-    safePage * PAYROLL_RECORDS_PER_PAGE,
-  );
-
+  const activeStep = period
+    ? { draft: 0, prepared: 1, reviewed: 1, approved: 2, paid: 3, locked: 3 }[period.status]
+    : 0;
+  async function download(kind: "csv" | "payslips") {
+    if (!period || downloadLock.current) return;
+    downloadLock.current = true;
+    setDownloading(true);
+    try {
+      if (kind === "csv")
+        downloadFile(
+          payrollCsv(entries, data.components),
+          `payroll-${period.periodStart}-${period.id.slice(0, 8)}.csv`,
+          "text/csv;charset=utf-8",
+        );
+      else
+        downloadFile(
+          payslipHtml(period, entries, data.components),
+          `payslips-${period.periodStart}-${period.id.slice(0, 8)}.html`,
+          "text/html;charset=utf-8",
+        );
+      setFeedback({
+        status: "success",
+        mutationId: crypto.randomUUID(),
+        message:
+          kind === "csv"
+            ? "Payroll exported."
+            : "Payslips downloaded. Open the file to print or save as PDF.",
+      });
+    } catch {
+      setFeedback({
+        status: "error",
+        mutationId: crypto.randomUUID(),
+        message: "Download failed. Try again.",
+      });
+    } finally {
+      downloadLock.current = false;
+      setDownloading(false);
+    }
+  }
   return (
     <div className={styles.stack}>
-      {canGenerate ? <GeneratePayrollForm /> : null}
+      {canGenerate ? <GeneratePayrollForm franchises={data.franchises} /> : null}
       <section className={styles.card}>
         <div className={styles.cardHeader}>
           <div>
-            <span className={styles.eyebrow}>Permanent ledger</span>
-            <h2>Payroll periods</h2>
-            <p>Every lifecycle decision and correction is retained in the audit trail.</p>
+            <h2>Payroll Summary</h2>
+            {period ? (
+              <p>
+                {formatDate(period.periodStart)} – {formatDate(period.periodEnd)}
+                {data.franchises.length > 1
+                  ? ` · ${data.franchises.find((f) => f.id === period.franchiseId)?.name ?? "Organization"}`
+                  : ""}
+              </p>
+            ) : null}
           </div>
-          <span className={styles.count}>{data.periods.length}</span>
+          {period ? (
+            <span className={styles.statusBadge} data-status={period.status}>
+              {PAYROLL_PERIOD_STATUS_LABELS[period.status]}
+            </span>
+          ) : null}
         </div>
-        {data.periods.length === 0 ? (
-          <div className={styles.empty}>
-            <strong>No payroll periods yet</strong>
-            <p>Generate the first period after attendance and expenses are approved.</p>
-          </div>
+        <div
+          className={`${styles.summaryGrid} ${styles.payrollSummary}`}
+          aria-label="Payroll summary"
+        >
+          <article>
+            <span>Total Employees</span>
+            <strong>{totals.employees}</strong>
+          </article>
+          {(
+            [
+              ["Gross Payroll", totals.gross],
+              ["Total Deductions", totals.deductions],
+              ["Net Payable", totals.net],
+              ["Employer Contributions", totals.employer],
+              ["Total Company Cost", totals.companyCost],
+            ] as const
+          ).map(([label, amount]) => (
+            <article key={label}>
+              <span>{label}</span>
+              <strong>{formatMoney((amount / 100).toFixed(2))}</strong>
+            </article>
+          ))}
+        </div>
+        <ol className={styles.workflow} aria-label="Payroll workflow">
+          {["Draft", "Review", "Approved", "Paid"].map((step, index) => (
+            <li
+              key={step}
+              aria-current={period && index === activeStep ? "step" : undefined}
+              data-complete={!!period && index <= activeStep}
+            >
+              {step}
+            </li>
+          ))}
+        </ol>
+        {period ? (
+          <>
+            <div className={styles.actions}>
+              <PeriodTransition
+                key={`${period.id}-${period.status}`}
+                period={period}
+                viewerRole={data.viewerRole}
+              />
+              <button
+                type="button"
+                className={styles.outlineButton}
+                disabled={
+                  downloading ||
+                  !entries.some((e) => ["approved", "paid"].includes(e.status)) ||
+                  !["approved", "paid", "locked"].includes(period.status)
+                }
+                onClick={() => void download("payslips")}
+              >
+                Generate Payslips
+              </button>
+              <button
+                type="button"
+                className={styles.outlineButton}
+                disabled={downloading || !entries.length}
+                onClick={() => void download("csv")}
+              >
+                Export Payroll
+              </button>
+            </div>
+            {period.paymentReference ? (
+              <p className={styles.paymentMeta}>Payment reference: {period.paymentReference}</p>
+            ) : null}
+          </>
         ) : (
-          <ul className={styles.periodList}>
-            {visiblePeriods.map((period) => {
-              const entries = data.entries.filter((entry) => entry.payrollPeriodId === period.id);
-
-              return (
-                <li className={styles.period} key={period.id}>
-                  <div className={styles.periodHeader}>
-                    <div>
-                      <span className={styles.periodDates}>
-                        {formatDate(period.periodStart)} – {formatDate(period.periodEnd)}
-                      </span>
-                      <strong>{formatMoney(amountTotal(entries))}</strong>
-                      <small>
-                        {entries.length} {entries.length === 1 ? "entry" : "entries"}
-                      </small>
-                    </div>
-                    <span className={styles.statusBadge} data-status={period.status}>
-                      {PAYROLL_PERIOD_STATUS_LABELS[period.status]}
-                    </span>
-                  </div>
-                  {period.paymentReference ? (
-                    <p className={styles.paymentMeta}>
-                      Payment reference: <strong>{period.paymentReference}</strong>
-                      {period.paidAt ? ` · ${formatDateTime(period.paidAt)}` : ""}
-                    </p>
-                  ) : null}
-                  <PeriodTransition period={period} viewerRole={data.viewerRole} />
-                  {entries.length === 0 ? (
-                    <p className={styles.emptyInline}>No eligible workforce records.</p>
-                  ) : (
-                    <div className={styles.entryList}>
-                      {entries.map((entry) => (
-                        <EntryCard
-                          canAdjust={
-                            period.status === "draft" &&
-                            ["director", "hr"].includes(data.viewerRole)
-                          }
-                          canReverse={data.viewerRole === "director" && entry.status === "paid"}
-                          components={data.components.filter(
-                            (component) => component.payrollEntryId === entry.id,
-                          )}
-                          entry={entry}
-                          key={entry.id}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <p className={styles.empty}>Generate a payroll draft to get started.</p>
         )}
+      </section>
+      <section className={styles.card}>
+        <div className={styles.cardHeader}>
+          <h2>Employee Payroll</h2>
+        </div>
+        <EmployeeTable
+          key={period?.id ?? "empty"}
+          entries={entries}
+          components={data.components}
+          onView={(e) => setEntryId(e.id)}
+        />
+      </section>
+      <section className={styles.card}>
+        <div className={styles.cardHeader}>
+          <h2>Payroll History</h2>
+        </div>
+        <div className={styles.tableScroll}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                {["Payroll Period", "Employees", "Total Payroll", "Status", "View"].map((label) => (
+                  <th key={label} scope="col">
+                    {label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.periods
+                .slice(
+                  (safePage - 1) * PAYROLL_RECORDS_PER_PAGE,
+                  safePage * PAYROLL_RECORDS_PER_PAGE,
+                )
+                .map((p) => {
+                  const summary = payrollSummary(
+                    data.entries.filter((e) => e.payrollPeriodId === p.id),
+                    data.components,
+                  );
+                  return (
+                    <tr key={p.id} aria-selected={p.id === period?.id}>
+                      <td>
+                        {formatDate(p.periodStart)} – {formatDate(p.periodEnd)}
+                        {data.franchises.length > 1 ? (
+                          <small className={styles.franchiseName}>
+                            {data.franchises.find((f) => f.id === p.franchiseId)?.name ??
+                              "Organization"}
+                          </small>
+                        ) : null}
+                      </td>
+                      <td>{summary.employees}</td>
+                      <td>{formatMoney((summary.net / 100).toFixed(2))}</td>
+                      <td>
+                        <span className={styles.statusBadge} data-status={p.status}>
+                          {PAYROLL_PERIOD_STATUS_LABELS[p.status]}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className={styles.textButton}
+                          onClick={() => {
+                            setSelectedId(p.id);
+                            setEntryId(null);
+                          }}
+                          aria-label={`View payroll ${p.periodStart} to ${p.periodEnd}`}
+                        >
+                          {p.id === period?.id ? "Viewing" : "View"}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+        </div>
+        {!data.periods.length ? <p className={styles.empty}>No payroll history yet.</p> : null}
         <Pagination page={safePage} pageCount={pageCount} setPage={setPage} />
       </section>
+      {canGenerate ? <SalarySetup data={data} /> : null}
+      {entry && period ? (
+        <EmployeeDetails
+          entry={entry}
+          period={period}
+          data={data}
+          onClose={() => setEntryId(null)}
+        />
+      ) : null}
+      <ActionFeedback state={feedback} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  salaryStructureSchema,
   adjustPayrollEntrySchema,
   generatePayrollSchema,
   lockPayrollSchema,
@@ -88,4 +89,41 @@ describe("payroll input validation", () => {
       }).success,
     ).toBe(false);
   });
+});
+
+it("rejects impossible dates and mismatched payroll months", () => {
+  expect(
+    generatePayrollSchema.safeParse({ periodStart: "2026-02-01", periodEnd: "2026-02-31" }).success,
+  ).toBe(false);
+  expect(
+    generatePayrollSchema.safeParse({
+      payrollMonth: "2026-08",
+      periodStart: "2026-09-01",
+      periodEnd: "2026-09-30",
+    }).success,
+  ).toBe(false);
+});
+it("validates saved salary amounts, effective month and explicit paid-leave choice", () => {
+  const input = {
+    profileId: payrollPeriodId,
+    effectiveFrom: "2026-09-01",
+    paidLeave: "false",
+    expectedVersion: "0",
+    hra: "0",
+    allowances: "0",
+    incentives: "0",
+    pf: "0",
+    esic: "0",
+    professional_tax: "0",
+    tds: "0",
+    other_deductions: "0",
+    employer_pf: "0",
+    employer_esic: "0",
+  };
+  expect(salaryStructureSchema.parse(input).paidLeave).toBe(false);
+  expect(salaryStructureSchema.parse({ ...input, paidLeave: "true" }).paidLeave).toBe(true);
+  expect(salaryStructureSchema.safeParse({ ...input, effectiveFrom: "2026-09-15" }).success).toBe(
+    false,
+  );
+  expect(salaryStructureSchema.safeParse({ ...input, pf: "-10" }).success).toBe(false);
 });

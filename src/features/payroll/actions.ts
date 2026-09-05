@@ -9,6 +9,7 @@ import type { Role } from "@/lib/constants/roles";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 import {
+  salaryStructureSchema,
   adjustPayrollEntrySchema,
   generatePayrollSchema,
   lockPayrollSchema,
@@ -68,6 +69,7 @@ function databaseMessage(error: unknown): string {
 function databaseFailure(error: unknown): CrudActionState {
   const rawMessage = databaseMessage(error);
   const messages: ReadonlyArray<[string, string]> = [
+    ["PAYROLL_FRANCHISE_REQUIRED", "Choose a franchise for this payroll."],
     ["PAYROLL_PERIOD_OVERLAP", "This date range overlaps an existing payroll period."],
     ["PAYROLL_PERIOD_INVALID", "Use a valid date range within one calendar month."],
     ["PAYROLL_PERIOD_NOT_EDITABLE", "This payroll is no longer editable."],
@@ -144,6 +146,7 @@ export async function generatePayrollAction(
   const { error } = await supabase.rpc("generate_payroll_period", {
     p_period_start: parsed.data.periodStart,
     p_period_end: parsed.data.periodEnd,
+    p_franchise_id: parsed.data.franchiseId || null,
   });
 
   if (error) {
@@ -345,4 +348,25 @@ export async function reversePayrollEntryAction(
 
   revalidatePayroll();
   return success("Payroll entry reversed. The original paid record remains in history.");
+}
+
+export async function saveSalaryStructureAction(
+  _previousState: CrudActionState,
+  formData: FormData,
+): Promise<CrudActionState> {
+  const session = await requireActiveSession();
+  if (!can(session.profile.role, ["director", "hr"]))
+    return failure("Only HR or the Director can save salary structures.");
+  const parsed = salaryStructureSchema.safeParse(input(formData));
+  if (!parsed.success) return validationFailure(parsed.error);
+  const { profileId, expectedVersion, ...values } = parsed.data;
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase.rpc("save_payroll_salary_structure", {
+    p_profile_id: profileId,
+    p_values: values,
+    p_expected_version: expectedVersion,
+  });
+  if (error) return databaseFailure(error);
+  revalidatePayroll();
+  return success("Salary structure saved. It will be used in future payroll drafts.");
 }
