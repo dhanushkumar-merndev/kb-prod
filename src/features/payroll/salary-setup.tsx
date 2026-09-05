@@ -79,12 +79,15 @@ export function SalarySetup({ data }: { data: PayrollWorkspaceData }) {
                 value="true"
                 defaultChecked={structure?.paid_leave ?? false}
               />
-              Include approved leave as payable days for monthly salary
+              Approved leave is paid leave (does not reduce monthly salary)
             </label>
             <p className={styles.wide}>
-              Use the first day of the effective month. Earnings and employer contributions are
+              Use the first day of the effective month. Monthly staff are paid for the full
+              calendar month; only days marked absent in Attendance, and approved leave when the
+              box above is unticked, reduce payable days. Earnings and employer contributions are
               prorated by payable days; configured employee deductions are prorated by the period
-              length. Enter applicable PF, ESIC and tax amounts from your payroll policy.
+              length. PF and ESIC stay off while left at zero — enter amounts only if your payroll
+              policy applies them.
             </p>
             <div className={styles.wide}>
               <SubmitButton>Save Salary Structure</SubmitButton>

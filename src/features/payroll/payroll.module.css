@@ -517,6 +517,26 @@
 .table tr[aria-selected="true"] {
   background: var(--saffron-tint);
 }
+.table tbody tr[data-reversed] td {
+  color: var(--slate);
+  text-decoration: line-through;
+}
+.table tbody tr[data-reversed] td:last-child,
+.table tbody tr[data-reversed] td:nth-last-child(2) {
+  text-decoration: none;
+}
+.table tfoot th,
+.table tfoot td {
+  font-weight: 700;
+  border-bottom: none;
+  border-top: 2px solid var(--hair);
+  text-transform: none;
+  font-size: 14px;
+  white-space: normal;
+}
+.table tfoot td {
+  font-variant-numeric: tabular-nums;
+}
 .actionButton,
 .outlineButton,
 .textButton {

@@ -56,9 +56,12 @@ export async function createPayrollDatabase() {
     await db.exec(
       `create trigger aa_franchise_scope before insert or update or delete on public.${table} for each row execute function public.apply_franchise_scope(${args});`,
     );
-  await db.exec(
-    fs.readFileSync(`${root}/supabase/migrations/202609050001_payroll_simple_design.sql`, "utf8"),
-  );
+  for (const filename of [
+    "202609050001_payroll_simple_design.sql",
+    "202609050002_payroll_lock_reversal.sql",
+    "202609050003_payroll_calendar_month_days.sql",
+  ])
+    await db.exec(fs.readFileSync(`${root}/supabase/migrations/${filename}`, "utf8"));
   await db.exec(`insert into organizations(id,name,slug) values('10000000-0000-4000-8000-000000000001','Payroll test','payroll-test');
 insert into franchises values ('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001');
 insert into auth.users values ('30000000-0000-4000-8000-000000000001'), ('30000000-0000-4000-8000-000000000002');

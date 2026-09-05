@@ -89,8 +89,10 @@ function GeneratePayrollForm({ franchises }: { franchises: PayrollWorkspaceData[
         <div>
           <h2>Generate Payroll</h2>
           <p>
-            Calculated from approved attendance, saved salary structure, leave, incentives,
-            deductions and approved expenses.
+            Monthly staff are paid for the full calendar month, less days marked absent and
+            unpaid approved leave. Daily, hourly and temporary workers are paid from approved
+            attendance. Salary structure, incentives, deductions and approved expenses are applied
+            automatically.
           </p>
         </div>
       </div>
@@ -517,6 +519,10 @@ function EmployeeTable({
       ),
     },
   ];
+  // Totals mirror the Summary and History cards, which also exclude reversed entries,
+  // so the three views reconcile even though reversed rows stay visible for audit.
+  const totals = payrollSummary(entries, components);
+  const reversedCount = entries.filter((entry) => entry.status === "reversed").length;
   // TanStack owns pagination state; rows still contain the full selected payroll for totals and export.
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -543,13 +549,28 @@ function EmployeeTable({
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
+              <tr key={row.id} data-reversed={row.original.status === "reversed" || undefined}>
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                 ))}
               </tr>
             ))}
           </tbody>
+          {entries.length ? (
+            <tfoot>
+              <tr>
+                <th scope="row" colSpan={3}>
+                  {reversedCount
+                    ? `Period totals (excludes ${reversedCount} reversed)`
+                    : "Period totals"}
+                </th>
+                {(["gross", "reimbursement", "deductions", "net"] as const).map((key) => (
+                  <td key={key}>{formatMoney((totals[key] / 100).toFixed(2))}</td>
+                ))}
+                <td colSpan={2} />
+              </tr>
+            </tfoot>
+          ) : null}
         </table>
       </div>
       {!entries.length ? (
@@ -606,7 +627,11 @@ function EmployeeDetails({
         entry={entry}
         components={data.components.filter((c) => c.payrollEntryId === entry.id)}
         canAdjust={period.status === "draft" && ["director", "hr"].includes(data.viewerRole)}
-        canReverse={data.viewerRole === "director" && entry.status === "paid"}
+        canReverse={
+          data.viewerRole === "director" &&
+          entry.status === "paid" &&
+          period.status !== "locked"
+        }
       />
     </dialog>
   );

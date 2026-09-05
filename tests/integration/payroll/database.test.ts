@@ -65,7 +65,7 @@ afterEach(async () => {
 });
 
 describe("transactional payroll generation", () => {
-  it("counts distinct approved days and paid leave without overlap, and includes only approved expenses", async () => {
+  it("pays monthly staff for the calendar month, counts distinct attendance, and includes only approved expenses", async () => {
     await save();
     await attendance();
     await attendance("2026-09-01", "2026-09-01");
@@ -77,7 +77,7 @@ describe("transactional payroll generation", () => {
       ('10000000-0000-4000-8000-000000000001','${chef}','travel',999,'Pending travel','pending',null,null);
       insert into attendance_shifts(organization_id,profile_id,shift_date,started_at,ended_at,status,payroll_eligible) values
       ('10000000-0000-4000-8000-000000000001','${chef}','2026-09-13','2026-09-13 09:00Z','2026-09-13 17:00Z','pending_approval',false);`);
-    expect((await generate()).net_payable).toBe("13700.00");
+    expect((await generate()).net_payable).toBe("34400.00");
     expect(
       (
         await db.query(
@@ -86,22 +86,22 @@ describe("transactional payroll generation", () => {
       ).rows[0],
     ).toEqual({
       attendance_days: 10,
-      payable_days: 12,
-      base_amount: "12000.00",
+      payable_days: 30,
+      base_amount: "30000.00",
       expense_reimbursement: "200.00",
     });
     expect(
       (await db.query("select amount from payroll_components where component_type = 'employer_pf'"))
         .rows[0],
-    ).toEqual({ amount: "240.00" });
+    ).toEqual({ amount: "600.00" });
   });
   it("retains the earlier salary structure when a future revision is saved", async () => {
     await save();
     await save({ ...salary, effectiveFrom: "2026-10-01", hra: 6000 }, 1);
     await attendance();
-    expect((await generate()).net_payable).toBe("11200.00");
+    expect((await generate()).net_payable).toBe("34200.00");
     await attendance("2026-10-01", "2026-10-10");
-    expect((await generate("2026-10-01", "2026-10-31")).net_payable).toBe("11796.77");
+    expect((await generate("2026-10-01", "2026-10-31")).net_payable).toBe("37200.00");
   });
   it("does not pay unapproved attendance or leave without the saved paid-leave policy", async () => {
     await save({ ...salary, paidLeave: false });
@@ -109,6 +109,75 @@ describe("transactional payroll generation", () => {
       ('10000000-0000-4000-8000-000000000001','${chef}','2026-09-01','2026-09-30','Leave','approved')`);
     expect((await generate()).net_payable).toBe("0.00");
   });
+  it("does not dock a monthly salary for weekly offs and holidays", async () => {
+    await save();
+    // Every day except Sunday, which is how a six-day week is actually recorded.
+    await db.query(
+      `insert into attendance_shifts(organization_id,franchise_id,profile_id,shift_date,started_at,ended_at,status,payroll_eligible,approved_by_profile_id,approved_at)
+      select '10000000-0000-4000-8000-000000000001',$3,$4,d::date,d+interval '9 hours',d+interval '17 hours','approved',true,$5,now()
+      from generate_series($1::timestamp,$2::timestamp,interval '1 day') d
+      where extract(dow from d) <> 0`,
+      ["2026-09-01", "2026-09-30", franchise, chef, hr],
+    );
+    await generate();
+    expect(
+      (
+        await db.query(
+          "select attendance_days,payable_days,base_amount from payroll_entries where profile_id=$1",
+          [chef],
+        )
+      ).rows[0],
+    ).toEqual({ attendance_days: 26, payable_days: 30, base_amount: "30000.00" });
+  });
+
+  it("deducts only days recorded as absent, and lets approved paid leave outrank an absence", async () => {
+    await save();
+    await attendance("2026-09-01", "2026-09-30");
+    await db.exec(`update attendance_shifts set status='absent', payroll_eligible=false
+      where profile_id='${chef}' and shift_date in ('2026-09-05','2026-09-06','2026-09-20');
+      insert into leave_requests(organization_id,profile_id,start_date,end_date,reason,status) values
+      ('10000000-0000-4000-8000-000000000001','${chef}','2026-09-20','2026-09-20','Approved paid leave','approved')`);
+    await generate();
+    // 30 days less the two unexcused absences; 20 Sept is covered by approved paid leave.
+    expect(
+      (
+        await db.query("select payable_days,base_amount from payroll_entries where profile_id=$1", [
+          chef,
+        ])
+      ).rows[0],
+    ).toEqual({ payable_days: 28, base_amount: "28000.00" });
+  });
+
+  it("pays daily workers only for days actually worked", async () => {
+    await db.query("update profiles set payment_type='daily', payment_amount=1200 where id=$1", [
+      chef,
+    ]);
+    await attendance("2026-09-01", "2026-09-10");
+    await generate();
+    expect(
+      (
+        await db.query(
+          "select payable_days,attendance_amount from payroll_entries where profile_id=$1",
+          [chef],
+        )
+      ).rows[0],
+    ).toEqual({ payable_days: 10, attendance_amount: "12000.00" });
+  });
+
+  it("prorates a mid-month joiner from the joining date", async () => {
+    await save();
+    await db.query("update profiles set joining_date='2026-09-16' where id=$1", [chef]);
+    await attendance("2026-09-16", "2026-09-30");
+    await generate();
+    expect(
+      (
+        await db.query("select payable_days,base_amount from payroll_entries where profile_id=$1", [
+          chef,
+        ])
+      ).rows[0],
+    ).toEqual({ payable_days: 15, base_amount: "15000.00" });
+  });
+
   it("rolls back the entire draft if configured deductions exceed earnings", async () => {
     await save({ ...salary, pf: 50000 });
     await attendance();
@@ -196,13 +265,51 @@ describe("transactional payroll generation", () => {
     await db.query("select lock_payroll_period($1)", [generated.payroll_period_id]);
     await save({ ...salary, hra: 6000 }, 1);
     expect((await db.query("select net_payable,status from payroll_entries")).rows[0]).toEqual({
-      net_payable: "11200.00",
+      net_payable: "34200.00",
       status: "paid",
     });
     await db.exec("savepoint invalid_action");
-    await expect(db.exec("update payroll_entries set payable_days=30")).rejects.toThrow(
+    await expect(db.exec("update payroll_entries set payable_days=7")).rejects.toThrow(
       "PAYROLL_HISTORY_IMMUTABLE",
     );
     await db.exec("rollback to invalid_action");
+  });
+
+  it("refuses to reverse a paid entry once the period is locked", async () => {
+    await save();
+    await attendance();
+    const generated = await generate();
+    const period = generated.payroll_period_id;
+    await db.query("select prepare_payroll_period($1)", [period]);
+    await actor(director);
+    await db.query("select review_payroll_period($1)", [period]);
+    await db.query("select approve_payroll_period($1)", [period]);
+    await db.query("select mark_payroll_paid($1,'UTR-TEST-002')", [period]);
+    const entry = (
+      await db.query<{ id: string }>(
+        "select id from payroll_entries where payroll_period_id=$1 and profile_id=$2",
+        [period, chef],
+      )
+    ).rows[0]!.id;
+
+    // A paid but unlocked period still allows an audited correction.
+    await db.exec("savepoint before_lock");
+    await db.query("select reverse_payroll_entry($1,'duplicate transfer')", [entry]);
+    expect(
+      (await db.query<{ status: string }>("select status from payroll_entries where id=$1", [entry]))
+        .rows[0]!.status,
+    ).toBe("reversed");
+    await db.exec("rollback to before_lock");
+
+    await db.query("select lock_payroll_period($1)", [period]);
+    await db.exec("savepoint after_lock");
+    await expect(
+      db.query("select reverse_payroll_entry($1,'duplicate transfer')", [entry]),
+    ).rejects.toThrow("PAYROLL_PERIOD_LOCKED");
+    await db.exec("rollback to after_lock");
+    expect(
+      (await db.query<{ status: string }>("select status from payroll_entries where id=$1", [entry]))
+        .rows[0]!.status,
+    ).toBe("paid");
   });
 });
