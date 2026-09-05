@@ -13,6 +13,7 @@ describe("payroll presentation and downloads", () => {
   it("keeps contributions out of take-home pay and reimbursements out of gross salary", () => {
     expect(payrollBreakdown(employee, components)).toMatchObject({
       gross: 3100000,
+      reimbursement: 20000,
       deductions: 300000,
       employer: 210000,
       net: 2820000,
@@ -21,6 +22,9 @@ describe("payroll presentation and downloads", () => {
       incentives: 50000,
       otherDeductions: 70000,
     });
+    // The columns shown to payroll staff must reconcile: gross + reimbursement - deductions = net.
+    const b = payrollBreakdown(employee, components);
+    expect(b.gross + b.reimbursement - b.deductions).toBe(b.net);
     expect(detailRows(employee, components).find(([name]) => name === "Net Salary")?.[1]).toBe(
       2820000,
     );
@@ -32,6 +36,7 @@ describe("payroll presentation and downloads", () => {
     expect(payrollSummary([], [])).toEqual({
       employees: 0,
       gross: 0,
+      reimbursement: 0,
       deductions: 0,
       net: 0,
       employer: 0,

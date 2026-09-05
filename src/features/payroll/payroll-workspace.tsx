@@ -475,6 +475,7 @@ function EmployeeTable({
     ...(
       [
         ["Gross Salary", "gross"],
+        ["Reimbursements", "reimbursement"],
         ["Deductions", "deductions"],
         ["Net Salary", "net"],
       ] as const
@@ -697,6 +698,7 @@ function AdminPayroll({ data }: { data: PayrollWorkspaceData }) {
           {(
             [
               ["Gross Payroll", totals.gross],
+              ["Reimbursements", totals.reimbursement],
               ["Total Deductions", totals.deductions],
               ["Net Payable", totals.net],
               ["Employer Contributions", totals.employer],

@@ -24,12 +24,15 @@ export function payrollBreakdown(entry: PayrollEntryRecord, components: PayrollC
     paise(entry.allowances);
   const deductions = paise(entry.deductions) + paise(entry.advances);
   const employer = sum("employer_pf", "employer_esic");
+  // Reimbursements are paid out but are not salary, so they stay out of gross and inside net.
+  const reimbursement = paise(entry.expenseReimbursement);
   return {
     gross,
+    reimbursement,
     deductions,
     employer,
     net: paise(entry.netPayable),
-    companyCost: gross + paise(entry.expenseReimbursement) + employer,
+    companyCost: gross + reimbursement + employer,
     incentives,
     pf,
     esic,
@@ -55,13 +58,22 @@ export function payrollSummary(
         return {
           employees: total.employees + 1,
           gross: total.gross + amounts.gross,
+          reimbursement: total.reimbursement + amounts.reimbursement,
           deductions: total.deductions + amounts.deductions,
           net: total.net + amounts.net,
           employer: total.employer + amounts.employer,
           companyCost: total.companyCost + amounts.companyCost,
         };
       },
-      { employees: 0, gross: 0, deductions: 0, net: 0, employer: 0, companyCost: 0 },
+      {
+        employees: 0,
+        gross: 0,
+        reimbursement: 0,
+        deductions: 0,
+        net: 0,
+        employer: 0,
+        companyCost: 0,
+      },
     );
 }
 
@@ -77,7 +89,7 @@ export function detailRows(
     ["Overtime", paise(entry.overtimeAmount)],
     ["HRA / Allowances", b.allowances],
     ["Incentives", b.incentives],
-    ["Reimbursements", paise(entry.expenseReimbursement)],
+    ["Reimbursements", b.reimbursement],
     ["PF", b.pf],
     ["ESIC", b.esic],
     ["Professional Tax", b.professionalTax],
@@ -104,6 +116,7 @@ export function payrollCsv(
       "Designation",
       "Payable Days",
       "Gross Salary",
+      "Reimbursements",
       "Deductions",
       "Net Salary",
       "Status",
@@ -121,6 +134,7 @@ export function payrollCsv(
       entry.subjectLabel,
       entry.payableDays?.toString() ?? "Unavailable",
       (b.gross / 100).toFixed(2),
+      (b.reimbursement / 100).toFixed(2),
       (b.deductions / 100).toFixed(2),
       (b.net / 100).toFixed(2),
       entry.status,
