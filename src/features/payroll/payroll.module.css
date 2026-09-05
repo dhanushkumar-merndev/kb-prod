@@ -590,6 +590,7 @@
   max-height: calc(100dvh - 48px);
   padding: 24px;
   color: var(--ink);
+  margin: auto;
 }
 .dialog::backdrop {
   background: rgb(11 37 69 / 50%);
